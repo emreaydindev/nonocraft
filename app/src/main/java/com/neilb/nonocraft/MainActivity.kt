@@ -10,8 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import com.neilb.nonocraft.presentation.ui.navigation.NavigationView
-import com.neilb.nonocraft.presentation.ui.theme.NonogramTheme
+import com.neilb.nonocraft.presentation.navigation.NavigationView
+import com.neilb.nonocraft.presentation.theme.NonogramTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
