@@ -30,6 +30,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -44,6 +45,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.runtime.livedata)
 
     // UI & Navigation
     implementation(libs.androidx.navigation.compose)
@@ -54,6 +56,7 @@ dependencies {
     // DI - Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.kotlinMetadataJvm)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Data - Room & Network
