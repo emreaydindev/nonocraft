@@ -2,15 +2,17 @@ package com.neilb.nonocraft.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val BackgroundDark = Color(0xFF0A0A0F)
+val SurfaceDark = Color(0xFF16161E)
+val SurfaceVariantDark = Color(0xFF222230)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val NeonCyan = Color(0xFF00E5FF)
+val NeonPink = Color(0xFFFF007F)
+val ElectricPurple = Color(0xFF9D00FF)
 
-val indigoColor = Color(0xFF330099)
-val goldColor = Color(0xFFCFAF00)
-val greenColor = Color(0xff09ce4b)
-val orangeColor = Color(0xFFF84C16)
+val TextWhite = Color(0xFFFDFDFD)
+val TextGray = Color(0xFFA0A0B0)
+
+val GameGreen = Color(0xFF09CE4B)
+val GameOrange = Color(0xFFF84C16)
+val GameGold = Color(0xFFCFAF00)

@@ -25,7 +25,18 @@ fun NavigationView() {
 
     NavHost(rootNavController, startDestination = Route.Splash) {
         composable<Route.Splash> {
-            SplashScreen(onNavigateToOnboarding = { rootNavController.navigate(Route.Onboarding) })
+            SplashScreen(
+                onNavigateToOnboarding = {
+                    rootNavController.navigate(Route.Onboarding) {
+                        popUpTo(Route.Splash) { inclusive = true }
+                    }
+                },
+                onNavigateToDashboard = {
+                    rootNavController.navigate(Route.DashboardRoot) {
+                        popUpTo(Route.Splash) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable<Route.Onboarding> {

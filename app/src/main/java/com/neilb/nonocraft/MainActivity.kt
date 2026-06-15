@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     MaterialTheme.colorScheme.primary.toArgb()
                 )
             )
-            NonogramTheme(dynamicColor = false) {
+            NonogramTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
