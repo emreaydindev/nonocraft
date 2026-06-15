@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
     @Serializable data object Onboarding : Route
 
     @Serializable data object AuthRoot : Route
+    @Serializable data object AuthGateway : Route
     @Serializable data object Login : Route
     @Serializable data object Register : Route
     @Serializable data object ForgotPassword : Route

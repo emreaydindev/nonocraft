@@ -2,17 +2,17 @@ package com.neilb.nonocraft.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
-val BackgroundDark = Color(0xFF0A0A0F)
-val SurfaceDark = Color(0xFF16161E)
-val SurfaceVariantDark = Color(0xFF222230)
+val BackgroundDark = Color(0xFF121212)
+val SurfaceDark = Color(0xFF1C1C1E)
+val SurfaceVariantDark = Color(0xFF242426)
+val BorderDark = Color(0xFF2A2A2C)
 
-val NeonCyan = Color(0xFF00E5FF)
-val NeonPink = Color(0xFFFF007F)
-val ElectricPurple = Color(0xFF9D00FF)
+val NeonCyan = Color(0xFF00FFDC)
+val PurpleAccent = Color(0xFF7F77DD)
+val GameGold = Color(0xFFFFD700)
+val DangerRed = Color(0xFFE24B4A)
 
-val TextWhite = Color(0xFFFDFDFD)
-val TextGray = Color(0xFFA0A0B0)
-
-val GameGreen = Color(0xFF09CE4B)
-val GameOrange = Color(0xFFF84C16)
-val GameGold = Color(0xFFCFAF00)
+// --- Metin Renkleri ---
+val TextPrimary = Color(0xFFF5F5F5)
+val TextSecondary = Color(0xFF888888)
+val TextMuted = Color(0xFF555555)

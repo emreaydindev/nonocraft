@@ -6,25 +6,17 @@ import androidx.compose.runtime.Composable
 
 private val NonocraftColorScheme = darkColorScheme(
     primary = NeonCyan,
-    onPrimary = BackgroundDark,
-
-    secondary = NeonPink,
-    onSecondary = TextWhite,
-
-    tertiary = ElectricPurple,
-    onTertiary = TextWhite,
-
+    secondary = PurpleAccent,
+    tertiary = GameGold,
     background = BackgroundDark,
-    onBackground = TextWhite,
-
     surface = SurfaceDark,
-    onSurface = TextWhite,
-
     surfaceVariant = SurfaceVariantDark,
-    onSurfaceVariant = TextWhite,
-
-    error = GameOrange,
-    onError = TextWhite
+    error = DangerRed,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = BorderDark,
+    outlineVariant = TextMuted
 )
 
 @Composable

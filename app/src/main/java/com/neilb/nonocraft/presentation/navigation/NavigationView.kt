@@ -1,5 +1,8 @@
 package com.neilb.nonocraft.presentation.navigation
 
+import com.neilb.nonocraft.presentation.screens.auth.gateway.AuthGatewayScreen
+import com.neilb.nonocraft.presentation.screens.auth.login.LoginScreen
+import com.neilb.nonocraft.presentation.screens.auth.register.RegisterScreen
 import com.neilb.nonocraft.presentation.screens.intro.SplashScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -7,10 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.neilb.nonocraft.presentation.screens.auth.ForgotPasswordScreen
-import com.neilb.nonocraft.presentation.screens.auth.LoginScreen
-import com.neilb.nonocraft.presentation.screens.auth.RegisterScreen
-import com.neilb.nonocraft.presentation.screens.auth.ResetPasswordScreen
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ForgotPasswordScreen
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswordScreen
 import com.neilb.nonocraft.presentation.screens.crafting.CraftingScreen
 import com.neilb.nonocraft.presentation.screens.dashboard.DashboardScreen
 import com.neilb.nonocraft.presentation.screens.extras.PremiumScreen
@@ -47,31 +48,72 @@ fun NavigationView() {
             })
         }
 
-        navigation<Route.AuthRoot>(startDestination = Route.Register) {
+        navigation<Route.AuthRoot>(startDestination = Route.AuthGateway) {
+
+            composable<Route.AuthGateway> {
+                AuthGatewayScreen(
+                    onNavigateToLogin = { rootNavController.navigate(Route.Login) },
+                    onNavigateToRegister = { rootNavController.navigate(Route.Register) },
+                    onContinueAsGuest = {
+                        rootNavController.navigate(Route.Tutorial) {
+                            popUpTo(Route.AuthRoot) { inclusive = true }
+                        }
+                    }
+                )
+            }
 
             composable<Route.Register> {
                 RegisterScreen(
-                    onNavigateToLogin = { rootNavController.navigate(Route.Login) },
-                    onContinueAsGuest = {
-                        rootNavController.navigate(Route.Tutorial) { popUpTo(Route.AuthRoot) { inclusive = true } }
+                    onNavigateBack = { rootNavController.popBackStack() },
+                    onNavigateToLogin = {
+                        rootNavController.navigate(Route.Login) {
+                            popUpTo(Route.AuthGateway)
+                        }
                     },
                     onRegisterSuccess = {
-                        rootNavController.navigate(Route.Tutorial) { popUpTo(Route.AuthRoot) { inclusive = true } }
+                        rootNavController.navigate(Route.Tutorial) {
+                            popUpTo(Route.AuthRoot) { inclusive = true }
+                        }
                     }
                 )
             }
 
             composable<Route.Login> {
                 LoginScreen(
+                    onNavigateBack = { rootNavController.popBackStack() },
                     onNavigateToForgotPassword = { rootNavController.navigate(Route.ForgotPassword) },
+                    onNavigateToRegister = {
+                        rootNavController.navigate(Route.Register) {
+                            popUpTo(Route.AuthGateway)
+                        }
+                    },
                     onLoginSuccess = {
-                        rootNavController.navigate(Route.DashboardRoot) { popUpTo(Route.AuthRoot) { inclusive = true } }
+                        rootNavController.navigate(Route.DashboardRoot) {
+                            popUpTo(Route.AuthRoot) { inclusive = true }
+                        }
                     }
                 )
             }
 
-            composable<Route.ForgotPassword> { ForgotPasswordScreen() }
-            composable<Route.ResetPassword> { ResetPasswordScreen() }
+            composable<Route.ForgotPassword> {
+                ForgotPasswordScreen(
+                    onNavigateBack = { rootNavController.popBackStack() },
+                    onCodeSentSuccess = {
+                        rootNavController.navigate(Route.ResetPassword)
+                    }
+                )
+            }
+
+            composable<Route.ResetPassword> {
+                ResetPasswordScreen(
+                    onNavigateBack = { rootNavController.popBackStack() },
+                    onResetSuccess = {
+                        rootNavController.navigate(Route.Login) {
+                            popUpTo(Route.AuthGateway) { inclusive = false }
+                        }
+                    }
+                )
+            }
         }
 
         composable<Route.DashboardRoot> {
