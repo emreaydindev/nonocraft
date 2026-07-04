@@ -69,5 +69,10 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.gson)
 
+    // Auth
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

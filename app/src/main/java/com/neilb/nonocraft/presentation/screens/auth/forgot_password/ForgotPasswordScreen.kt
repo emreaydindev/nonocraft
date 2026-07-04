@@ -2,9 +2,12 @@ package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,99 +35,97 @@ fun ForgotPasswordScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundDark),
+            .background(BackgroundDark)
+            .navigationBarsPadding(),
     ) {
-        AuthGridBackground()
+        GridBackground()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(horizontal = 28.dp)
-                .padding(top = 16.dp, bottom = 36.dp),
+                .padding(bottom = 24.dp),
         ) {
-
             AuthBackRow(onBack = onNavigateBack)
-            Spacer(Modifier.height(24.dp))
 
-            AuthIconBox(
-                icon = {
-                    Text("🔒", fontSize = 24.sp)
-                },
-            )
-            Spacer(Modifier.height(20.dp))
-
-            Text(
-                text = "Şifremi Unuttum",
-                color = TextPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = AppFont,
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.",
-                color = TextSecondary,
-                fontSize = 12.sp,
-                fontFamily = AppFont,
-                lineHeight = 18.sp,
-            )
-            Spacer(Modifier.height(28.dp))
-
-            AuthTextField(
-                value = email,
-                onValueChange = {
-                    email = it.trim()
-                    isSent = false
-                    isError = false
-                },
-                label = "E-posta adresi",
-                placeholder = "ornek@gmail.com",
-                isError = !isEmailValid || isError,
-                errorMessage = when {
-                    !isEmailValid -> "Geçerli bir e-posta adresi girin"
-                    isError       -> "Bu e-posta kayıtlı değil"
-                    else          -> null
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Done,
-                ),
-            )
-
-            if (isSent) {
-                Spacer(Modifier.height(12.dp))
-                InfoBanner(
-                    message = "Bağlantı gönderildi!",
-                    subMessage = "Gelen kutunu kontrol et. Spam klasörünü de unutma.",
-                )
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            PrimaryAuthButton(
-                text = if (isSent) "Tekrar Gönder" else "Bağlantı Gönder",
-                enabled = canSubmit,
-                onClick = {
-                    // TODO: POST /auth/forgot-password { email }
-                    //   başarılıysa → isSent = true
-                    //   404 (kayıtlı değil) → isError = true
-                    isSent = true
-                },
-            )
-
-            Spacer(Modifier.height(14.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 28.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextMuted)) { append("Giriş sayfasına ") }
-                        withStyle(SpanStyle(color = NeonCyan))  { append("dön") }
+                    text = "Şifremi Unuttum",
+                    color = TextPrimary,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppFont,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.",
+                    color = TextSecondary,
+                    fontSize = 15.sp,
+                    fontFamily = AppFont,
+                    lineHeight = 22.sp,
+                )
+                Spacer(Modifier.height(32.dp))
+
+                AuthTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it.trim()
+                        isSent = false
+                        isError = false
                     },
-                    fontSize = 12.sp,
+                    label = "E-posta adresi",
+                    placeholder = "ornek@gmail.com",
+                    isError = !isEmailValid || isError,
+                    errorMessage = when {
+                        !isEmailValid -> "Geçerli bir e-posta adresi girin"
+                        isError       -> "Bu e-posta kayıtlı değil"
+                        else          -> null
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done,
+                    ),
+                )
+
+                if (isSent) {
+                    Spacer(Modifier.height(12.dp))
+                    InfoBanner(
+                        message = "Bağlantı gönderildi!",
+                        subMessage = "Gelen kutunu kontrol et. Spam klasörünü de unutma.",
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PrimaryAuthButton(
+                    text = if (isSent) "Tekrar Gönder" else "Bağlantı Gönder",
+                    enabled = canSubmit,
+                    onClick = {
+                        // TODO: POST /auth/forgot-password { email }
+                        //   başarılıysa → isSent = true
+                        //   404 (kayıtlı değil) → isError = true
+                        isSent = true
+                    },
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = TextSecondary)) { append("Giriş sayfasına ") }
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append("dön") }
+                    },
+                    fontSize = 13.sp,
                     fontFamily = AppFont,
                     modifier = Modifier.noRippleClickable(onNavigateBack),
                 )

@@ -18,5 +18,5 @@ data class User(
 data class AuthResult(
     val accessToken: String,
     val refreshToken: String,
-    val user: User
+    val user: User?
 )

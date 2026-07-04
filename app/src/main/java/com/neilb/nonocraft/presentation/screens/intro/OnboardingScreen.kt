@@ -1,26 +1,47 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
@@ -30,11 +51,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.neilb.nonocraft.presentation.theme.BrightGreen
+import com.neilb.nonocraft.presentation.theme.GridBackground
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
+import kotlin.time.Duration.Companion.milliseconds
 
-// ─── Slide veri modeli ────────────────────────────────────────────────────────
 private data class OnboardingSlide(
     val tag: String,
     val title: String,
@@ -44,7 +67,6 @@ private data class OnboardingSlide(
     val visual: @Composable (Color) -> Unit,
 )
 
-// ─── Ana ekran ────────────────────────────────────────────────────────────────
 @Composable
 fun OnboardingScreen(
     onFinishOnboarding: () -> Unit,
@@ -53,8 +75,19 @@ fun OnboardingScreen(
     val secondaryPurple = MaterialTheme.colorScheme.secondary
     val tertiaryGold = MaterialTheme.colorScheme.tertiary
     val backgroundColor = MaterialTheme.colorScheme.background
+    val errorColor = MaterialTheme.colorScheme.error
 
-    val slides = rememberSlides(primaryCyan, secondaryPurple, tertiaryGold)
+    val colors = listOf(primaryCyan, errorColor, tertiaryGold, secondaryPurple, BrightGreen)
+    var selectedColor by remember { mutableIntStateOf(3) }
+
+    val slides = rememberSlides(
+        cyan = primaryCyan,
+        selectedColor = selectedColor,
+        colors = colors,
+        setSelectedColor = { color -> selectedColor = color },
+        gold = tertiaryGold
+    )
+
     val pagerState = rememberPagerState { slides.size }
     val scope = rememberCoroutineScope()
 
@@ -62,15 +95,15 @@ fun OnboardingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(backgroundColor)
+            .navigationBarsPadding()
     ) {
-        GridBackground(primaryColor = primaryCyan)
+        GridBackground()
 
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            // ── Pager ─────────────────────────────────────────────────────────
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -87,7 +120,6 @@ fun OnboardingScreen(
                 )
             }
 
-            // ── Sayfa göstergesi + Butonlar ───────────────────────────────────
             BottomSection(
                 pagerState = pagerState,
                 totalPages = slides.size,
@@ -107,7 +139,6 @@ fun OnboardingScreen(
     }
 }
 
-// ─── Tek slide içeriği ────────────────────────────────────────────────────────
 @Composable
 private fun SlideContent(
     slide: OnboardingSlide,
@@ -192,7 +223,6 @@ private fun SlideContent(
     }
 }
 
-// ─── Alt bölüm: dots + butonlar ───────────────────────────────────────────────
 @Composable
 private fun BottomSection(
     pagerState: PagerState,
@@ -233,7 +263,7 @@ private fun BottomSection(
                 text = if (isLastPage) "Başla" else "Devam Et",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = backgroundColor, // Buton içi metin arka plan renginde
+                color = backgroundColor,
             )
         }
 
@@ -248,7 +278,6 @@ private fun BottomSection(
     }
 }
 
-// ─── Animasyonlu dot indicator ────────────────────────────────────────────────
 @Composable
 private fun PageIndicator(
     pagerState: PagerState,
@@ -283,7 +312,6 @@ private fun PageIndicator(
     }
 }
 
-// ─── Slide görselleri ─────────────────────────────────────────────────────────
 
 @Composable
 private fun VisualSolve(accentColor: Color) {
@@ -308,11 +336,11 @@ private fun VisualSolve(accentColor: Color) {
         while (true) {
             for (i in 0..totalCells) {
                 filledCount = i
-                delay(80L)
+                delay(80L.milliseconds)
             }
-            delay(1200L)
+            delay(1200L.milliseconds)
             filledCount = 0
-            delay(400L)
+            delay(400L.milliseconds)
         }
     }
 
@@ -324,7 +352,7 @@ private fun VisualSolve(accentColor: Color) {
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Spacer(modifier = Modifier.width(28.dp))
-            listOf("1", "3", "5", "5", "5", "3", "1").forEach { clue ->
+            listOf("2", "4", "4", "4", "4", "4", "2").forEach { clue ->
                 Box(modifier = Modifier.width(32.dp), contentAlignment = Alignment.Center) {
                     Text(clue, fontSize = 9.sp, color = accentColor, fontWeight = FontWeight.Medium)
                 }
@@ -376,27 +404,20 @@ private fun VisualSolve(accentColor: Color) {
 }
 
 @Composable
-private fun VisualCraft(accentColor: Color) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val errorColor = MaterialTheme.colorScheme.error
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
+private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColor: (Int) -> Unit) {
+
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val borderColor = MaterialTheme.colorScheme.outline
 
-    val colors = listOf(primaryColor, errorColor, tertiaryColor, secondaryColor, surfaceVariantColor)
-    var selectedColor by remember { mutableIntStateOf(3) }
-
     val pixelGrid = remember {
         listOf(
-            listOf(0, 0, 1, 1, 1, 0, 0, 0),
-            listOf(0, 1, 1, 0, 1, 1, 0, 0),
-            listOf(1, 1, 1, 1, 1, 1, 1, 0),
-            listOf(1, 0, 1, 1, 1, 0, 1, 0),
-            listOf(0, 1, 1, 1, 1, 1, 0, 0),
-            listOf(0, 0, 1, 0, 1, 0, 0, 0),
-            listOf(0, 1, 0, 0, 0, 1, 0, 0),
-            listOf(0, 0, 0, 0, 0, 0, 0, 0),
+            listOf(0, 0, 1, 1, 1, 0, 0),
+            listOf(0, 1, 1, 0, 1, 1, 0),
+            listOf(1, 1, 1, 1, 1, 1, 1),
+            listOf(1, 0, 1, 1, 1, 0, 1),
+            listOf(0, 1, 1, 1, 1, 1, 0),
+            listOf(0, 0, 1, 0, 1, 0, 0),
+            listOf(0, 1, 0, 0, 0, 1, 0)
         )
     }
 
@@ -433,6 +454,8 @@ private fun VisualCraft(accentColor: Color) {
             }
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             colors.forEachIndexed { i, color ->
                 val isSelected = i == selectedColor
@@ -444,13 +467,13 @@ private fun VisualCraft(accentColor: Color) {
                         .drawBehind {
                             if (isSelected) {
                                 drawCircle(
-                                    color = accentColor,
+                                    color = color,
                                     radius = size.minDimension / 2f + 2.dp.toPx(),
                                     style = Stroke(width = 1.5.dp.toPx()),
                                 )
                             }
                         }
-                        .noRippleClickable { selectedColor = i }
+                        .noRippleClickable { setSelectedColor(i) }
                 )
             }
         }
@@ -459,17 +482,19 @@ private fun VisualCraft(accentColor: Color) {
 
 @Composable
 private fun VisualPremium(accentColor: Color) {
-    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
-
     Column(
-        modifier = Modifier.padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Yıldız rozeti
+        Spacer(modifier = Modifier.height(8.dp))
+
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(56.dp)
                 .clip(CircleShape)
                 .background(accentColor.copy(alpha = 0.15f))
                 .drawBehind {
@@ -481,10 +506,11 @@ private fun VisualPremium(accentColor: Color) {
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Text("★", fontSize = 28.sp, color = accentColor)
+            Text("★", fontSize = 22.sp, color = accentColor)
         }
 
-        // ÖZELLİK LİSTESİ (Güncellendi)
+        Spacer(modifier = Modifier.height(12.dp))
+
         val features = listOf(
             "Reklamsız deneyim",
             "Sınırsız kristal paketleri",
@@ -496,56 +522,19 @@ private fun VisualPremium(accentColor: Color) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(vertical = 3.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(accentColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("✓ ", color = accentColor, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                Text(feature, color = accentColor, fontSize = 13.sp)
+                Text("✓ ", color = accentColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(feature, color = accentColor, fontSize = 14.sp)
             }
         }
-    }
-}
 
-// ─── Yardımcı composable'lar ──────────────────────────────────────────────────
-
-@Composable
-private fun StatCard(label: String, value: String, backgroundColor: Color, modifier: Modifier = Modifier) {
-    val textPrimary = MaterialTheme.colorScheme.onBackground
-    val textSecondary = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .padding(vertical = 12.dp, horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textPrimary)
-        Text(label, fontSize = 10.sp, color = textSecondary)
-    }
-}
-
-@Composable
-private fun GridBackground(primaryColor: Color, modifier: Modifier = Modifier) {
-    Canvas(
-        modifier = modifier.fillMaxSize()
-    ) {
-        val step = 72f
-        val color = primaryColor.copy(alpha = 0.03f)
-        var x = 0f
-        while (x <= size.width) {
-            drawLine(color, Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
-            x += step
-        }
-        var y = 0f
-        while (y <= size.height) {
-            drawLine(color, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
-            y += step
-        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -559,33 +548,33 @@ private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
         )
     )
 
-// ─── Slide listesi ────────────────────────────────────────────────────────────
 @Composable
-private fun rememberSlides(cyan: Color, purple: Color, gold: Color) = remember {
-    listOf(
-        OnboardingSlide(
-            tag          = "BULMACA · MANTIK · SINIRSIZ",
-            title        = "Çöz!",
-            titleAccent  = "Çöz",
-            description  = "Her gün yenilenen, binlerce benzersiz nonogram bulmacasını keşfet. Mantığını konuştur.",
-            accentColor  = cyan,
-            visual       = { color -> VisualSolve(color) },
-        ),
-        OnboardingSlide(
-            tag          = "TASARIM · PAYLAŞIM · TOPLULUK",
-            title        = "Tasarla ve Paylaş!",
-            titleAccent  = "Paylaş",
-            description  = "Kendi pixel artını oluştur, toplulukla paylaş. Beğenileri topla, efsane ol.",
-            accentColor  = purple,
-            visual       = { color -> VisualCraft(color) },
-        ),
-        OnboardingSlide(
-            tag          = "PREMIUM · AVANTAJLAR",
-            title        = "Sınırlarını Aş!",
-            titleAccent  = "Sınırlarını",
-            description  = "Premium ile reklamsız bir deneyim yaşa; sınırsız kristal, fazladan kalpler ve özel öne çıkarmalar kazan.",
-            accentColor  = gold,
-            visual       = { color -> VisualPremium(color) },
-        ),
-    )
-}
+private fun rememberSlides(cyan: Color, selectedColor: Int, colors: List<Color>, setSelectedColor: (Int) -> Unit, gold: Color) =
+    remember(selectedColor) {
+        listOf(
+            OnboardingSlide(
+                tag          = "BULMACA · MANTIK · SINIRSIZ",
+                title        = "Çöz!",
+                titleAccent  = "Çöz",
+                description  = "Her gün yenilenen, binlerce benzersiz nonogram bulmacasını keşfet. Mantığını konuştur.",
+                accentColor  = cyan,
+                visual       = { color -> VisualSolve(color) },
+            ),
+            OnboardingSlide(
+                tag          = "TASARIM · PAYLAŞIM · TOPLULUK",
+                title        = "Tasarla ve Paylaş!",
+                titleAccent  = "Paylaş",
+                description  = "Kendi pixel artını oluştur, toplulukla paylaş. Beğenileri topla, efsane ol.",
+                accentColor  = colors[selectedColor],
+                visual       = { color -> VisualCraft(selectedColor, colors, setSelectedColor) },
+            ),
+            OnboardingSlide(
+                tag          = "PREMIUM · AVANTAJLAR",
+                title        = "Sınırlarını Aş!",
+                titleAccent  = "Sınırlarını",
+                description  = "Premium ile reklamsız bir deneyim yaşa; sınırsız kristal, fazladan kalpler ve özel öne çıkarmalar kazan.",
+                accentColor  = gold,
+                visual       = { color -> VisualPremium(color) },
+            ),
+        )
+    }

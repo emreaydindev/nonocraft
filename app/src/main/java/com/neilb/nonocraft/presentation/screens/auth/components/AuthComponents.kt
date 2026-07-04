@@ -1,6 +1,5 @@
 package com.neilb.nonocraft.presentation.screens.auth.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,8 +21,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,11 +37,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,7 +53,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.neilb.nonocraft.R
 import com.neilb.nonocraft.presentation.theme.AppFont
+import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.BorderDark
 import com.neilb.nonocraft.presentation.theme.DangerRed
 import com.neilb.nonocraft.presentation.theme.GameGold
@@ -60,25 +65,7 @@ import com.neilb.nonocraft.presentation.theme.SurfaceVariantDark
 import com.neilb.nonocraft.presentation.theme.TextMuted
 import com.neilb.nonocraft.presentation.theme.TextPrimary
 import com.neilb.nonocraft.presentation.theme.TextSecondary
-import com.neilb.nonocraft.R
-
-@Composable
-fun AuthGridBackground(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val step = 72f
-        val color = NeonCyan.copy(alpha = 0.09f)
-        var x = 0f
-        while (x <= size.width) {
-            drawLine(color, Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
-            x += step
-        }
-        var y = 0f
-        while (y <= size.height) {
-            drawLine(color, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
-            y += step
-        }
-    }
-}
+import com.neilb.nonocraft.presentation.theme.BackgroundDark as BrandBackground // To avoid confusion if needed, though not strictly necessary here
 
 @Composable
 fun AuthLogoRow(modifier: Modifier = Modifier) {
@@ -98,47 +85,41 @@ fun AuthLogoRow(modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(
                     id = R.drawable.ic_neon_cube_logo),
-                    contentDescription = null,
+                contentDescription = null,
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
             )
         }
 
-    Text(
-        text = buildAnnotatedString {
-            withStyle(SpanStyle(color = TextPrimary)) { append("Nono") }
-            withStyle(SpanStyle(color = NeonCyan))    { append("craft") }
-        },
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        fontFamily = AppFont,
-    )
-}
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(color = TextPrimary)) { append("Nono") }
+                withStyle(SpanStyle(color = NeonCyan))    { append("craft") }
+            },
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = AppFont,
+        )
+    }
 }
 @Composable
 fun AuthBackRow(
     onBack: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .noRippleClickable(onBack)
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(SurfaceDark)
-                .border(0.5.dp, BorderDark, RoundedCornerShape(9.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("←", color = TextSecondary, fontSize = 16.sp)
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                contentDescription = "Geri",
+                tint = TextPrimary
+            )
         }
-        Text("Geri", color = TextSecondary, fontSize = 14.sp, fontFamily = AppFont)
     }
 }
 
@@ -168,24 +149,30 @@ fun GoogleSignInButton(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .height(52.dp)
+            .clip(RoundedCornerShape(16.dp))
             .background(SurfaceDark)
-            .border(0.5.dp, BorderDark, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 13.dp),
+            .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF4285F4)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("G", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        }
-        Text(label, color = TextPrimary, fontSize = 14.sp, fontFamily = AppFont)
+        Image(
+            painter = painterResource(id = R.drawable.ic_google),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Text(
+            text = label,
+            color = TextPrimary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = AppFont,
+            letterSpacing = 0.3.sp
+        )
     }
 }
 
@@ -194,12 +181,12 @@ fun AuthDivider(label: String = "veya") {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 14.dp),
+            .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(Modifier.weight(1f).height(0.5.dp).background(BorderDark))
-        Text(label, color = TextMuted, fontSize = 11.sp, fontFamily = AppFont)
+        Text(label, color = TextSecondary, fontSize = 12.sp, fontFamily = AppFont)
         Box(Modifier.weight(1f).height(0.5.dp).background(BorderDark))
     }
 }
@@ -429,6 +416,7 @@ fun PrimaryAuthButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isLoading: Boolean = false,
 ) {
     Box(
         modifier = modifier
@@ -436,17 +424,25 @@ fun PrimaryAuthButton(
             .height(52.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (enabled) NeonCyan else NeonCyan.copy(alpha = 0.35f))
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled && !isLoading, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = text,
-            color = if (enabled) Color(0xFF0A0A0F) else TextMuted,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = AppFont,
-            letterSpacing = 0.5.sp,
-        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color(0xFF0A0A0F),
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(
+                text = text,
+                color = if (enabled) Color(0xFF0A0A0F) else TextSecondary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFont,
+                letterSpacing = 0.5.sp,
+            )
+        }
     }
 }
 
@@ -461,7 +457,7 @@ fun OutlineAuthButton(
             .fillMaxWidth()
             .height(50.dp)
             .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, NeonCyan.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+            .border(1.5.dp, NeonCyan.copy(alpha = 0.50f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -469,6 +465,7 @@ fun OutlineAuthButton(
             text = text,
             color = NeonCyan,
             fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
             fontFamily = AppFont,
             letterSpacing = 0.3.sp,
         )
@@ -492,8 +489,9 @@ fun GhostAuthButton(
     ) {
         Text(
             text = text,
-            color = TextMuted,
+            color = TextSecondary,
             fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
             fontFamily = AppFont,
         )
     }
@@ -502,9 +500,9 @@ fun GhostAuthButton(
 @Composable
 fun InfoBanner(
     message: String,
+    modifier: Modifier = Modifier,
     subMessage: String? = null,
     isError: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     val bgColor   = if (isError) DangerRed.copy(alpha = 0.10f) else NeonCyan.copy(alpha = 0.08f)
     val brdColor  = if (isError) DangerRed.copy(alpha = 0.35f) else NeonCyan.copy(alpha = 0.30f)

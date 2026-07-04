@@ -1,20 +1,43 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -22,7 +45,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.R
+import com.neilb.nonocraft.presentation.theme.GridBackground
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -38,14 +63,40 @@ private const val NAV_DELAY_MS     = 3200L
 @Composable
 fun SplashScreen(
     onNavigateToOnboarding: () -> Unit,
+    onNavigateToAuthGateway: () -> Unit,
     onNavigateToDashboard: () -> Unit,
+    viewModel: SplashViewModel = hiltViewModel(),
 ) {
-    val isLoggedIn = false
+    val destination by viewModel.destination.collectAsState()
 
     var logoVisible  by remember { mutableStateOf(false) }
     var nameVisible  by remember { mutableStateOf(false) }
     var tagVisible   by remember { mutableStateOf(false) }
     var gridVisible  by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(LOGO_START_MS.milliseconds)
+        logoVisible = true
+        delay((NAME_START_MS - LOGO_START_MS).milliseconds)
+        nameVisible = true
+        delay((TAG_START_MS - NAME_START_MS).milliseconds)
+        tagVisible = true
+        delay((GRID_START_MS - TAG_START_MS).milliseconds)
+        gridVisible = true
+        delay((NAV_DELAY_MS - GRID_START_MS).milliseconds)
+    }
+
+    LaunchedEffect(destination) {
+        if (destination == SplashDestination.Loading) return@LaunchedEffect
+        delay(NAV_DELAY_MS.milliseconds)
+
+        when (destination) {
+            SplashDestination.Onboarding -> onNavigateToOnboarding()
+            SplashDestination.AuthGateway -> onNavigateToAuthGateway()
+            SplashDestination.Dashboard -> onNavigateToDashboard()
+            SplashDestination.Loading -> Unit
+        }
+    }
 
     val logoScale by animateFloatAsState(
         targetValue  = if (logoVisible) 1f else 0.7f,
@@ -95,40 +146,18 @@ fun SplashScreen(
         label = "gridAlpha"
     )
 
-    LaunchedEffect(Unit) {
-        delay(LOGO_START_MS.milliseconds)
-        logoVisible = true
-
-        delay((NAME_START_MS - LOGO_START_MS).milliseconds)
-        nameVisible = true
-
-        delay((TAG_START_MS - NAME_START_MS).milliseconds)
-        tagVisible = true
-
-        delay((GRID_START_MS - TAG_START_MS).milliseconds)
-        gridVisible = true
-
-        delay((NAV_DELAY_MS - GRID_START_MS).milliseconds)
-        if (isLoggedIn) onNavigateToDashboard() else onNavigateToOnboarding()
-    }
-
     val backgroundColor = MaterialTheme.colorScheme.background
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
 
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(gridAlpha)
-        ) {
-            drawGridBackground(this, primaryColor)
-        }
+        GridBackground()
 
         if (glowRadius > 1f) {
             Canvas(
@@ -185,7 +214,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Forge Your Grid",
+                text = "Çöz ve Tasarla",
                 color = primaryColor.copy(alpha = 0.55f),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
@@ -207,24 +236,6 @@ fun SplashScreen(
                 PulsingDot(delayMs = idx * 200, color = primaryColor)
             }
         }
-    }
-}
-
-private fun drawGridBackground(scope: DrawScope, primaryColor: Color) {
-    val step = 72f
-    val gridColor = primaryColor.copy(alpha = 0.04f)
-    val w = scope.size.width
-    val h = scope.size.height
-
-    var x = 0f
-    while (x <= w) {
-        scope.drawLine(gridColor, Offset(x, 0f), Offset(x, h), strokeWidth = 1f)
-        x += step
-    }
-    var y = 0f
-    while (y <= h) {
-        scope.drawLine(gridColor, Offset(0f, y), Offset(w, y), strokeWidth = 1f)
-        y += step
     }
 }
 

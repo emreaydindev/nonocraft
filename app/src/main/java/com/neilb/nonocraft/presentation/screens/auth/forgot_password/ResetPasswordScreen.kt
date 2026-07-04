@@ -2,10 +2,13 @@ package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -35,121 +38,124 @@ fun ResetPasswordScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundDark),
+            .background(BackgroundDark)
+            .navigationBarsPadding(),
     ) {
-        AuthGridBackground()
+        GridBackground()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(horizontal = 28.dp)
-                .padding(top = 16.dp, bottom = 36.dp),
+                .padding(bottom = 24.dp),
         ) {
-
             AuthBackRow(onBack = onNavigateBack)
-            Spacer(Modifier.height(24.dp))
 
-            AuthIconBox(
-                icon = {
-                    Text("🔑", fontSize = 24.sp)
-                },
-            )
-            Spacer(Modifier.height(20.dp))
-
-            Text(
-                text = "Yeni Şifre Belirle",
-                color = TextPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = AppFont,
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "Güçlü bir şifre seç. Bir daha unutma!",
-                color = TextSecondary,
-                fontSize = 12.sp,
-                fontFamily = AppFont,
-            )
-            Spacer(Modifier.height(28.dp))
-
-            AuthPasswordField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Yeni şifre",
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next,
-                ),
-            )
-
-            if (password.isNotEmpty()) {
-                PasswordStrengthBar(
-                    password = password,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            AuthPasswordField(
-                value = confirm,
-                onValueChange = { confirm = it },
-                label = "Şifreyi onayla",
-                isError = confirm.isNotEmpty() && !passwordsMatch,
-                errorMessage = if (confirm.isNotEmpty() && !passwordsMatch) "Şifreler eşleşmiyor" else null,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                ),
-            )
-
-            if (passwordsMatch) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "✓ Şifreler eşleşiyor",
-                    color = NeonCyan.copy(alpha = 0.80f),
-                    fontSize = 11.sp,
-                    fontFamily = AppFont,
-                    modifier = Modifier.padding(start = 4.dp),
-                )
-            }
-
-            Spacer(Modifier.height(14.dp))
-
-            Box(
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(13.dp))
-                    .background(SurfaceDark)
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                    .padding(horizontal = 28.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center
             ) {
-                Column {
-                    Text(
-                        text = "GEREKSİNİMLER",
-                        color = TextMuted,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.8.sp,
-                        fontFamily = AppFont,
-                        modifier = Modifier.padding(bottom = 8.dp),
+                Text(
+                    text = "Yeni Şifre Belirle",
+                    color = TextPrimary,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppFont,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "Güçlü bir şifre seç. Bir daha unutma!",
+                    color = TextSecondary,
+                    fontSize = 15.sp,
+                    fontFamily = AppFont,
+                )
+                Spacer(Modifier.height(32.dp))
+
+                AuthPasswordField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = "Yeni şifre",
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
+
+                if (password.isNotEmpty()) {
+                    PasswordStrengthBar(
+                        password = password,
+                        modifier = Modifier.padding(top = 6.dp),
                     )
-                    PasswordRequirementRow("En az 8 karakter",   met = hasMinLength)
-                    PasswordRequirementRow("Büyük harf içeriyor", met = hasUpper)
-                    PasswordRequirementRow("Rakam içeriyor",      met = hasDigit)
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                AuthPasswordField(
+                    value = confirm,
+                    onValueChange = { confirm = it },
+                    label = "Şifreyi onayla",
+                    isError = confirm.isNotEmpty() && !passwordsMatch,
+                    errorMessage = if (confirm.isNotEmpty() && !passwordsMatch) "Şifreler eşleşmiyor" else null,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done,
+                    ),
+                )
+
+                if (passwordsMatch) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "✓ Şifreler eşleşiyor",
+                        color = NeonCyan.copy(alpha = 0.80f),
+                        fontSize = 11.sp,
+                        fontFamily = AppFont,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(SurfaceDark)
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                ) {
+                    Column {
+                        Text(
+                            text = "GEREKSİNİMLER",
+                            color = TextMuted,
+                            fontSize = 10.sp,
+                            letterSpacing = 0.8.sp,
+                            fontFamily = AppFont,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                        PasswordRequirementRow("En az 8 karakter",   met = hasMinLength)
+                        PasswordRequirementRow("Büyük harf içeriyor", met = hasUpper)
+                        PasswordRequirementRow("Rakam içeriyor",      met = hasDigit)
+                    }
                 }
             }
 
-            Spacer(Modifier.weight(1f))
-
-            PrimaryAuthButton(
-                text = "Şifremi Güncelle",
-                enabled = canSubmit,
-                onClick = {
-                    // TODO: POST /auth/reset-password { token (deep link'ten), password }
-                    //   başarılıysa → onResetSuccess()
-                    onResetSuccess()
-                },
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PrimaryAuthButton(
+                    text = "Şifremi Güncelle",
+                    enabled = canSubmit,
+                    onClick = {
+                        // TODO: POST /auth/reset-password { token (deep link'ten), password }
+                        //   başarılıysa → onResetSuccess()
+                        onResetSuccess()
+                    },
+                )
+            }
         }
     }
 }

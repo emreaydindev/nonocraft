@@ -1,4 +1,4 @@
-package com.neilb.nonocraft.presentation.screens.extras
+package com.neilb.nonocraft.presentation.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -38,6 +39,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,12 +48,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
 import com.neilb.nonocraft.presentation.screens.dashboard.components.SectionLabel
 import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.settings.components.DeleteAccountDialog
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.BorderDark
@@ -63,24 +69,51 @@ import com.neilb.nonocraft.presentation.theme.SurfaceDark
 import com.neilb.nonocraft.presentation.theme.SurfaceVariantDark
 import com.neilb.nonocraft.presentation.theme.TextMuted
 import com.neilb.nonocraft.presentation.theme.TextPrimary
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToTheme: () -> Unit,
     onNavigateToAppIcon: () -> Unit,
-    onLogoutClick: () -> Unit,
-    onDeleteAccountClick: () -> Unit
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
+    onLogoutSuccess: () -> Unit
 ) {
+    val context = LocalContext.current
+
     var isNeonEffectsEnabled by remember { mutableStateOf(true) }
     var isVibrationEnabled by remember { mutableStateOf(true) }
     var isSoundEnabled by remember { mutableStateOf(true) }
     var isErrorWarningEnabled by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is SettingsUiEvent.NavigateToAuth -> onLogoutSuccess()
+                is SettingsUiEvent.ShowError -> context.showToast(event.message)
+            }
+        }
+    }
+
+    if (showDeleteDialog) {
+        DeleteAccountDialog(
+            onDismiss = { showDeleteDialog = false },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteAccount()
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDark)
+            .navigationBarsPadding()
     ) {
         GridBackground()
 
@@ -167,17 +200,17 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = Icons.Rounded.ManageAccounts,
                         label = "Hesap Bilgilerini Düzenle",
-                        onClick = { /* TODO */ }
+                        onClick = onNavigateToEditProfile
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Lock,
                         label = "Şifre Değiştir",
-                        onClick = { /* TODO */ }
+                        onClick = onNavigateToChangePassword
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Notifications,
                         label = "Bildirim Tercihleri",
-                        onClick = { /* TODO */ }
+                        onClick = onNavigateToNotifications
                     )
                 }
 
@@ -186,19 +219,19 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Email,
                         label = "Bize Ulaşın",
                         isExternalLink = true,
-                        onClick = { /* TODO */ }
+                        onClick = { }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Policy,
                         label = "Gizlilik Politikası",
                         isExternalLink = true,
-                        onClick = { /* TODO */ }
+                        onClick = { }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Description,
                         label = "Kullanım Koşulları",
                         isExternalLink = true,
-                        onClick = { /* TODO */ }
+                        onClick = { }
                     )
                 }
 
@@ -208,14 +241,14 @@ fun SettingsScreen(
                         label = "Çıkış Yap",
                         contentColor = DangerRed,
                         hideTrailingIcon = true,
-                        onClick = onLogoutClick
+                        onClick = { viewModel.logout() }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.DeleteForever,
                         label = "Hesabı Kalıcı Olarak Sil",
                         contentColor = DangerRed,
                         hideTrailingIcon = true,
-                        onClick = onDeleteAccountClick
+                        onClick = { showDeleteDialog = true }
                     )
                 }
             }

@@ -3,6 +3,7 @@ package com.neilb.nonocraft.presentation.mapper
 import androidx.compose.ui.graphics.Color
 import com.neilb.nonocraft.domain.model.Puzzle
 import com.neilb.nonocraft.presentation.model.PostItem
+import androidx.core.graphics.toColorInt
 
 fun Puzzle.toPostItem(): PostItem {
     return PostItem(
@@ -16,7 +17,7 @@ fun Puzzle.toPostItem(): PostItem {
         isFollowed = false, // Not directly in Puzzle model, usually handled via separate state
         difficulty = difficulty ?: "Orta",
         size = "${size}×${size}",
-        accentColor = if (paletteHex.isNotEmpty()) Color(android.graphics.Color.parseColor(paletteHex.first())) else Color.Gray,
+        accentColor = if (paletteHex.isNotEmpty()) Color(paletteHex.first().toColorInt()) else Color.Gray,
         pattern = grid
     )
 }

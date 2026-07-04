@@ -20,6 +20,9 @@ object UseCaseModule {
     fun provideGetPuzzle(repository: PuzzleRepository): GetPuzzle = GetPuzzle(repository)
 
     @Provides @Singleton
+    fun provideGetPuzzles(repository: PuzzleRepository): GetPuzzles = GetPuzzles(repository)
+
+    @Provides @Singleton
     fun providePlayPuzzle(repository: PuzzleRepository): PlayPuzzle = PlayPuzzle(repository)
 
     @Provides @Singleton
@@ -29,5 +32,20 @@ object UseCaseModule {
     fun provideLogin(repository: AuthRepository): Login = Login(repository)
 
     @Provides @Singleton
+    fun provideRegister(repository: AuthRepository): Register = Register(repository)
+
+    @Provides @Singleton
+    fun provideGoogleLogin(repository: AuthRepository): GoogleLogin = GoogleLogin(repository)
+
+    @Provides @Singleton
     fun provideGetMyProfile(repository: UserRepository): GetMyProfile = GetMyProfile(repository)
+
+    @Provides @Singleton
+    fun provideUpdateProfile(repository: UserRepository): UpdateProfile = UpdateProfile(repository)
+
+    @Provides @Singleton
+    fun provideChangePassword(repository: UserRepository): ChangePassword = ChangePassword(repository)
+
+    @Provides @Singleton
+    fun provideDeleteAccount(repository: UserRepository): DeleteAccount = DeleteAccount(repository)
 }

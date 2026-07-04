@@ -24,6 +24,6 @@ fun LoginResponse.toAuthResult(): AuthResult {
     return AuthResult(
         accessToken = accessToken,
         refreshToken = refreshToken,
-        user = user.toUser()
+        user = user?.toUser()
     )
 }

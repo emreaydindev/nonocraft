@@ -35,7 +35,7 @@ fun CompleteResponse.toCompletionResult(): CompletionResult {
 
 fun LikeResponse.toLikeResult(): LikeResult {
     return LikeResult(
-        liked = liked ?: false,
+        isLiked = liked ?: false,
         likeCount = likeCount ?: 0
     )
 }
