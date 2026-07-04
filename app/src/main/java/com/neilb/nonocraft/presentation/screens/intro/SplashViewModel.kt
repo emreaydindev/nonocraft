@@ -16,6 +16,7 @@ sealed interface SplashDestination {
     data object Onboarding : SplashDestination
     data object AuthGateway : SplashDestination
     data object Dashboard : SplashDestination
+    data object Tutorial : SplashDestination
 }
 
 @HiltViewModel
@@ -29,15 +30,18 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val hasSeenTutorial = tokenManager.hasSeenTutorial
             _destination.value = when {
                 !tokenManager.hasCompletedOnboarding -> SplashDestination.Onboarding
 
                 tokenManager.isLoggedIn -> {
                     val sessionValid = sessionManager.refreshSession()
-                    if (sessionValid) SplashDestination.Dashboard else SplashDestination.AuthGateway
+                    if (!hasSeenTutorial) SplashDestination.Tutorial else if (sessionValid) SplashDestination.Dashboard else SplashDestination.AuthGateway
                 }
 
-                tokenManager.isGuest -> SplashDestination.Dashboard
+                tokenManager.isGuest -> {
+                    if (!hasSeenTutorial) SplashDestination.Tutorial else SplashDestination.Dashboard
+                }
 
                 else -> SplashDestination.AuthGateway
             }

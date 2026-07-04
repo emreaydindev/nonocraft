@@ -4,29 +4,26 @@ import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.neilb.nonocraft.data.local.TokenManager
-import com.neilb.nonocraft.data.session.SessionManager
-import com.neilb.nonocraft.domain.model.User
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ForgotPasswordScreen
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswordScreen
 import com.neilb.nonocraft.presentation.screens.auth.gateway.AuthGatewayScreen
 import com.neilb.nonocraft.presentation.screens.auth.login.LoginScreen
 import com.neilb.nonocraft.presentation.screens.auth.register.RegisterScreen
-import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ForgotPasswordScreen
-import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswordScreen
 import com.neilb.nonocraft.presentation.screens.crafting.CraftingScreen
 import com.neilb.nonocraft.presentation.screens.dashboard.DashboardScreen
 import com.neilb.nonocraft.presentation.screens.dashboard.library.detail.LibraryDetailScreen
-import com.neilb.nonocraft.presentation.screens.premium.PremiumScreen
 import com.neilb.nonocraft.presentation.screens.gameplay.GameScreen
 import com.neilb.nonocraft.presentation.screens.gameplay.GameViewModel
 import com.neilb.nonocraft.presentation.screens.intro.OnboardingScreen
 import com.neilb.nonocraft.presentation.screens.intro.SplashScreen
 import com.neilb.nonocraft.presentation.screens.intro.TutorialScreen
+import com.neilb.nonocraft.presentation.screens.premium.PremiumScreen
 import com.neilb.nonocraft.presentation.screens.profile.ProfileScreen
 import com.neilb.nonocraft.presentation.screens.settings.SettingsScreen
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.ChangePasswordScreen
@@ -34,30 +31,6 @@ import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.Edit
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.icons.AppIconScreen
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.notifications.NotificationSettingsScreen
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.theme.ThemeScreen
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
-
-@HiltViewModel
-class AppViewModel @Inject constructor(
-    private val tokenManager: TokenManager,
-    private val sessionManager: SessionManager,
-) : ViewModel() {
-
-    val userProfile: StateFlow<User?> = sessionManager.userProfile
-
-    fun completeOnboarding() {
-        tokenManager.hasCompletedOnboarding = true
-    }
-
-    fun enterGuestMode() {
-        tokenManager.setGuestMode()
-    }
-
-    fun logout() {
-        sessionManager.clearSession()
-    }
-}
 
 @Composable
 fun NavigationView() {
@@ -79,6 +52,11 @@ fun NavigationView() {
                 },
                 onNavigateToDashboard = {
                     rootNavController.navigate(Route.DashboardRoot) {
+                        popUpTo(Route.Splash) { inclusive = true }
+                    }
+                },
+                onNavigateToTutorial = {
+                    rootNavController.navigate(Route.Tutorial) {
                         popUpTo(Route.Splash) { inclusive = true }
                     }
                 }
@@ -103,19 +81,16 @@ fun NavigationView() {
                     onNavigateToRegister = { rootNavController.navigate(Route.Register) },
                     onContinueAsGuest = {
                         appViewModel.enterGuestMode()
-                        rootNavController.navigate(Route.Tutorial) {
-                            popUpTo(Route.AuthRoot) { inclusive = true }
-                        }
+                        navigateAfterAuth(rootNavController, appViewModel, Route.AuthRoot)
                     },
                     onGoogleLoginSuccess = {
-                        rootNavController.navigate(Route.DashboardRoot) {
-                            popUpTo(Route.AuthRoot) { inclusive = true }
-                        }
+                        navigateAfterAuth(rootNavController, appViewModel, Route.AuthRoot)
                     }
                 )
             }
 
             composable<Route.Register> {
+                val appViewModel: AppViewModel = hiltViewModel()
                 RegisterScreen(
                     onNavigateBack = { rootNavController.popBackStack() },
                     onNavigateToLogin = {
@@ -124,14 +99,13 @@ fun NavigationView() {
                         }
                     },
                     onRegisterSuccess = {
-                        rootNavController.navigate(Route.DashboardRoot) {
-                            popUpTo(Route.AuthRoot) { inclusive = true }
-                        }
+                        navigateAfterAuth(rootNavController, appViewModel, Route.AuthRoot)
                     }
                 )
             }
 
             composable<Route.Login> {
+                val appViewModel: AppViewModel = hiltViewModel()
                 LoginScreen(
                     onNavigateBack = { rootNavController.popBackStack() },
                     onNavigateToForgotPassword = { rootNavController.navigate(Route.ForgotPassword) },
@@ -141,9 +115,7 @@ fun NavigationView() {
                         }
                     },
                     onLoginSuccess = {
-                        rootNavController.navigate(Route.DashboardRoot) {
-                            popUpTo(Route.AuthRoot) { inclusive = true }
-                        }
+                        navigateAfterAuth(rootNavController, appViewModel, Route.AuthRoot)
                     }
                 )
             }
@@ -204,15 +176,19 @@ fun NavigationView() {
         }
 
         composable<Route.Tutorial> {
+            val appViewModel: AppViewModel = hiltViewModel()
             TutorialScreen(
                 onNavigateToDashboard = {
+                    appViewModel.completeTutorial()
                     rootNavController.navigate(Route.DashboardRoot) {
                         popUpTo(Route.Tutorial) { inclusive = true }
                     }
                 }
             )
         }
+
         composable<Route.Crafting> { CraftingScreen() }
+
         composable<Route.Premium> {
             PremiumScreen(
                 onNavigateBack = { rootNavController.popBackStack() }
@@ -282,6 +258,22 @@ fun NavigationView() {
                 onNavigateToGame = { gameId -> rootNavController.navigate(Route.Game(gameId)) },
                 onNavigateToProfile = { userId -> rootNavController.navigate(Route.Profile(userId)) }
             )
+        }
+    }
+}
+
+private fun navigateAfterAuth(
+    navController: NavHostController,
+    appViewModel: AppViewModel,
+    popUpToRoute: Any,
+) {
+    if (appViewModel.hasSeenTutorial) {
+        navController.navigate(Route.DashboardRoot) {
+            popUpTo(popUpToRoute) { inclusive = true }
+        }
+    } else {
+        navController.navigate(Route.Tutorial) {
+            popUpTo(popUpToRoute) { inclusive = true }
         }
     }
 }

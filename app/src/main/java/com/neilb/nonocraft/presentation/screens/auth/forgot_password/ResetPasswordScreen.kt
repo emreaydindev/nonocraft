@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.presentation.screens.auth.components.*
 import com.neilb.nonocraft.presentation.theme.*
 
@@ -23,17 +24,28 @@ import com.neilb.nonocraft.presentation.theme.*
 fun ResetPasswordScreen(
     onNavigateBack: () -> Unit,
     onResetSuccess: () -> Unit,
+    viewModel: ResetPasswordViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.state.collectAsState()
+
+    var code      by remember { mutableStateOf("") }
     var password  by remember { mutableStateOf("") }
     var confirm   by remember { mutableStateOf("") }
 
+    val isCodeValid  = code.length == 6
     val hasMinLength = password.length >= 8
     val hasUpper     = password.any { it.isUpperCase() }
     val hasDigit     = password.any { it.isDigit() }
     val passwordsMatch = password.isNotEmpty() && password == confirm
     val allRequirementsMet = hasMinLength && hasUpper && hasDigit
 
-    val canSubmit = allRequirementsMet && passwordsMatch
+    val canSubmit = isCodeValid && allRequirementsMet && passwordsMatch && !state.isLoading
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            onResetSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -68,12 +80,30 @@ fun ResetPasswordScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Güçlü bir şifre seç. Bir daha unutma!",
+                    text = "E-postana gönderdiğimiz 6 haneli kodu gir ve yeni şifreni belirle.",
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
+                    lineHeight = 22.sp,
                 )
                 Spacer(Modifier.height(32.dp))
+
+                AuthTextField(
+                    value = code,
+                    onValueChange = {
+                        code = it.filter { ch -> ch.isDigit() }.take(6)
+                    },
+                    label = "Doğrulama kodu",
+                    placeholder = "000000",
+                    isError = state.error != null,
+                    errorMessage = state.error,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.NumberPassword,
+                        imeAction = ImeAction.Next,
+                    ),
+                )
+
+                Spacer(Modifier.height(20.dp))
 
                 AuthPasswordField(
                     value = password,
@@ -149,11 +179,8 @@ fun ResetPasswordScreen(
                 PrimaryAuthButton(
                     text = "Şifremi Güncelle",
                     enabled = canSubmit,
-                    onClick = {
-                        // TODO: POST /auth/reset-password { token (deep link'ten), password }
-                        //   başarılıysa → onResetSuccess()
-                        onResetSuccess()
-                    },
+                    isLoading = state.isLoading,
+                    onClick = { viewModel.resetPassword(code, password) },
                 )
             }
         }

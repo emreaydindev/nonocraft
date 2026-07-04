@@ -65,6 +65,7 @@ fun SplashScreen(
     onNavigateToOnboarding: () -> Unit,
     onNavigateToAuthGateway: () -> Unit,
     onNavigateToDashboard: () -> Unit,
+    onNavigateToTutorial: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
     val destination by viewModel.destination.collectAsState()
@@ -94,6 +95,7 @@ fun SplashScreen(
             SplashDestination.Onboarding -> onNavigateToOnboarding()
             SplashDestination.AuthGateway -> onNavigateToAuthGateway()
             SplashDestination.Dashboard -> onNavigateToDashboard()
+            SplashDestination.Tutorial -> onNavigateToTutorial()
             SplashDestination.Loading -> Unit
         }
     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.presentation.screens.auth.components.*
 import com.neilb.nonocraft.presentation.theme.*
 
@@ -24,13 +25,19 @@ import com.neilb.nonocraft.presentation.theme.*
 fun ForgotPasswordScreen(
     onNavigateBack: () -> Unit,
     onCodeSentSuccess: () -> Unit,
+    viewModel: ForgotPasswordViewModel = hiltViewModel(),
 ) {
-    var email   by remember { mutableStateOf("") }
-    var isSent  by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
+    val state by viewModel.state.collectAsState()
+    var email by remember { mutableStateOf("") }
 
     val isEmailValid = email.isEmpty() || android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val canSubmit    = email.isNotEmpty() && isEmailValid
+    val canSubmit    = email.isNotEmpty() && isEmailValid && !state.isLoading
+
+    LaunchedEffect(state.isSent) {
+        if (state.isSent) {
+            onCodeSentSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -65,7 +72,7 @@ fun ForgotPasswordScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "E-posta adresini gir, sana sıfırlama bağlantısı gönderelim.",
+                    text = "E-posta adresini gir, sana bir doğrulama kodu gönderelim.",
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
@@ -77,30 +84,21 @@ fun ForgotPasswordScreen(
                     value = email,
                     onValueChange = {
                         email = it.trim()
-                        isSent = false
-                        isError = false
+                        viewModel.clearError()
                     },
                     label = "E-posta adresi",
                     placeholder = "ornek@gmail.com",
-                    isError = !isEmailValid || isError,
+                    isError = !isEmailValid || state.error != null,
                     errorMessage = when {
-                        !isEmailValid -> "Geçerli bir e-posta adresi girin"
-                        isError       -> "Bu e-posta kayıtlı değil"
-                        else          -> null
+                        !isEmailValid   -> "Geçerli bir e-posta adresi girin"
+                        state.error != null -> state.error
+                        else            -> null
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done,
                     ),
                 )
-
-                if (isSent) {
-                    Spacer(Modifier.height(12.dp))
-                    InfoBanner(
-                        message = "Bağlantı gönderildi!",
-                        subMessage = "Gelen kutunu kontrol et. Spam klasörünü de unutma.",
-                    )
-                }
             }
 
             Column(
@@ -108,14 +106,10 @@ fun ForgotPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PrimaryAuthButton(
-                    text = if (isSent) "Tekrar Gönder" else "Bağlantı Gönder",
+                    text = "Kod Gönder",
                     enabled = canSubmit,
-                    onClick = {
-                        // TODO: POST /auth/forgot-password { email }
-                        //   başarılıysa → isSent = true
-                        //   404 (kayıtlı değil) → isError = true
-                        isSent = true
-                    },
+                    isLoading = state.isLoading,
+                    onClick = { viewModel.sendResetCode(email) },
                 )
 
                 Spacer(Modifier.height(24.dp))

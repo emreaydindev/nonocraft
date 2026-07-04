@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.common.buildGoogleCredentialRequest
+import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.common.signInWithGoogle
 import com.neilb.nonocraft.presentation.screens.auth.AuthViewModel
 import com.neilb.nonocraft.presentation.screens.auth.components.AuthBackRow
@@ -71,6 +72,7 @@ fun RegisterScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val authState by authViewModel.state.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var username by remember { mutableStateOf("") }
@@ -79,6 +81,12 @@ fun RegisterScreen(
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
+            onRegisterSuccess()
+        }
+    }
+
+    LaunchedEffect(authState.isSuccess) {
+        if (authState.isSuccess) {
             onRegisterSuccess()
         }
     }
@@ -134,11 +142,16 @@ fun RegisterScreen(
                     label = "Google ile kayıt ol",
                     onClick = {
                         scope.launch {
+                            authViewModel.changeLoadingState(true)
                             signInWithGoogle(context, credentialManager, request)
                                 .onSuccess { idToken -> authViewModel.googleLogin(idToken) }
-                                .onFailure { e -> authViewModel.showError(e.localizedMessage) }
+                                .onFailure { e ->
+                                    context.showToast(e.localizedMessage)
+                                    authViewModel.changeLoadingState(false)
+                                }
                         }
                     },
+                    isLoading = authState.isLoading
                 )
 
                 AuthDivider(label = "veya e-posta ile")

@@ -38,6 +38,15 @@ object UseCaseModule {
     fun provideGoogleLogin(repository: AuthRepository): GoogleLogin = GoogleLogin(repository)
 
     @Provides @Singleton
+    fun provideForgotPassword(repository: AuthRepository): ForgotPassword = ForgotPassword(repository)
+
+    @Provides @Singleton
+    fun provideResetPassword(repository: AuthRepository): ResetPassword = ResetPassword(repository)
+
+    @Provides @Singleton
+    fun provideVerifyEmail(repository: AuthRepository): VerifyEmail = VerifyEmail(repository)
+
+    @Provides @Singleton
     fun provideGetMyProfile(repository: UserRepository): GetMyProfile = GetMyProfile(repository)
 
     @Provides @Singleton

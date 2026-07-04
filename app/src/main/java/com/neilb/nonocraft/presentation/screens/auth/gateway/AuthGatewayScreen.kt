@@ -92,11 +92,16 @@ fun AuthGatewayScreen(
                     label = "Google ile devam et",
                     onClick = {
                         scope.launch {
+                            authViewModel.changeLoadingState(true)
                             signInWithGoogle(context, credentialManager, request)
                                 .onSuccess { idToken -> authViewModel.googleLogin(idToken) }
-                                .onFailure { e -> context.showToast(e.localizedMessage) }
+                                .onFailure { e ->
+                                    context.showToast(e.localizedMessage)
+                                    authViewModel.changeLoadingState(false)
+                                }
                         }
                     },
+                    isLoading = authState.isLoading
                 )
 
                 AuthDivider(label = "veya")
@@ -142,7 +147,9 @@ fun AuthGatewayScreen(
                     fontFamily = AppFont,
                     lineHeight = 16.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
             }
         }

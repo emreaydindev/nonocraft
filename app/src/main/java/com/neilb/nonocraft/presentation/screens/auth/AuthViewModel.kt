@@ -30,7 +30,7 @@ class AuthViewModel @Inject constructor(
 
     fun googleLogin(idToken: String) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            changeLoadingState(true)
             when (val result = googleLoginUseCase(idToken)) {
                 is Resource.Success -> {
                     sessionManager.refreshSession()
@@ -40,6 +40,10 @@ class AuthViewModel @Inject constructor(
                 is Resource.Loading -> {}
             }
         }
+    }
+
+    fun changeLoadingState(loading: Boolean, error: String? = null) {
+        _state.update { it.copy(isLoading = loading, error = error) }
     }
 
     fun showError(message: String?) {

@@ -144,35 +144,52 @@ fun AuthIconBox(
 fun GoogleSignInButton(
     label: String,
     onClick: () -> Unit,
+    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceDark)
+            .background(if (!isLoading) SurfaceDark else SurfaceDark.copy(alpha = 0.35f))
             .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+            .clickable(enabled = !isLoading, onClick = onClick),
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_google),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color(0xFFB8B4B4),
+                strokeWidth = 4.dp
+            )
+        } else {
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
 
-        Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
-            text = label,
-            color = TextPrimary,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = AppFont,
-            letterSpacing = 0.3.sp
-        )
+                Text(
+                    text = label,
+                    color = TextPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = AppFont,
+                    letterSpacing = 0.3.sp
+                )
+            }
+        }
     }
 }
 
@@ -431,7 +448,7 @@ fun PrimaryAuthButton(
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
                 color = Color(0xFF0A0A0F),
-                strokeWidth = 2.dp
+                strokeWidth = 4.dp
             )
         } else {
             Text(
