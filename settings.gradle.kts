@@ -17,4 +17,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Nonocraft"
-include(":app")
+include(":androidApp")
+include(":shared")
