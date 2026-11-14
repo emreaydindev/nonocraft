@@ -37,7 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.neilb.nonocraft.common.buildGoogleCredentialRequest
 import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.common.signInWithGoogle

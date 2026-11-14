@@ -16,7 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountScreen
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardBottomNavBar
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardTab

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.neilb.nonocraft"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.neilb.nonocraft"

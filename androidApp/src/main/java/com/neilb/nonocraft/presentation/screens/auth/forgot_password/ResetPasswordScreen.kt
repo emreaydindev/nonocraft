@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.presentation.screens.auth.components.*
 import com.neilb.nonocraft.presentation.theme.*

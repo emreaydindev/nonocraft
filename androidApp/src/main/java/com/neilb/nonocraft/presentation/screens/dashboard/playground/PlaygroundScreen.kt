@@ -49,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neilb.nonocraft.R
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
@@ -82,15 +82,21 @@ fun PlaygroundScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     PlaygroundContent(
-        uiState = uiState,
-        onEvent = viewModel::onEvent
+        state = uiState,
+        onEvent = viewModel::onEvent,
+        onNavigateToGame = onNavigateToGame,
+        onNavigateToSettings = onNavigateToSettings,
+        onNavigateToTutorial = onNavigateToTutorial
     )
 }
 
 @Composable
 fun PlaygroundContent(
-    uiState: PlaygroundUiState,
-    onEvent: (PlaygroundUiEvent) -> Unit
+    state: PlaygroundUiState,
+    onEvent: (PlaygroundUiEvent) -> Unit,
+    onNavigateToGame: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToTutorial: () -> Unit
 ) {
     Box(
         modifier = Modifier

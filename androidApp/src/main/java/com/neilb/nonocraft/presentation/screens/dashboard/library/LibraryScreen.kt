@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.neilb.nonocraft.presentation.components.PlaylistSelectionDialog
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
 import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
