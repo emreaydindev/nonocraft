@@ -1,16 +1,16 @@
 package com.neilb.nonocraft.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 @Serializable
 data class PlaylistDto(
     val id: String,
     val name: String,
-    val description: String?,
-    val userId: String,
-    val puzzleCount: Int?,
-    val createdAt: String?
+    val description: String? = null,
+    val userId: String = "",
+    @SerialName("postCount") val puzzleCount: Int? = null,
+    val createdAt: String? = null
 )
 
 @Serializable

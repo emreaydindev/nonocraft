@@ -12,5 +12,5 @@ class DailyRepositoryImpl(
     override suspend fun getTodayPuzzle() = safeApiCall { api.getTodayPuzzle() }
     override suspend fun getStreak() = safeApiCall { api.getStreak() }
     override suspend fun getCalendar() = safeApiCall { api.getCalendar() }
-    override suspend fun completeDaily() = safeApiCall { api.completeDaily() }
+    override suspend fun completeDaily(date: String) = safeApiCall { api.completeDaily(date) }
 }

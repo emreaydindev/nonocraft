@@ -2,6 +2,7 @@ package com.neilb.nonocraft.data.remote.service
 
 import com.neilb.nonocraft.data.remote.ApiResponse
 import com.neilb.nonocraft.data.remote.dto.*
+import com.neilb.nonocraft.data.remote.map
 import com.neilb.nonocraft.data.remote.unitBody
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -15,7 +16,7 @@ import io.ktor.client.request.setBody
 class PlaylistApiService(private val client: HttpClient) {
 
     suspend fun getPlaylists(): ApiResponse<PlaylistListResponse> =
-        client.get("playlists").body()
+        client.get("playlists").body<ApiResponse<List<PlaylistDto>>>().map(::PlaylistListResponse)
 
     suspend fun createPlaylist(request: CreatePlaylistRequest): ApiResponse<PlaylistDto> =
         client.post("playlists") { setBody(request) }.body()

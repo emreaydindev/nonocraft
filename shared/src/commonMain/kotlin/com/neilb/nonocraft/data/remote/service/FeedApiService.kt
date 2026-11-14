@@ -2,6 +2,7 @@ package com.neilb.nonocraft.data.remote.service
 
 import com.neilb.nonocraft.data.remote.ApiResponse
 import com.neilb.nonocraft.data.remote.dto.*
+import com.neilb.nonocraft.data.remote.map
 import com.neilb.nonocraft.data.remote.unitBody
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -30,5 +31,5 @@ class FeedApiService(private val client: HttpClient) {
         client.get(path) {
             parameter("limit", limit)
             parameter("offset", offset)
-        }.body()
+        }.body<ApiResponse<List<FeedItemDto>>>().map(::FeedListResponse)
 }

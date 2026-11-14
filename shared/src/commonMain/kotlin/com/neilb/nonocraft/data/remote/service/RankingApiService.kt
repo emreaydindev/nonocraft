@@ -21,5 +21,5 @@ class RankingApiService(private val client: HttpClient) {
         }.body()
 
     suspend fun getMyRank(): ApiResponse<MyRankResponse> =
-        client.get("ranking/my-rank").body()
+        client.get("ranking/me").body()
 }

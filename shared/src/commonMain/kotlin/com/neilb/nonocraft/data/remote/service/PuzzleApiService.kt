@@ -2,6 +2,7 @@ package com.neilb.nonocraft.data.remote.service
 
 import com.neilb.nonocraft.data.remote.ApiResponse
 import com.neilb.nonocraft.data.remote.dto.*
+import com.neilb.nonocraft.data.remote.map
 import com.neilb.nonocraft.data.remote.unitBody
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -25,7 +26,7 @@ class PuzzleApiService(private val client: HttpClient) {
             parameter("offset", offset)
             parameter("type", type)
             parameter("difficulty", difficulty)
-        }.body()
+        }.body<ApiResponse<List<PuzzleDto>>>().map(::PuzzleListResponse)
 
     suspend fun getPuzzleById(puzzleId: String): ApiResponse<PuzzleDto> =
         client.get("puzzles/$puzzleId").body()
@@ -52,7 +53,7 @@ class PuzzleApiService(private val client: HttpClient) {
         client.post("puzzles/$puzzleId/play").unitBody()
 
     suspend fun getComments(puzzleId: String): ApiResponse<CommentListResponse> =
-        client.get("puzzles/$puzzleId/comments").body()
+        client.get("puzzles/$puzzleId/comments").body<ApiResponse<List<CommentDto>>>().map(::CommentListResponse)
 
     suspend fun createComment(puzzleId: String, request: CreateCommentRequest): ApiResponse<CommentDto> =
         client.post("puzzles/$puzzleId/comments") { setBody(request) }.body()

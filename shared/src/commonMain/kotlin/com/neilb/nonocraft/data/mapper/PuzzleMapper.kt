@@ -22,7 +22,9 @@ fun PuzzleDto.toPuzzle(): Puzzle {
         isLiked = isLiked ?: false,
         isCompleted = isCompleted ?: false,
         createdAt = createdAt,
-        dailyDate = dailyDate
+        dailyDate = dailyDate,
+        timeLimitSeconds = timeLimitSeconds,
+        maxLives = maxLives ?: 3
     )
 }
 

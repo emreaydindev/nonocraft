@@ -7,5 +7,5 @@ interface DailyRepository {
     suspend fun getTodayPuzzle(): Resource<DailyPuzzleResponse>
     suspend fun getStreak(): Resource<StreakResponse>
     suspend fun getCalendar(): Resource<CalendarResponse>
-    suspend fun completeDaily(): Resource<CompleteResponse>
+    suspend fun completeDaily(date: String): Resource<CompleteResponse>
 }

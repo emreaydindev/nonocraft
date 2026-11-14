@@ -1,18 +1,19 @@
 package com.neilb.nonocraft.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
 
 @Serializable
 data class DailyPuzzleResponse(
     val puzzle: PuzzleDto,
-    val dayNumber: Int
+    val dayNumber: Int = 0
 )
 
 @Serializable
 data class StreakResponse(
-    val currentStreak: Int,
-    val longestStreak: Int
+    @SerialName("streakCount") val currentStreak: Int = 0,
+    val longestStreak: Int = 0,
+    val lastStreakDate: String? = null
 )
 
 @Serializable
