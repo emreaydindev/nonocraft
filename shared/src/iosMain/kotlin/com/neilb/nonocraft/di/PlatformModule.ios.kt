@@ -13,8 +13,3 @@ actual val platformModule: Module = module {
     single<HttpClientEngine> { Darwin.create() }
     single<Settings> { NSUserDefaultsSettings(NSUserDefaults(suiteName = TokenManager.STORE_NAME)) }
 }
-
-/** Entry point for the iOS app: call once from `NonocraftApp.init`. */
-fun doInitKoin() {
-    initKoin()
-}

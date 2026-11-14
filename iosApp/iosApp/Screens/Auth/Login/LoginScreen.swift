@@ -1,0 +1,99 @@
+import Shared
+import SwiftUI
+
+struct LoginScreen: View {
+    let onNavigateBack: () -> Void
+    let onNavigateToRegister: () -> Void
+    let onNavigateToForgotPassword: () -> Void
+    let onGoogleSignIn: () -> Void
+    let onLoginSuccess: () -> Void
+
+    @StateObject private var model = ObservedViewModel({ $0.loginViewModel() }, state: \.state)
+
+    @State private var identifier = ""
+    @State private var password = ""
+    @FocusState private var focus: Field?
+
+    private enum Field { case identifier, password }
+
+    private var uiState: LoginUiState { model.state }
+    private var canSubmit: Bool { !identifier.isEmpty && !password.isEmpty && !uiState.isLoading }
+
+    var body: some View {
+        ScreenBackground {
+            VStack(spacing: 0) {
+                AuthBackRow(onBack: onNavigateBack)
+
+                CenteredScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Tekrar Hoş Geldin")
+                            .font(.app(32, .bold))
+                            .foregroundColor(.textPrimary)
+                        Text("Devam etmek için giriş yap.")
+                            .font(.app(15))
+                            .foregroundColor(.textSecondary)
+                            .padding(.top, 8)
+
+                        GoogleSignInButton(label: "Google ile giriş yap", action: onGoogleSignIn)
+                            .padding(.top, 32)
+                        AuthDivider(label: "veya e-posta ile")
+
+                        if let error = uiState.error {
+                            InfoBanner(message: "Giriş başarısız", subMessage: error, isError: true)
+                                .padding(.bottom, 14)
+                        }
+
+                        AuthTextField(
+                            text: $identifier,
+                            label: "E-posta veya kullanıcı adı",
+                            placeholder: "ornek@gmail.com veya @kullanici",
+                            isError: uiState.error != nil,
+                            keyboardType: .emailAddress,
+                            contentType: .username
+                        )
+                        .focused($focus, equals: .identifier)
+                        .onSubmit { focus = .password }
+                        .onChange(of: identifier) { _, value in
+                            identifier = value.trimmingCharacters(in: .whitespaces)
+                        }
+
+                        AuthPasswordField(text: $password, label: "Şifre", isError: uiState.error != nil)
+                            .focused($focus, equals: .password)
+                            .onSubmit(submit)
+                            .padding(.top, 12)
+
+                        Button("Şifremi unuttum", action: onNavigateToForgotPassword)
+                            .font(.app(13))
+                            .foregroundColor(.neonCyan)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.top, 8)
+                            .padding(.bottom, 24)
+                    }
+                    .padding(.horizontal, 28)
+                }
+
+                VStack(spacing: 24) {
+                    PrimaryAuthButton(text: "Giriş Yap", enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
+                    Button(action: onNavigateToRegister) {
+                        (Text("Hesabın yok mu? ").foregroundColor(.textSecondary)
+                            + Text("Kayıt Ol").font(.app(13, .semibold)).foregroundColor(.neonCyan))
+                            .font(.app(13))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 24)
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .onChange(of: uiState.isSuccess) { _, isSuccess in
+            if isSuccess { onLoginSuccess() }
+        }
+    }
+
+    private func submit() {
+        guard canSubmit else { return }
+        focus = nil
+        model.viewModel.login(email: identifier, password: password)
+    }
+}
