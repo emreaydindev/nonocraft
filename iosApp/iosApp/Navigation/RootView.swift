@@ -3,7 +3,7 @@ import SwiftUI
 
 struct RootView: View {
     private enum Phase {
-        case splash, auth, dashboard
+        case splash, onboarding, auth, tutorial, dashboard
     }
 
     @StateObject private var store = ViewModelStore()
@@ -16,8 +16,18 @@ struct RootView: View {
             switch phase {
             case .splash:
                 SplashScreen(onFinished: route)
+            case .onboarding:
+                OnboardingScreen {
+                    appViewModel.completeOnboarding()
+                    phase = .auth
+                }
             case .auth:
                 authStack
+            case .tutorial:
+                TutorialScreen {
+                    appViewModel.completeTutorial()
+                    phase = .dashboard
+                }
             case .dashboard:
                 DashboardScreen(onNavigateToAuthGateway: {
                     authPath = []
@@ -39,7 +49,7 @@ struct RootView: View {
                 onNavigateToLogin: { authPath = [.login] },
                 onNavigateToRegister: { authPath = [.register] },
                 onContinueAsGuest: {
-                    store.owner.appViewModel().enterGuestMode()
+                    appViewModel.enterGuestMode()
                     enterDashboard()
                 },
                 onGoogleSignIn: { showGoogleUnavailable = true }
@@ -66,23 +76,20 @@ struct RootView: View {
         }
     }
 
-    // Onboarding and the tutorial are not ported to iOS yet, so those destinations continue to the
-    // screen that follows them on Android. Onboarding is marked as seen, otherwise the splash
-    // would keep returning it and a signed-in user would never reach the dashboard.
+    private var appViewModel: AppViewModel { store.owner.appViewModel() }
+
     private func route(_ destination: SplashDestination) {
         switch onEnum(of: destination) {
-        case .dashboard, .tutorial:
-            phase = .dashboard
-        case .onboarding:
-            store.owner.appViewModel().completeOnboarding()
-            phase = .auth
-        case .authGateway, .loading:
-            phase = .auth
+        case .onboarding: phase = .onboarding
+        case .tutorial: phase = .tutorial
+        case .dashboard: phase = .dashboard
+        case .authGateway, .loading: phase = .auth
         }
     }
 
+    /// After signing in or continuing as a guest: first-time users see the tutorial.
     private func enterDashboard() {
         authPath = []
-        phase = .dashboard
+        phase = appViewModel.hasSeenTutorial ? .dashboard : .tutorial
     }
 }
