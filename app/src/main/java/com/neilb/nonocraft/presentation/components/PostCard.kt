@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neilb.nonocraft.presentation.model.PostItem
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.BorderDark
@@ -61,7 +61,7 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.noRippleClickable { onAction(PostAction.ProfileClick(post.author)) }
+                    modifier = Modifier.rippleClickable { onAction(PostAction.ProfileClick(post.author)) }
                 ) {
                     Box(
                         modifier = Modifier
@@ -104,7 +104,7 @@ fun PostCard(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(if (post.isFollowed) SurfaceVariantDark else NeonCyan)
-                                .noRippleClickable { onAction(PostAction.FollowClick(post.id)) }
+                                .rippleClickable { onAction(PostAction.FollowClick(post.id)) }
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
@@ -122,7 +122,7 @@ fun PostCard(
                         tint = TextMuted,
                         modifier = Modifier
                             .size(24.dp)
-                            .noRippleClickable { onAction(PostAction.MoreClick(post.id)) }
+                            .rippleClickable { onAction(PostAction.MoreClick(post.id)) }
                     )
                 }
             }
@@ -167,7 +167,7 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.noRippleClickable { onAction(PostAction.LikeClick(post.id)) }
+                    modifier = Modifier.rippleClickable { onAction(PostAction.LikeClick(post.id)) }
                 ) {
                     Icon(
                         imageVector = if (post.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -186,7 +186,7 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.noRippleClickable { onAction(PostAction.CommentClick(post.id)) }
+                    modifier = Modifier.rippleClickable { onAction(PostAction.CommentClick(post.id)) }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ChatBubbleOutline,
@@ -233,7 +233,7 @@ fun PostCard(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .background(NeonCyan)
-                        .noRippleClickable { onAction(PostAction.PlayClick(post.id)) }
+                        .rippleClickable { onAction(PostAction.PlayClick(post.id)) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(

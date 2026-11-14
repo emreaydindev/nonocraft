@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.*
 
 data class AppIconOption(val id: String, val name: String, val isPremium: Boolean)
@@ -112,7 +112,7 @@ private fun AppIconCard(
                 color = if (isSelected) NeonCyan else BorderDark,
                 shape = RoundedCornerShape(20.dp)
             )
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .padding(16.dp)
     ) {
         Box(

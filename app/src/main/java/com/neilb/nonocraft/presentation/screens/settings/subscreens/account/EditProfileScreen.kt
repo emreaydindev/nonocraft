@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.*
 
 @Composable
@@ -80,7 +80,7 @@ fun EditProfileScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(NeonCyan)
-                        .noRippleClickable { viewModel.updateProfile(username, bio) }
+                        .rippleClickable { viewModel.updateProfile(username, bio) }
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {

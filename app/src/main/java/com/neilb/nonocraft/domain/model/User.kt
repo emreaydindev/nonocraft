@@ -5,14 +5,16 @@ data class User(
     val email: String,
     val username: String,
     val bio: String?,
+    val avatarPuzzleId: String?,
     val isPremium: Boolean,
-    val isAdmin: Boolean,
+    val emailVerified: Boolean,
     val stars: Int,
     val streakCount: Int,
-    val emailVerified: Boolean,
-    val avatarUrl: String?,
-    val followerCount: Int,
-    val followingCount: Int
+    val solvedPuzzles: Int,
+    val solvedDailies: Int,
+    val followersCount: Int,
+    val followingCount: Int,
+    val postsCount: Int,
 )
 
 data class AuthResult(

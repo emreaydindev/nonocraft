@@ -121,7 +121,7 @@ fun ForgotPasswordScreen(
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,
-                    modifier = Modifier.noRippleClickable(onNavigateBack),
+                    modifier = Modifier.rippleClickable(onNavigateBack),
                 )
             }
         }

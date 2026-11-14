@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -256,7 +257,7 @@ private fun BottomSection(
                 .height(52.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(accentColor)
-                .noRippleClickable(onClick = onNext),
+                .rippleClickable(onClick = onNext),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -272,7 +273,7 @@ private fun BottomSection(
                 text = "Atla",
                 fontSize = 13.sp,
                 color = textMuted,
-                modifier = Modifier.noRippleClickable(onClick = onSkip),
+                modifier = Modifier.rippleClickable(onClick = onSkip),
             )
         }
     }
@@ -473,7 +474,7 @@ private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColo
                                 )
                             }
                         }
-                        .noRippleClickable { setSelectedColor(i) }
+                        .rippleClickable { setSelectedColor(i) }
                 )
             }
         }
@@ -539,11 +540,11 @@ private fun VisualPremium(accentColor: Color) {
 }
 
 @Composable
-private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
+private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier =
     this.then(
         Modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
-            indication = null,
+            indication = ripple(color = Color(0xFF0D0D10)),
             onClick = onClick,
         )
     )

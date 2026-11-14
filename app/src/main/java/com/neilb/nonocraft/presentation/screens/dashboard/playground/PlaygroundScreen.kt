@@ -49,9 +49,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neilb.nonocraft.R
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.screens.dashboard.playground.components.RandomPuzzleDialog
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
@@ -70,29 +72,26 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-private data class PlaygroundUiState(
-    val username: String = "neilb",
-    val stars: Int = 1240,
-    val crystals: Int = 0,
-    val crystalRefillMinutes: Int = 23,
-    val isDailySolved: Boolean = false,
-    val currentLevelNumber: Int = 3,
-    val hasDraft: Boolean = true,
-    val draftSize: String = "10×10",
-    val draftProgress: Int = 60,
-)
-
 @Composable
 fun PlaygroundScreen(
     onNavigateToGame: (String) -> Unit,
-    onNavigateToCrafting: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToTutorial: () -> Unit
+    onNavigateToTutorial: () -> Unit,
+    viewModel: PlaygroundViewModel = hiltViewModel()
 ) {
-    var state by remember {
-        mutableStateOf(PlaygroundUiState())
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    PlaygroundContent(
+        uiState = uiState,
+        onEvent = viewModel::onEvent
+    )
+}
+
+@Composable
+fun PlaygroundContent(
+    uiState: PlaygroundUiState,
+    onEvent: (PlaygroundUiEvent) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -126,8 +125,6 @@ fun PlaygroundScreen(
                     onPlayToday = { onNavigateToGame("daily-today-20") },
                     onPlayPast = { date -> onNavigateToGame("daily-$date-20") },
                 )
-
-                //SimulationToggles(state = state, onStateChange = { state = it })
             }
 
             Column(
@@ -162,6 +159,14 @@ fun PlaygroundScreen(
         }
     }
 }
+
+
+
+
+
+
+
+
 
 @Composable
 private fun LevelProgressCard(
@@ -204,7 +209,7 @@ private fun LevelProgressCard(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(NeonCyan)
-                        .noRippleClickable(onContinue)
+                        .rippleClickable(onContinue)
                         .padding(horizontal = 18.dp, vertical = 11.dp),
                 ) {
                     Text(
@@ -504,7 +509,7 @@ private fun DailyChallengeCard(
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
                             .background(NeonCyan)
-                            .noRippleClickable(onPlayToday)
+                            .rippleClickable(onPlayToday)
                             .padding(horizontal = 18.dp, vertical = 10.dp),
                     ) {
                         Text(
@@ -573,7 +578,7 @@ private fun DailyChallengeCard(
                             .weight(1f)
                             .clip(RoundedCornerShape(10.dp))
                             .background(SurfaceVariantDark)
-                            .noRippleClickable { onPlayPast(key) }
+                            .rippleClickable { onPlayPast(key) }
                             .padding(vertical = 9.dp),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -600,7 +605,7 @@ private fun RandomPuzzleButton(onClick: () -> Unit) {
             .clip(RoundedCornerShape(18.dp))
             .background(SurfaceDark)
             .border(0.5.dp, BorderDark, RoundedCornerShape(18.dp))
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .padding(horizontal = 18.dp, vertical = 16.dp),
     ) {
         Row(
@@ -704,7 +709,7 @@ private fun ToggleRow(label: String, value: Boolean, onToggle: (Boolean) -> Unit
                     if (value) NeonCyan.copy(alpha = 0.6f) else BorderDark,
                     RoundedCornerShape(11.dp),
                 )
-                .noRippleClickable { onToggle(!value) },
+                .rippleClickable { onToggle(!value) },
             contentAlignment = if (value) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(

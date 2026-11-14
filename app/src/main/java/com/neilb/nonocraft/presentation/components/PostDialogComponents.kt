@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.neilb.nonocraft.presentation.model.PostItem
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.Comment
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.Playlist
 import com.neilb.nonocraft.presentation.theme.AppFont
@@ -241,7 +241,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(if (textValue.isNotBlank()) NeonCyan else SurfaceVariantDark)
-                        .noRippleClickable {
+                        .rippleClickable {
                             if (textValue.isNotBlank()) {
                                 textValue = ""
                             }
@@ -333,7 +333,7 @@ fun PlaylistSelectionDialog(
                         tint = TextMuted,
                         modifier = Modifier
                             .size(24.dp)
-                            .noRippleClickable(onDismiss)
+                            .rippleClickable(onDismiss)
                     )
                 }
 
@@ -347,7 +347,7 @@ fun PlaylistSelectionDialog(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(SurfaceVariantDark)
-                                .noRippleClickable { onSelectPlaylist(playlist.id) }
+                                .rippleClickable { onSelectPlaylist(playlist.id) }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -409,7 +409,7 @@ fun PlaylistSelectionDialog(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(PurpleAccent)
-                                .noRippleClickable {
+                                .rippleClickable {
                                     if (newPlaylistName.isNotBlank()) {
                                         onCreatePlaylist(newPlaylistName)
                                     }
@@ -429,7 +429,7 @@ fun PlaylistSelectionDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .noRippleClickable { showCreateInput = true }
+                            .rippleClickable { showCreateInput = true }
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)

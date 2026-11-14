@@ -36,6 +36,7 @@ import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -394,7 +395,7 @@ private fun PlanSelectionCard(
             .border(width = if (isSelected) 2.dp else 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+                indication = ripple(color = Color(0xFF0D0D10)),
                 onClick = onClick
             )
             .padding(16.dp)
@@ -475,7 +476,7 @@ private fun PurchaseButton(
             .background(buttonColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+                indication = ripple(color = Color(0xFF0D0D10)),
                 enabled = !isProcessing,
                 onClick = onClick
             ),

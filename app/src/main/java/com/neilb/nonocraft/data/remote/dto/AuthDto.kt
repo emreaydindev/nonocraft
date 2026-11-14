@@ -24,14 +24,16 @@ data class UserDto(
     @SerializedName("email") val email: String,
     @SerializedName("username") val username: String,
     @SerializedName("bio") val bio: String?,
+    @SerializedName("avatarPuzzleId") val avatarPuzzleId: String? = null,
     @SerializedName("isPremium") val isPremium: Boolean,
-    @SerializedName("isAdmin") val isAdmin: Boolean,
+    @SerializedName("emailVerified") val emailVerified: Boolean,
     @SerializedName("stars") val stars: Int,
     @SerializedName("streakCount") val streakCount: Int,
-    @SerializedName("emailVerified") val emailVerified: Boolean,
-    @SerializedName("avatarUrl") val avatarUrl: String? = null,
-    @SerializedName("followerCount") val followerCount: Int = 0,
-    @SerializedName("followingCount") val followingCount: Int = 0
+    @SerializedName("solvedPuzzles") val solvedPuzzles: Int = 0,
+    @SerializedName("solvedDailies") val solvedDailies: Int = 0,
+    @SerializedName("followersCount") val followersCount: Int = 0,
+    @SerializedName("followingCount") val followingCount: Int = 0,
+    @SerializedName("postsCount") val postsCount: Int = 0
 )
 
 data class RefreshTokenRequest(

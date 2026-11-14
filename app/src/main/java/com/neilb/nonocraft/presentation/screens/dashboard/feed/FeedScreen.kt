@@ -51,7 +51,7 @@ import com.neilb.nonocraft.presentation.components.PlaylistSelectionDialog
 import com.neilb.nonocraft.presentation.components.PostAction
 import com.neilb.nonocraft.presentation.components.PostCard
 import com.neilb.nonocraft.presentation.components.PostMenuSheetContent
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.BorderDark
@@ -264,7 +264,7 @@ private fun FeedFilterRow(
                         color = if (isSelected) NeonCyan else BorderDark,
                         shape = RoundedCornerShape(20.dp)
                     )
-                    .noRippleClickable { onTabSelected(tab) }
+                    .rippleClickable { onTabSelected(tab) }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {

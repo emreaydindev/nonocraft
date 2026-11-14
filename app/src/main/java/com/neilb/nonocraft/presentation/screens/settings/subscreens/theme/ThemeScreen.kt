@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
 import com.neilb.nonocraft.presentation.screens.dashboard.components.SectionLabel
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.*
 
 @Composable
@@ -108,7 +108,7 @@ private fun ThemeOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .background(if (isSelected) NeonCyan.copy(alpha = 0.05f) else Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

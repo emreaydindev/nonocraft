@@ -1,4 +1,3 @@
-// data/session/SessionManager.kt
 package com.neilb.nonocraft.data.session
 
 import com.neilb.nonocraft.common.Resource

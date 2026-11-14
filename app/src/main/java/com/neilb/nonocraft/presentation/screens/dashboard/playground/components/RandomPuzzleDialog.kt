@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.neilb.nonocraft.presentation.screens.auth.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.auth.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BorderDark
 import com.neilb.nonocraft.presentation.theme.DangerRed
@@ -86,7 +86,7 @@ fun RandomPuzzleDialog(
                             .size(32.dp)
                             .clip(CircleShape)
                             .background(SurfaceVariantDark)
-                            .noRippleClickable(onDismiss),
+                            .rippleClickable(onDismiss),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -192,7 +192,7 @@ fun RandomPuzzleDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(PurpleAccent)
-                        .noRippleClickable {
+                        .rippleClickable {
                             onGenerate(isColored, selectedSize, selectedLives)
                             onDismiss()
                         }
@@ -253,7 +253,7 @@ private fun SelectableOptionCard(
                 if (isSelected) PurpleAccent else Color.Transparent,
                 RoundedCornerShape(12.dp)
             )
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .padding(vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -279,7 +279,7 @@ private fun SelectableChip(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(if (isSelected) activeColor else SurfaceVariantDark)
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .padding(horizontal = 13.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {

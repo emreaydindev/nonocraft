@@ -53,10 +53,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.neilb.nonocraft.common.Constants
 import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
 import com.neilb.nonocraft.presentation.screens.dashboard.components.SectionLabel
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.screens.settings.components.DeleteAccountDialog
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
@@ -70,6 +71,8 @@ import com.neilb.nonocraft.presentation.theme.SurfaceVariantDark
 import com.neilb.nonocraft.presentation.theme.TextMuted
 import com.neilb.nonocraft.presentation.theme.TextPrimary
 import kotlinx.coroutines.flow.collectLatest
+import androidx.core.net.toUri
+import com.neilb.nonocraft.common.openInCustomTab
 
 @Composable
 fun SettingsScreen(
@@ -219,19 +222,24 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Email,
                         label = "Bize Ulaşın",
                         isExternalLink = true,
-                        onClick = { }
+                        onClick = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                                data = "mailto:${Constants.SUPPORT_EMAIL}".toUri()
+                            }
+                            context.startActivity(intent)
+                        }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Policy,
                         label = "Gizlilik Politikası",
                         isExternalLink = true,
-                        onClick = { }
+                        onClick = { context.openInCustomTab(Constants.PRIVACY_POLICY_URL) }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Description,
                         label = "Kullanım Koşulları",
                         isExternalLink = true,
-                        onClick = { }
+                        onClick = { context.openInCustomTab(Constants.TERMS_OF_SERVICE_URL) }
                     )
                 }
 
@@ -293,7 +301,7 @@ private fun SettingsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick)
+            .rippleClickable(onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

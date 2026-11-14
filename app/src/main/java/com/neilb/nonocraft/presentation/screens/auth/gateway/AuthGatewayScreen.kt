@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.auth.gateway
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,16 +13,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.neilb.nonocraft.common.Constants
 import com.neilb.nonocraft.common.buildGoogleCredentialRequest
+import com.neilb.nonocraft.common.openInCustomTab
 import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.common.signInWithGoogle
 import com.neilb.nonocraft.presentation.screens.auth.AuthViewModel
@@ -43,6 +48,42 @@ fun AuthGatewayScreen(
     val credentialManager = remember { CredentialManager.create(context) }
     val request = remember { buildGoogleCredentialRequest() }
     val authState by authViewModel.state.collectAsState()
+
+    val legalText = buildAnnotatedString {
+        withStyle(SpanStyle(color = TextSecondary)) {
+            append("Devam ederek ")
+        }
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "PRIVACY",
+                linkInteractionListener = {
+                    context.openInCustomTab(Constants.PRIVACY_POLICY_URL)
+                }
+            )
+        ) {
+            withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
+                append("Gizlilik Politikası")
+            }
+        }
+        withStyle(SpanStyle(color = TextSecondary)) {
+            append(" ve ")
+        }
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "TERMS",
+                linkInteractionListener = {
+                    context.openInCustomTab(Constants.TERMS_OF_SERVICE_URL)
+                }
+            )
+        ) {
+            withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
+                append("Kullanım Koşulları")
+            }
+        }
+        withStyle(SpanStyle(color = TextSecondary)) {
+            append("'nı kabul etmiş olursunuz.")
+        }
+    }
 
     LaunchedEffect(authState.isSuccess) {
         if (authState.isSuccess) onGoogleLoginSuccess()
@@ -126,23 +167,7 @@ fun AuthGatewayScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextSecondary)) {
-                            append("Devam ederek ")
-                        }
-                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                            append("Gizlilik Politikası")
-                        }
-                        withStyle(SpanStyle(color = TextSecondary)) {
-                            append(" ve ")
-                        }
-                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                            append("Kullanım Koşulları")
-                        }
-                        withStyle(SpanStyle(color = TextSecondary)) {
-                            append("'nı kabul etmiş olursunuz.")
-                        }
-                    },
+                    text = legalText,
                     fontSize = 11.sp,
                     fontFamily = AppFont,
                     lineHeight = 16.sp,

@@ -12,6 +12,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,7 +100,7 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                         .clip(RoundedCornerShape(20.dp))
                         .background(SurfaceDark)
                         .border(0.5.dp, BorderDark, RoundedCornerShape(20.dp))
-                        .noRippleClickable { onNavigateToDashboard() }
+                        .rippleClickable { onNavigateToDashboard() }
                         .padding(horizontal = 14.dp, vertical = 7.dp)
                         .visible(page != 3)
                 ) {
@@ -216,7 +217,7 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                         .height(52.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFF4CAF50))
-                        .noRippleClickable(onClick = {
+                        .rippleClickable(onClick = {
                             onNavigateToDashboard()
                         }),
                     contentAlignment = Alignment.Center,
@@ -447,10 +448,10 @@ private fun StepDots(count: Int = 4, current: Int) {
     }
 }
 
-private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
+private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = composed {
     this.clickable(
         interactionSource = remember { MutableInteractionSource() },
-        indication = null,
+        indication = ripple(color = Color(0xFF0D0D10)),
         onClick = onClick
     )
 }

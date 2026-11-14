@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.presentation.components.PlaylistSelectionDialog
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.DangerRed
@@ -181,7 +181,7 @@ fun LibraryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1.1f)
-                        .noRippleClickable { viewModel.handleAction(LibraryAction.OnCreatePlaylist) },
+                        .rippleClickable { viewModel.handleAction(LibraryAction.OnCreatePlaylist) },
                     cornerRadius = 24
                 ) {
                     Column(
@@ -252,7 +252,7 @@ private fun LibraryGridCard(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.1f)
-            .noRippleClickable(onClick),
+            .rippleClickable(onClick),
         cornerRadius = 24
     ) {
         Column(
@@ -329,7 +329,7 @@ private fun PlaylistGridCard(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.1f)
-            .noRippleClickable(onClick),
+            .rippleClickable(onClick),
         cornerRadius = 24
     ) {
         Column(

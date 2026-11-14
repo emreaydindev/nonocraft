@@ -53,6 +53,7 @@ import kotlin.math.roundToInt
 import androidx.core.graphics.toColorInt
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.material3.ripple
 
 @Composable
 fun AnalogStick(
@@ -158,7 +159,7 @@ fun GameActionButtons(
                 .clip(CircleShape)
                 .background(SurfaceDark)
                 .border(2.dp, NeonCyan.copy(alpha = 0.5f), CircleShape)
-                .noRippleClickable { onHintAction() },
+                .rippleClickable { onHintAction() },
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -244,7 +245,7 @@ private fun ToolItem(
             .clip(CircleShape)
             .background(if (isSelected) (if (isCross) DangerRed.copy(alpha = 0.2f) else color.copy(alpha = 0.2f)) else Color.Transparent)
             .border(2.dp, if (isSelected) (if (isCross) DangerRed else color) else BorderDark, CircleShape)
-            .noRippleClickable { onClick() },
+            .rippleClickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         if (isCross) {
@@ -263,6 +264,6 @@ fun String.toColor(): Color {
     }
 }
 
-private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
-    this.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
+private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = composed {
+    this.clickable(interactionSource = remember { MutableInteractionSource() }, indication = ripple(color = Color(0xFF0D0D10)), onClick = onClick)
 }

@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -124,28 +125,11 @@ fun AuthBackRow(
 }
 
 @Composable
-fun AuthIconBox(
-    icon: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(56.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(NeonCyan.copy(alpha = 0.10f))
-            .border(1.5.dp, NeonCyan.copy(alpha = 0.28f), RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center,
-    ) {
-        icon()
-    }
-}
-
-@Composable
 fun GoogleSignInButton(
     label: String,
     onClick: () -> Unit,
-    isLoading: Boolean = false,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Box(
         modifier = modifier
@@ -435,13 +419,21 @@ fun PrimaryAuthButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
 ) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (enabled) NeonCyan else NeonCyan.copy(alpha = 0.35f))
-            .clickable(enabled = enabled && !isLoading, onClick = onClick),
+            .clickable(
+                enabled = enabled && !isLoading,
+                onClick = onClick,
+                interactionSource = interactionSource,
+                indication = ripple(color = Color(0xFF0D0D10))
+            ),
         contentAlignment = Alignment.Center,
     ) {
         if (isLoading) {
@@ -556,8 +548,8 @@ fun InfoBanner(
     }
 }
 
-fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = this.clickable(
+fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = this.clickable(
     interactionSource = MutableInteractionSource(),
-    indication = null,
+    indication = ripple(color = Color(0xFF0D0D10)),
     onClick = onClick,
 )

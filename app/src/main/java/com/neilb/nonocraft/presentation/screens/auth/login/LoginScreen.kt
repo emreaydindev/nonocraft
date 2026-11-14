@@ -49,7 +49,7 @@ import com.neilb.nonocraft.presentation.screens.auth.components.AuthTextField
 import com.neilb.nonocraft.presentation.screens.auth.components.GoogleSignInButton
 import com.neilb.nonocraft.presentation.screens.auth.components.InfoBanner
 import com.neilb.nonocraft.presentation.screens.auth.components.PrimaryAuthButton
-import com.neilb.nonocraft.presentation.screens.auth.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.auth.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.GridBackground
@@ -196,7 +196,7 @@ fun LoginScreen(
                         color = NeonCyan,
                         fontSize = 13.sp,
                         fontFamily = AppFont,
-                        modifier = Modifier.noRippleClickable(onNavigateToForgotPassword),
+                        modifier = Modifier.rippleClickable(onNavigateToForgotPassword),
                     )
                 }
 
@@ -225,7 +225,7 @@ fun LoginScreen(
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,
-                    modifier = Modifier.noRippleClickable(onNavigateToRegister),
+                    modifier = Modifier.rippleClickable(onNavigateToRegister),
                 )
             }
         }

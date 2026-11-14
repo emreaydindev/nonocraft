@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.*
 
 @Composable
@@ -73,7 +73,7 @@ fun ChangePasswordScreen(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(NeonCyan)
-                        .noRippleClickable {
+                        .rippleClickable {
                             if (newPassword == confirmPassword) {
                                 viewModel.changePassword(currentPassword, newPassword)
                             }

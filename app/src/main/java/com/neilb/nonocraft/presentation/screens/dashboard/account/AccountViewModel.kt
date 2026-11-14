@@ -31,7 +31,7 @@ class AccountViewModel @Inject constructor(
                 AccountUiState(
                     isGuest = false,
                     username = "@${profile.username}",
-                    avatarUrl = profile.avatarUrl,
+                    avatarUrl = profile.avatarPuzzleId,
                 )
             } else {
                 AccountUiState(isGuest = tokenManager.isGuest)

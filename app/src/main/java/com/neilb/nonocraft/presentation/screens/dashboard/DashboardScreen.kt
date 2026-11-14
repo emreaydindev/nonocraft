@@ -87,7 +87,6 @@ fun DashboardScreen(
             when (currentTab) {
                 DashboardTab.PLAYGROUND -> PlaygroundScreen(
                     onNavigateToGame = onNavigateToGame,
-                    onNavigateToCrafting = onNavigateToCrafting,
                     onNavigateToSettings = onNavigateToSettings,
                     onNavigateToTutorial = onNavigateToTutorial
                 )

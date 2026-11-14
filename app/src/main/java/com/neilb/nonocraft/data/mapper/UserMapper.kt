@@ -6,17 +6,19 @@ import com.neilb.nonocraft.domain.model.*
 fun UserDto.toUser(): User {
     return User(
         id = id,
-        email = email,
         username = username,
+        email = email,
         bio = bio,
+        avatarPuzzleId = avatarPuzzleId,
+        followersCount = followersCount,
+        followingCount = followingCount,
+        postsCount = postsCount,
         isPremium = isPremium,
-        isAdmin = isAdmin,
+        emailVerified = emailVerified,
         stars = stars,
         streakCount = streakCount,
-        emailVerified = emailVerified,
-        avatarUrl = avatarUrl,
-        followerCount = followerCount,
-        followingCount = followingCount
+        solvedPuzzles = solvedPuzzles,
+        solvedDailies = solvedDailies
     )
 }
 

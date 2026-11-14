@@ -29,17 +29,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.neilb.nonocraft.common.Constants
 import com.neilb.nonocraft.common.buildGoogleCredentialRequest
+import com.neilb.nonocraft.common.openInCustomTab
 import com.neilb.nonocraft.common.showToast
 import com.neilb.nonocraft.common.signInWithGoogle
 import com.neilb.nonocraft.presentation.screens.auth.AuthViewModel
@@ -52,7 +57,7 @@ import com.neilb.nonocraft.presentation.screens.auth.components.InfoBanner
 import com.neilb.nonocraft.presentation.screens.auth.components.PasswordRequirementRow
 import com.neilb.nonocraft.presentation.screens.auth.components.PasswordStrengthBar
 import com.neilb.nonocraft.presentation.screens.auth.components.PrimaryAuthButton
-import com.neilb.nonocraft.presentation.screens.auth.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.auth.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.GridBackground
@@ -248,7 +253,7 @@ fun RegisterScreen(
                     },
                 )
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
 
                 Text(
                     text = buildAnnotatedString {
@@ -257,8 +262,58 @@ fun RegisterScreen(
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,
-                    modifier = Modifier.noRippleClickable(onNavigateToLogin),
+                    modifier = Modifier.rippleClickable(onNavigateToLogin),
                 )
+
+                Spacer(Modifier.height(20.dp))
+
+                val legalText = buildAnnotatedString {
+                    withStyle(SpanStyle(color = TextSecondary)) {
+                        append("Devam ederek ")
+                    }
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "PRIVACY",
+                            linkInteractionListener = {
+                                context.openInCustomTab(Constants.PRIVACY_POLICY_URL)
+                            }
+                        )
+                    ) {
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
+                            append("Gizlilik Politikası")
+                        }
+                    }
+                    withStyle(SpanStyle(color = TextSecondary)) {
+                        append(" ve ")
+                    }
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "TERMS",
+                            linkInteractionListener = {
+                                context.openInCustomTab(Constants.TERMS_OF_SERVICE_URL)
+                            }
+                        )
+                    ) {
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
+                            append("Kullanım Koşulları")
+                        }
+                    }
+                    withStyle(SpanStyle(color = TextSecondary)) {
+                        append("'nı kabul etmiş olursunuz.")
+                    }
+                }
+
+                Text(
+                    text = legalText,
+                    fontSize = 11.sp,
+                    fontFamily = AppFont,
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                )
+
             }
         }
     }

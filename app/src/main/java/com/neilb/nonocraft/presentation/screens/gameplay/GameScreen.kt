@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -232,7 +233,7 @@ fun GameEndOverlay(
                 .fillMaxSize()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
+                    indication = ripple(color = Color(0xFF0D0D10)),
                     onClick = { }
                 ),
             color = Color.Black.copy(alpha = 0.85f)

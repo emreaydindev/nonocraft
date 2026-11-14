@@ -75,4 +75,7 @@ dependencies {
     implementation(libs.googleid)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    //Browser (Custom Tabs)
+    implementation(libs.androidx.browser)
 }

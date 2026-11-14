@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.neilb.nonocraft.presentation.screens.auth.components.PrimaryAuthButton
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardCard
-import com.neilb.nonocraft.presentation.screens.dashboard.components.noRippleClickable
+import com.neilb.nonocraft.presentation.screens.dashboard.components.rippleClickable
 import com.neilb.nonocraft.presentation.theme.AppFont
 import com.neilb.nonocraft.presentation.theme.BackgroundDark
 import com.neilb.nonocraft.presentation.theme.BorderDark
@@ -129,7 +129,7 @@ private fun ProfileHeader(
                 .size(80.dp)
                 .clip(CircleShape)
                 .background(SurfaceVariantDark)
-                .noRippleClickable(onNavigateToCrafting),
+                .rippleClickable(onNavigateToCrafting),
             contentAlignment = Alignment.Center,
         ) {
             if (uiState.avatarUrl != null) {
@@ -184,7 +184,7 @@ private fun MenuRow(
     DashboardCard(
         modifier = Modifier
             .fillMaxWidth()
-            .noRippleClickable(onClick),
+            .rippleClickable(onClick),
         backgroundColor = backgroundColor,
         borderColor = borderColor,
         cornerRadius = 14,
