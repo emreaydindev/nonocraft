@@ -15,6 +15,9 @@ data class PlaygroundUiState(
 ) {
     val username: String get() = (userSection as? SectionState.Success)?.data?.username.orEmpty()
     val stars: Int get() = (userSection as? SectionState.Success)?.data?.stars ?: 0
+
+    /** Campaign levels are stored as "level-001", "level-002", ... */
+    val currentLevelId: String get() = "level-" + currentLevelNumber.toString().padStart(3, '0')
 }
 
 sealed interface SectionState<out T> {

@@ -144,7 +144,7 @@ fun PlaygroundContent(
                     hasDraft = state.hasDraft,
                     draftSize = state.draftSize,
                     draftProgress = state.draftProgress,
-                    onContinue = { onNavigateToGame("level-6") },
+                    onContinue = { onNavigateToGame(state.currentLevelId) },
                 )
 
                 var showRandomDialog by remember { mutableStateOf(false) }

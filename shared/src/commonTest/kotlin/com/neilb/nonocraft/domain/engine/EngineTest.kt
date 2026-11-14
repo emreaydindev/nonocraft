@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.domain.engine
 
+import com.neilb.nonocraft.domain.model.Clue
+
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

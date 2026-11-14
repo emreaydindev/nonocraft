@@ -1,7 +1,7 @@
 package com.neilb.nonocraft.domain.engine
 
-/** A run of [count] consecutive cells of palette colour [color] (1-based; 0 = empty). */
-data class Clue(val count: Int, val color: Int)
+import com.neilb.nonocraft.domain.model.Clue
+
 
 /**
  * Immutable puzzle definition. `solution[r][c]` is 0 for empty or a 1-based palette index.

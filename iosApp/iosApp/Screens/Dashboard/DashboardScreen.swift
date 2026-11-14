@@ -60,7 +60,8 @@ struct DashboardScreen: View {
         case .settingsSub(.editProfile): EditProfileScreen(onNavigateBack: back)
         case .settingsSub(.changePassword): ChangePasswordScreen(onNavigateBack: back)
         case .settingsSub(.notifications): NotificationSettingsScreen(onNavigateBack: back)
-        case .premium, .crafting, .tutorial, .game, .libraryDetail, .profile:
+        case .game(let id): GameScreen(gameId: id, onNavigateBack: back)
+        case .premium, .crafting, .tutorial, .libraryDetail, .profile:
             NotPortedYetView(title: "Yakında", onBack: back)
         }
     }

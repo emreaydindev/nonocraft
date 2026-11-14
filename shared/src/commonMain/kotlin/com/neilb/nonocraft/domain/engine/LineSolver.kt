@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.domain.engine
 
+import com.neilb.nonocraft.domain.model.Clue
+
 /**
  * DP line solver shared by hints, validation and the procedural generator.
  * Cell encoding: -1 unknown, 0 empty, >0 colour index.
@@ -20,7 +22,7 @@ object LineSolver {
             for (i in p until p + count) if (line[i] != UNKNOWN && line[i] != color) return false
             return true
         }
-        fun needsGap(j: Int) = j + 1 < k && clues[j + 1].color == clues[j].color
+        fun needsGap(j: Int) = j + 1 < k && clues[j + 1].colorIndex == clues[j].colorIndex
         fun canEmpty(p: Int) = p < n && (line[p] == UNKNOWN || line[p] == 0)
 
         fun feasible(p: Int, j: Int): Boolean {

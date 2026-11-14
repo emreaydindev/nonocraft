@@ -34,3 +34,15 @@ extension Color {
         self.init(hex: UInt32(truncatingIfNeeded: argb) & 0xFFFFFF)
     }
 }
+
+extension Color {
+    /// Parses "#RRGGBB"; falls back to grey like the Android `String.toColor()`.
+    init(hexString: String) {
+        let digits = hexString.trimmingCharacters(in: CharacterSet(charactersIn: "# "))
+        if digits.count == 6, let value = UInt32(digits, radix: 16) {
+            self.init(hex: value)
+        } else {
+            self = .gray
+        }
+    }
+}

@@ -56,7 +56,7 @@ private struct PlaygroundContent: View {
                         hasDraft: state.hasDraft,
                         draftSize: state.draftSize,
                         draftProgress: Int(state.draftProgress),
-                        onContinue: { onNavigateToGame("level-6") }
+                        onContinue: { onNavigateToGame(state.currentLevelId) }
                     )
                     RandomPuzzleButton(action: { onNavigateToGame("random-10") })
                 }

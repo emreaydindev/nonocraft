@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.di
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
@@ -14,7 +15,9 @@ import com.neilb.nonocraft.presentation.screens.dashboard.playground.PlaygroundV
 import com.neilb.nonocraft.presentation.screens.settings.SettingsViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.ChangePasswordViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.EditProfileViewModel
+import com.neilb.nonocraft.presentation.screens.gameplay.GameViewModel
 import com.neilb.nonocraft.presentation.screens.intro.SplashViewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 import kotlin.reflect.KClass
 
@@ -49,6 +52,17 @@ class ViewModelOwner {
     fun settingsViewModel(): SettingsViewModel = provider[SettingsViewModel::class]
     fun editProfileViewModel(): EditProfileViewModel = provider[EditProfileViewModel::class]
     fun changePasswordViewModel(): ChangePasswordViewModel = provider[ChangePasswordViewModel::class]
+
+    /** GameViewModel reads its puzzle id from a SavedStateHandle, like the Android navigation route. */
+    fun gameViewModel(gameId: String): GameViewModel = ViewModelProvider.create(
+        store = store,
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T =
+                KoinPlatform.getKoin().get(modelClass) {
+                    parametersOf(SavedStateHandle(mapOf("gameId" to gameId)))
+                }
+        },
+    )[GameViewModel::class]
 
     fun clear() = store.clear()
 }

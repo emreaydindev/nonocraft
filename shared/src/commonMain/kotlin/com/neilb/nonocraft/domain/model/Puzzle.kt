@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.domain.model
 
+/** A run of [count] consecutive cells of palette colour [colorIndex] (1-based; 0 = empty). */
 data class Clue(
     val count: Int,
     val colorIndex: Int
