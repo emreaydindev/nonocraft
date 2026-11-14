@@ -8,7 +8,12 @@ import com.neilb.nonocraft.presentation.navigation.AppViewModel
 import com.neilb.nonocraft.presentation.screens.auth.AuthViewModel
 import com.neilb.nonocraft.presentation.screens.auth.login.LoginViewModel
 import com.neilb.nonocraft.presentation.screens.auth.register.RegisterViewModel
+import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountViewModel
+import com.neilb.nonocraft.presentation.screens.dashboard.library.LibraryViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.playground.PlaygroundViewModel
+import com.neilb.nonocraft.presentation.screens.settings.SettingsViewModel
+import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.ChangePasswordViewModel
+import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.EditProfileViewModel
 import com.neilb.nonocraft.presentation.screens.intro.SplashViewModel
 import org.koin.mp.KoinPlatform
 import kotlin.reflect.KClass
@@ -39,6 +44,11 @@ class ViewModelOwner {
     fun loginViewModel(): LoginViewModel = provider[LoginViewModel::class]
     fun registerViewModel(): RegisterViewModel = provider[RegisterViewModel::class]
     fun playgroundViewModel(): PlaygroundViewModel = provider[PlaygroundViewModel::class]
+    fun libraryViewModel(): LibraryViewModel = provider[LibraryViewModel::class]
+    fun accountViewModel(): AccountViewModel = provider[AccountViewModel::class]
+    fun settingsViewModel(): SettingsViewModel = provider[SettingsViewModel::class]
+    fun editProfileViewModel(): EditProfileViewModel = provider[EditProfileViewModel::class]
+    fun changePasswordViewModel(): ChangePasswordViewModel = provider[ChangePasswordViewModel::class]
 
     fun clear() = store.clear()
 }

@@ -27,3 +27,10 @@ extension Color {
     /// Text and spinner colour on top of a neon button.
     static let onNeon = Color(hex: 0x0A0A0F)
 }
+
+extension Color {
+    /// ARGB value as used by the shared module, e.g. 0xFFE24B4A.
+    init(argb: Int64) {
+        self.init(hex: UInt32(truncatingIfNeeded: argb) & 0xFFFFFF)
+    }
+}

@@ -7,6 +7,7 @@ import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswo
 import com.neilb.nonocraft.presentation.screens.auth.login.LoginViewModel
 import com.neilb.nonocraft.presentation.screens.auth.register.RegisterViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountViewModel
+import com.neilb.nonocraft.presentation.screens.dashboard.library.LibraryViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.playground.PlaygroundViewModel
 import com.neilb.nonocraft.presentation.screens.gameplay.GameViewModel
 import com.neilb.nonocraft.presentation.screens.intro.SplashViewModel
@@ -25,6 +26,7 @@ val viewModelModule = module {
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::ForgotPasswordViewModel)
     viewModelOf(::GameViewModel)
+    viewModelOf(::LibraryViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::PlaygroundViewModel)
     viewModelOf(::PremiumViewModel)

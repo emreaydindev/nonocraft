@@ -1,10 +1,6 @@
 import Shared
 import SwiftUI
 
-enum AuthRoute: Hashable {
-    case login, register
-}
-
 struct RootView: View {
     private enum Phase {
         case splash, auth, dashboard
@@ -23,7 +19,10 @@ struct RootView: View {
             case .auth:
                 authStack
             case .dashboard:
-                DashboardScreen()
+                DashboardScreen(onNavigateToAuthGateway: {
+                    authPath = []
+                    phase = .auth
+                })
             }
         }
         .animation(.easeInOut(duration: 0.25), value: phase)

@@ -1,12 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neilb.nonocraft.presentation.theme.DangerRed
-import com.neilb.nonocraft.presentation.theme.GameGold
-import com.neilb.nonocraft.presentation.theme.NeonCyan
-import com.neilb.nonocraft.presentation.theme.PurpleAccent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 data class PlaylistItem(
     val id: String,
     val name: String,
     val postCount: Int,
-    val coverColor: Color
+    /** ARGB, e.g. 0xFFE24B4A. */
+    val coverColor: Long
 )
 
 data class LibraryUiState(
@@ -45,7 +42,7 @@ sealed interface LibraryUiEvent {
     object ShowCreatePlaylistDialog : LibraryUiEvent
 }
 
-class LibraryViewModel() : ViewModel() {
+class LibraryViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryUiState())
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
@@ -67,9 +64,9 @@ class LibraryViewModel() : ViewModel() {
                 completedLevelsCount = 42,
                 completedDailiesCount = 18,
                 playlists = listOf(
-                    PlaylistItem("pl_1", "Zor Bulmacalar", 15, DangerRed),
-                    PlaylistItem("pl_2", "Radiohead Dinlerken", 24, NeonCyan),
-                    PlaylistItem("pl_3", "Piksel Sanatı", 8, GameGold)
+                    PlaylistItem("pl_1", "Zor Bulmacalar", 15, 0xFFE24B4A),
+                    PlaylistItem("pl_2", "Radiohead Dinlerken", 24, 0xFF00FFDC),
+                    PlaylistItem("pl_3", "Piksel Sanatı", 8, 0xFFFFD700)
                 )
             )
         }
@@ -94,10 +91,10 @@ class LibraryViewModel() : ViewModel() {
             }
             is LibraryAction.OnCreatePlaylistSubmit -> {
                 val newPlaylist = PlaylistItem(
-                    id = "pl_${System.currentTimeMillis()}",
+                    id = "pl_${Random.nextInt(Int.MAX_VALUE)}",
                     name = action.name,
                     postCount = 0,
-                    coverColor = PurpleAccent
+                    coverColor = 0xFFB64FF6
                 )
                 _uiState.update { state ->
                     state.copy(playlists = state.playlists + newPlaylist)

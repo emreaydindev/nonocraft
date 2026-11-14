@@ -1,33 +1,75 @@
 import SwiftUI
 
 struct DashboardScreen: View {
+    let onNavigateToAuthGateway: () -> Void
+
     @State private var currentTab: DashboardTab = .playground
+    @State private var path: [AppRoute] = []
 
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch currentTab {
-                case .playground:
-                    PlaygroundScreen(
-                        onNavigateToGame: { _ in },
-                        onNavigateToSettings: {},
-                        onNavigateToTutorial: {}
-                    )
-                case .feed, .library, .account:
-                    NotPortedYetView(title: currentTab.label)
+        NavigationStack(path: $path) {
+            VStack(spacing: 0) {
+                Group {
+                    switch currentTab {
+                    case .playground:
+                        PlaygroundScreen(
+                            onNavigateToGame: { path.append(.game(id: $0)) },
+                            onNavigateToSettings: { path.append(.settings) },
+                            onNavigateToTutorial: { path.append(.tutorial) }
+                        )
+                    case .feed:
+                        NotPortedYetView(title: currentTab.label)
+                    case .library:
+                        LibraryScreen(
+                            onNavigateToCrafting: { path.append(.crafting) },
+                            onNavigateToPremium: { path.append(.premium) },
+                            onNavigateToCategory: { path.append(.libraryDetail(id: $0)) },
+                            onNavigateToPlaylist: { path.append(.libraryDetail(id: $0)) }
+                        )
+                    case .account:
+                        AccountScreen(
+                            onNavigateToPremium: { path.append(.premium) },
+                            onNavigateToSettings: { path.append(.settings) },
+                            onNavigateToCrafting: { path.append(.crafting) },
+                            onNavigateToAuthGateway: onNavigateToAuthGateway
+                        )
+                    }
                 }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            DashboardBottomNavBar(currentTab: $currentTab)
+                DashboardBottomNavBar(currentTab: $currentTab)
+            }
+            .background(Color.backgroundDark.ignoresSafeArea())
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: AppRoute.self, destination: destination)
         }
-        .background(Color.backgroundDark.ignoresSafeArea())
+    }
+
+    @ViewBuilder
+    private func destination(_ route: AppRoute) -> some View {
+        let back = { _ = path.popLast() }
+        switch route {
+        case .settings:
+            SettingsScreen(
+                onNavigateBack: back,
+                onNavigate: { path.append(.settingsSub($0)) },
+                onLogoutSuccess: onNavigateToAuthGateway
+            )
+        case .settingsSub(.theme): ThemeScreen(onNavigateBack: back)
+        case .settingsSub(.appIcon): AppIconScreen(onNavigateBack: back)
+        case .settingsSub(.editProfile): EditProfileScreen(onNavigateBack: back)
+        case .settingsSub(.changePassword): ChangePasswordScreen(onNavigateBack: back)
+        case .settingsSub(.notifications): NotificationSettingsScreen(onNavigateBack: back)
+        case .premium, .crafting, .tutorial, .game, .libraryDetail, .profile:
+            NotPortedYetView(title: "Yakında", onBack: back)
+        }
     }
 }
 
-/// Stand-in for tabs whose SwiftUI port has not been written yet.
-private struct NotPortedYetView: View {
+/// Stand-in for screens whose SwiftUI port has not been written yet.
+struct NotPortedYetView: View {
     let title: String
+    var onBack: (() -> Void)?
 
     var body: some View {
         ScreenBackground {
@@ -40,5 +82,11 @@ private struct NotPortedYetView: View {
                     .foregroundColor(.textSecondary)
             }
         }
+        .overlay(alignment: .topLeading) {
+            if let onBack {
+                AuthBackRow(onBack: onBack)
+            }
+        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 }

@@ -35,3 +35,20 @@ final class ObservedViewModel<ViewModel: AnyObject, State: AnyObject>: Observabl
         owner.clear()
     }
 }
+
+/// Holds a shared ViewModel that exposes no state flow (only actions and one-off events).
+@MainActor
+final class HeldViewModel<ViewModel: AnyObject>: ObservableObject {
+    let viewModel: ViewModel
+    private let owner: ViewModelOwner
+
+    init(_ resolve: (ViewModelOwner) -> ViewModel) {
+        let owner = ViewModelOwner()
+        self.owner = owner
+        viewModel = resolve(owner)
+    }
+
+    deinit {
+        owner.clear()
+    }
+}

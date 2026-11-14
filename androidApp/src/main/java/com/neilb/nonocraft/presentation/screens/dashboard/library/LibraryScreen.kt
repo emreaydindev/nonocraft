@@ -343,13 +343,13 @@ private fun PlaylistGridCard(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(playlist.coverColor.copy(alpha = 0.15f)),
+                    .background(Color(playlist.coverColor).copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.QueueMusic,
                     contentDescription = null,
-                    tint = playlist.coverColor,
+                    tint = Color(playlist.coverColor),
                     modifier = Modifier.size(24.dp)
                 )
             }
