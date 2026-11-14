@@ -9,7 +9,7 @@ import org.koin.dsl.KoinAppDeclaration
 expect val platformModule: Module
 
 val sharedModules: List<Module>
-    get() = listOf(platformModule, networkModule, repositoryModule, useCaseModule)
+    get() = listOf(platformModule, networkModule, repositoryModule, useCaseModule, viewModelModule)
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
     appDeclaration()

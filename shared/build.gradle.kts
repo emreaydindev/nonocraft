@@ -31,6 +31,8 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.multiplatform.settings)
             api(libs.koin.core)
+            api(libs.koin.core.viewmodel)
+            api(libs.lifecycle.viewmodel)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

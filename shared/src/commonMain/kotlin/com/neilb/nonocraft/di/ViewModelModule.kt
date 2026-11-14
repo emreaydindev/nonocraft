@@ -6,16 +6,11 @@ import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ForgotPassw
 import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswordViewModel
 import com.neilb.nonocraft.presentation.screens.auth.login.LoginViewModel
 import com.neilb.nonocraft.presentation.screens.auth.register.RegisterViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.DashboardViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.feed.FeedViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.library.LibraryViewModel
-import com.neilb.nonocraft.presentation.screens.dashboard.library.detail.LibraryDetailViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.playground.PlaygroundViewModel
 import com.neilb.nonocraft.presentation.screens.gameplay.GameViewModel
 import com.neilb.nonocraft.presentation.screens.intro.SplashViewModel
 import com.neilb.nonocraft.presentation.screens.premium.PremiumViewModel
-import com.neilb.nonocraft.presentation.screens.profile.ProfileViewModel
 import com.neilb.nonocraft.presentation.screens.settings.SettingsViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.ChangePasswordViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.EditProfileViewModel
@@ -27,17 +22,12 @@ val viewModelModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)
     viewModelOf(::ChangePasswordViewModel)
-    viewModelOf(::DashboardViewModel)
     viewModelOf(::EditProfileViewModel)
-    viewModelOf(::FeedViewModel)
     viewModelOf(::ForgotPasswordViewModel)
     viewModelOf(::GameViewModel)
-    viewModelOf(::LibraryDetailViewModel)
-    viewModelOf(::LibraryViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::PlaygroundViewModel)
     viewModelOf(::PremiumViewModel)
-    viewModelOf(::ProfileViewModel)
     viewModelOf(::RegisterViewModel)
     viewModelOf(::ResetPasswordViewModel)
     viewModelOf(::SettingsViewModel)
