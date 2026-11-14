@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.random.Random
 import kotlinx.coroutines.launch
 
 data class FeedUiState(
@@ -55,6 +56,8 @@ data class Playlist(
     val postCount: Int
 )
 
+private const val COMMUNITY_TYPE = "community"
+
 class FeedViewModel(
     private val getPuzzles: GetPuzzles
 ) : ViewModel() {
@@ -70,15 +73,9 @@ class FeedViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            // Map tab to API type if necessary
-            val type = when(_uiState.value.selectedTab) {
-                FeedTab.FEATURED -> "featured"
-                FeedTab.LATEST -> "latest"
-                FeedTab.MOST_LIKED -> "popular"
-                FeedTab.FOLLOWING -> "following"
-            }
-
-            when (val result = getPuzzles(type = type)) {
+            // TODO: every tab shows the newest community puzzles for now. The dedicated /feed
+            // endpoints do not return the grid that the card preview needs.
+            when (val result = getPuzzles(type = COMMUNITY_TYPE)) {
                 is Resource.Success -> {
                     val postItems = result.data?.map { it.toPostItem() } ?: emptyList()
                     _uiState.update { it.copy(isLoading = false, posts = postItems) }
@@ -188,7 +185,7 @@ class FeedViewModel(
     }
 
     fun createAndAddToPlaylist(name: String) {
-        val newPlaylist = Playlist(id = "pl_${System.currentTimeMillis()}", name = name, postCount = 1)
+        val newPlaylist = Playlist(id = "pl_${Random.nextInt(Int.MAX_VALUE)}", name = name, postCount = 1)
         _uiState.update { state ->
             state.copy(
                 playlists = state.playlists + newPlaylist,

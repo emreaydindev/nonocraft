@@ -15,10 +15,16 @@ import com.neilb.nonocraft.presentation.screens.premium.PremiumViewModel
 import com.neilb.nonocraft.presentation.screens.settings.SettingsViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.ChangePasswordViewModel
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.EditProfileViewModel
+import com.neilb.nonocraft.presentation.screens.dashboard.feed.FeedViewModel
+import com.neilb.nonocraft.presentation.screens.dashboard.library.detail.LibraryDetailViewModel
+import com.neilb.nonocraft.presentation.screens.profile.ProfileViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val viewModelModule = module {
+    viewModelOf(::FeedViewModel)
+    viewModelOf(::LibraryDetailViewModel)
+    viewModelOf(::ProfileViewModel)
     viewModelOf(::AccountViewModel)
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)

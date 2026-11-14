@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.components
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -68,12 +69,12 @@ fun PostCard(
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(SurfaceVariantDark)
-                            .border(1.dp, post.accentColor.copy(alpha = 0.5f), CircleShape),
+                            .border(1.dp, Color(post.accentColor).copy(alpha = 0.5f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = post.author.take(1).uppercase(),
-                            color = post.accentColor,
+                            color = Color(post.accentColor),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = AppFont
@@ -151,7 +152,7 @@ fun PostCard(
                                         .weight(1f)
                                         .aspectRatio(1f)
                                         .clip(RoundedCornerShape(2.dp))
-                                        .background(if (cell == 1) post.accentColor else SurfaceVariantDark)
+                                        .background(if (cell == 1) Color(post.accentColor) else SurfaceVariantDark)
                                 )
                             }
                         }

@@ -1,6 +1,5 @@
 package com.neilb.nonocraft.presentation.model
 
-import androidx.compose.ui.graphics.Color
 
 data class PostItem(
     val id: String,
@@ -13,6 +12,7 @@ data class PostItem(
     val isFollowed: Boolean = false,
     val difficulty: String,
     val size: String,
-    val accentColor: Color,
+    /** ARGB, e.g. 0xFFE24B4A. */
+    val accentColor: Long,
     val pattern: List<List<Int>>
 )

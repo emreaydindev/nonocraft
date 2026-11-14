@@ -1,6 +1,5 @@
 package com.neilb.nonocraft.presentation.screens.profile
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.neilb.nonocraft.presentation.components.PostAction
 import com.neilb.nonocraft.presentation.model.PostItem
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.random.Random
 
 class ProfileViewModel : ViewModel() {
 
@@ -29,7 +29,7 @@ class ProfileViewModel : ViewModel() {
                 isLiked = false,
                 difficulty = "Zor",
                 size = "8×8",
-                accentColor = Color(0xFF00FFCC),
+                accentColor = 0xFF00FFCC,
                 pattern = listOf(
                     listOf(1, 1, 1, 1, 1, 1, 1, 1),
                     listOf(1, 0, 0, 0, 0, 0, 0, 1),
@@ -51,7 +51,7 @@ class ProfileViewModel : ViewModel() {
                 isLiked = true,
                 difficulty = "Kolay",
                 size = "5×5",
-                accentColor = Color(0xFFFFD700),
+                accentColor = 0xFFFFD700,
                 pattern = listOf(
                     listOf(0, 0, 1, 0, 0),
                     listOf(0, 1, 1, 1, 0),
@@ -137,7 +137,7 @@ class ProfileViewModel : ViewModel() {
     }
 
     fun createAndAddToPlaylist(name: String) {
-        val newPlaylist = Playlist(id = "pl_${System.currentTimeMillis()}", name = name, postCount = 1)
+        val newPlaylist = Playlist(id = "pl_${Random.nextInt(Int.MAX_VALUE)}", name = name, postCount = 1)
         _uiState.update { state ->
             state.copy(
                 playlists = state.playlists + newPlaylist,

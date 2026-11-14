@@ -1,18 +1,16 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library.detail
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.navigation.toRoute
 import com.neilb.nonocraft.presentation.components.PostAction
 import com.neilb.nonocraft.presentation.model.PostItem
-import com.neilb.nonocraft.presentation.navigation.Route
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.Comment
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.Playlist
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.random.Random
 
 data class LibraryDetailUiState(
     val title: String = "",
@@ -29,8 +27,8 @@ class LibraryDetailViewModel(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val args = savedStateHandle.toRoute<Route.LibraryDetail>()
-    private val categoryId: String = args.categoryId
+    // Same key as the `categoryId` property of the navigation route.
+    private val categoryId: String = savedStateHandle["categoryId"] ?: ""
 
     private val _uiState = MutableStateFlow(LibraryDetailUiState())
     val uiState: StateFlow<LibraryDetailUiState> = _uiState.asStateFlow()
@@ -132,7 +130,7 @@ class LibraryDetailViewModel(
     }
 
     fun createAndAddToPlaylist(name: String) {
-        val newPlaylist = Playlist(id = "pl_${System.currentTimeMillis()}", name = name, postCount = 1)
+        val newPlaylist = Playlist(id = "pl_${Random.nextInt(Int.MAX_VALUE)}", name = name, postCount = 1)
         _uiState.update { state ->
             state.copy(
                 playlists = state.playlists + newPlaylist,
@@ -152,7 +150,7 @@ class LibraryDetailViewModel(
     private fun getMockLikedPosts(): List<PostItem> = listOf(
         PostItem(
             id = "liked_1", title = "Kalp", author = "ali", timeAgo = "5s önce", likes = 88, comments = 4,
-            isLiked = true, difficulty = "Kolay", size = "5×5", accentColor = Color(0xFFFF4444),
+            isLiked = true, difficulty = "Kolay", size = "5×5", accentColor = 0xFFFF4444,
             pattern = listOf(
                 listOf(0, 1, 0, 1, 0), listOf(1, 1, 1, 1, 1), listOf(1, 1, 1, 1, 1),
                 listOf(0, 1, 1, 1, 0), listOf(0, 0, 1, 0, 0)
@@ -160,7 +158,7 @@ class LibraryDetailViewModel(
         ),
         PostItem(
             id = "liked_2", title = "Yıldız", author = "zeynep", timeAgo = "1g önce", likes = 150, comments = 22,
-            isLiked = true, difficulty = "Orta", size = "5×5", accentColor = Color(0xFFFFD700),
+            isLiked = true, difficulty = "Orta", size = "5×5", accentColor = 0xFFFFD700,
             pattern = listOf(
                 listOf(0, 0, 1, 0, 0), listOf(0, 1, 1, 1, 0), listOf(1, 1, 1, 1, 1),
                 listOf(0, 1, 1, 1, 0), listOf(0, 0, 1, 0, 0)
@@ -171,7 +169,7 @@ class LibraryDetailViewModel(
     private fun getMockDownloadedPosts(): List<PostItem> = listOf(
         PostItem(
             id = "dl_1", title = "Gece Manzarası", author = "neilb", timeAgo = "3g önce", likes = 45, comments = 7,
-            isLiked = false, difficulty = "Zor", size = "8×8", accentColor = Color(0xFF00FFCC),
+            isLiked = false, difficulty = "Zor", size = "8×8", accentColor = 0xFF00FFCC,
             pattern = listOf(
                 listOf(1, 1, 1, 1, 1, 1, 1, 1), listOf(1, 0, 0, 0, 0, 0, 0, 1),
                 listOf(1, 0, 1, 1, 1, 1, 0, 1), listOf(1, 0, 1, 0, 0, 1, 0, 1),
@@ -184,7 +182,7 @@ class LibraryDetailViewModel(
     private fun getMockSharedPosts(): List<PostItem> = listOf(
         PostItem(
             id = "shared_1", title = "Kılıç", author = "kullanici_adin", timeAgo = "1h önce", likes = 12, comments = 1,
-            isLiked = false, difficulty = "Kolay", size = "5×5", accentColor = Color(0xFFAAAAAA),
+            isLiked = false, difficulty = "Kolay", size = "5×5", accentColor = 0xFFAAAAAA,
             pattern = listOf(
                 listOf(0, 0, 0, 0, 1), listOf(0, 0, 0, 1, 0), listOf(0, 0, 1, 0, 0),
                 listOf(0, 1, 0, 0, 0), listOf(1, 0, 0, 0, 0)
@@ -195,7 +193,7 @@ class LibraryDetailViewModel(
     private fun getMockDraftPosts(): List<PostItem> = listOf(
         PostItem(
             id = "draft_1", title = "Taslak - Mantar", author = "kullanici_adin", timeAgo = "Şimdi", likes = 0, comments = 0,
-            isLiked = false, difficulty = "Belirsiz", size = "6×6", accentColor = Color(0xFF4CAF50),
+            isLiked = false, difficulty = "Belirsiz", size = "6×6", accentColor = 0xFF4CAF50,
             pattern = listOf(
                 listOf(0, 1, 1, 1, 1, 0), listOf(1, 1, 1, 1, 1, 1), listOf(1, 0, 1, 1, 0, 1),
                 listOf(1, 1, 1, 1, 1, 1), listOf(0, 0, 1, 1, 0, 0), listOf(0, 0, 1, 1, 0, 0)
@@ -206,7 +204,7 @@ class LibraryDetailViewModel(
     private fun getMockCompletedPosts(): List<PostItem> = listOf(
         PostItem(
             id = "comp_1", title = "Kedi", author = "system", timeAgo = "1a önce", likes = 890, comments = 120,
-            isLiked = true, difficulty = "Orta", size = "5×5", accentColor = Color(0xFFFF9800),
+            isLiked = true, difficulty = "Orta", size = "5×5", accentColor = 0xFFFF9800,
             pattern = listOf(
                 listOf(1, 0, 0, 0, 1), listOf(1, 1, 0, 1, 1), listOf(1, 1, 1, 1, 1),
                 listOf(0, 1, 1, 1, 0), listOf(0, 1, 0, 1, 0)
@@ -217,7 +215,7 @@ class LibraryDetailViewModel(
     private fun getMockDailyPosts(): List<PostItem> = listOf(
         PostItem(
             id = "daily_1", title = "Güneş", author = "nonocraft_daily", timeAgo = "12s önce", likes = 4500, comments = 300,
-            isLiked = true, difficulty = "Zor", size = "5×5", accentColor = Color(0xFFFFEB3B),
+            isLiked = true, difficulty = "Zor", size = "5×5", accentColor = 0xFFFFEB3B,
             pattern = listOf(
                 listOf(0, 1, 0, 1, 0), listOf(1, 1, 1, 1, 1), listOf(0, 1, 1, 1, 0),
                 listOf(1, 1, 1, 1, 1), listOf(0, 1, 0, 1, 0)

@@ -24,8 +24,8 @@ class PuzzleApiService(private val client: HttpClient) {
         client.get("puzzles") {
             parameter("limit", limit)
             parameter("offset", offset)
-            parameter("type", type)
-            parameter("difficulty", difficulty)
+            parameter("types", type)
+            parameter("difficulties", difficulty)
         }.body<ApiResponse<List<PuzzleDto>>>().map(::PuzzleListResponse)
 
     suspend fun getPuzzleById(puzzleId: String): ApiResponse<PuzzleDto> =
