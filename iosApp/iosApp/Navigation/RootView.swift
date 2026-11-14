@@ -10,6 +10,7 @@ struct RootView: View {
     @State private var phase: Phase = .splash
     @State private var authPath: [AuthRoute] = []
     @State private var showGoogleUnavailable = false
+    @State private var showPasswordUpdated = false
 
     var body: some View {
         Group {
@@ -36,6 +37,9 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: phase)
+        .alert("Şifren başarıyla güncellendi.", isPresented: $showPasswordUpdated) {
+            Button("Tamam", role: .cancel) {}
+        }
         .alert("Google ile giriş", isPresented: $showGoogleUnavailable) {
             Button("Tamam", role: .cancel) {}
         } message: {
@@ -60,9 +64,22 @@ struct RootView: View {
                     LoginScreen(
                         onNavigateBack: { authPath = [] },
                         onNavigateToRegister: { authPath = [.register] },
-                        onNavigateToForgotPassword: {},
+                        onNavigateToForgotPassword: { authPath.append(.forgotPassword) },
                         onGoogleSignIn: { showGoogleUnavailable = true },
                         onLoginSuccess: enterDashboard
+                    )
+                case .forgotPassword:
+                    ForgotPasswordScreen(
+                        onNavigateBack: { _ = authPath.popLast() },
+                        onCodeSentSuccess: { authPath.append(.resetPassword) }
+                    )
+                case .resetPassword:
+                    ResetPasswordScreen(
+                        onNavigateBack: { _ = authPath.popLast() },
+                        onResetSuccess: {
+                            authPath = [.login]
+                            showPasswordUpdated = true
+                        }
                     )
                 case .register:
                     RegisterScreen(

@@ -62,7 +62,8 @@ struct DashboardScreen: View {
         case .settingsSub(.notifications): NotificationSettingsScreen(onNavigateBack: back)
         case .game(let id): GameScreen(gameId: id, onNavigateBack: back)
         case .tutorial: TutorialScreen(onNavigateToDashboard: back)
-        case .premium, .crafting, .libraryDetail, .profile:
+        case .premium: PremiumScreen(onNavigateBack: back)
+        case .crafting, .libraryDetail, .profile:
             NotPortedYetView(title: "Yakında", onBack: back)
         }
     }

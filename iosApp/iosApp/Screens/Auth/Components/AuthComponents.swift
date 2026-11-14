@@ -185,13 +185,15 @@ struct AuthPasswordField: View {
     let label: String
     var placeholder = "••••••••"
     var isError = false
+    var errorMessage: String?
     var contentType: UITextContentType = .password
+    var submitLabel: SubmitLabel = .done
     @State private var isVisible = false
 
     var body: some View {
         AuthTextField(
-            text: $text, label: label, placeholder: placeholder, isError: isError,
-            isSecure: !isVisible, contentType: contentType, submitLabel: .done
+            text: $text, label: label, placeholder: placeholder, isError: isError, errorMessage: errorMessage,
+            isSecure: !isVisible, contentType: contentType, submitLabel: submitLabel
         ) {
             Button {
                 isVisible.toggle()

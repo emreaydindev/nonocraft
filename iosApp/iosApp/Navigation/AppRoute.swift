@@ -1,7 +1,7 @@
 import Foundation
 
 enum AuthRoute: Hashable {
-    case login, register
+    case login, register, forgotPassword, resetPassword
 }
 
 enum SettingsRoute: Hashable {

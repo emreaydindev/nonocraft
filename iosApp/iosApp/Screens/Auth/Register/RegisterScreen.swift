@@ -17,9 +17,7 @@ struct RegisterScreen: View {
     private enum Field { case username, email, password }
 
     private var uiState: RegisterUiState { model.state }
-    private var isEmailValid: Bool {
-        email.isEmpty || email.wholeMatch(of: /[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/) != nil
-    }
+    private var isEmailValid: Bool { isValidEmailOrEmpty(email) }
     private var isPasswordLongEnough: Bool { password.count >= 8 }
     private var canSubmit: Bool {
         !username.isEmpty && !email.isEmpty && isEmailValid && isPasswordLongEnough && !uiState.isLoading

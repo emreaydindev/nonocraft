@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.neilb.nonocraft.presentation.navigation.AppViewModel
 import com.neilb.nonocraft.presentation.screens.auth.AuthViewModel
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ForgotPasswordViewModel
+import com.neilb.nonocraft.presentation.screens.auth.forgot_password.ResetPasswordViewModel
 import com.neilb.nonocraft.presentation.screens.auth.login.LoginViewModel
 import com.neilb.nonocraft.presentation.screens.auth.register.RegisterViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountViewModel
@@ -17,6 +19,7 @@ import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.Chan
 import com.neilb.nonocraft.presentation.screens.settings.subscreens.account.EditProfileViewModel
 import com.neilb.nonocraft.presentation.screens.gameplay.GameViewModel
 import com.neilb.nonocraft.presentation.screens.intro.SplashViewModel
+import com.neilb.nonocraft.presentation.screens.premium.PremiumViewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 import kotlin.reflect.KClass
@@ -46,6 +49,9 @@ class ViewModelOwner {
     fun authViewModel(): AuthViewModel = provider[AuthViewModel::class]
     fun loginViewModel(): LoginViewModel = provider[LoginViewModel::class]
     fun registerViewModel(): RegisterViewModel = provider[RegisterViewModel::class]
+    fun forgotPasswordViewModel(): ForgotPasswordViewModel = provider[ForgotPasswordViewModel::class]
+    fun resetPasswordViewModel(): ResetPasswordViewModel = provider[ResetPasswordViewModel::class]
+    fun premiumViewModel(): PremiumViewModel = provider[PremiumViewModel::class]
     fun playgroundViewModel(): PlaygroundViewModel = provider[PlaygroundViewModel::class]
     fun libraryViewModel(): LibraryViewModel = provider[LibraryViewModel::class]
     fun accountViewModel(): AccountViewModel = provider[AccountViewModel::class]
