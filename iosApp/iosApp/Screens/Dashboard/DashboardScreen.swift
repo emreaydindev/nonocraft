@@ -18,7 +18,11 @@ struct DashboardScreen: View {
                             onNavigateToTutorial: { path.append(.tutorial) }
                         )
                     case .feed:
-                        NotPortedYetView(title: currentTab.label)
+                        FeedScreen(
+                            onNavigateToGame: { path.append(.game(id: $0)) },
+                            onNavigateToProfile: { path.append(.profile(userId: $0)) },
+                            onNavigateToCrafting: { path.append(.crafting) }
+                        )
                     case .library:
                         LibraryScreen(
                             onNavigateToCrafting: { path.append(.crafting) },
@@ -63,33 +67,43 @@ struct DashboardScreen: View {
         case .game(let id): GameScreen(gameId: id, onNavigateBack: back)
         case .tutorial: TutorialScreen(onNavigateToDashboard: back)
         case .premium: PremiumScreen(onNavigateBack: back)
-        case .crafting, .libraryDetail, .profile:
-            NotPortedYetView(title: "Yakında", onBack: back)
+        case .libraryDetail(let id):
+            LibraryDetailScreen(
+                categoryId: id,
+                onNavigateBack: back,
+                onNavigateToGame: { path.append(.game(id: $0)) },
+                onNavigateToProfile: { path.append(.profile(userId: $0)) }
+            )
+        case .profile(let userId):
+            ProfileScreen(userId: userId, onNavigateBack: back, onNavigateToGame: { path.append(.game(id: $0)) })
+        case .crafting:
+            CraftingScreen(onNavigateBack: back)
         }
     }
 }
 
-/// Stand-in for screens whose SwiftUI port has not been written yet.
-struct NotPortedYetView: View {
-    let title: String
-    var onBack: (() -> Void)?
+/// The puzzle editor has not been built on either platform yet (Android shows a stub too).
+struct CraftingScreen: View {
+    let onNavigateBack: () -> Void
 
     var body: some View {
         ScreenBackground {
             VStack(spacing: 8) {
-                Text(title)
+                Image(systemName: "paintbrush.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.purpleAccent)
+                    .padding(.bottom, 8)
+                Text("Tasarım Stüdyosu")
                     .font(.app(22, .bold))
                     .foregroundColor(.textPrimary)
-                Text("Bu ekran iOS sürümüne taşınıyor.")
+                Text("Bulmaca tasarlama ekranı yakında burada olacak.")
                     .font(.app(13))
                     .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
             }
+            .padding(32)
         }
-        .overlay(alignment: .topLeading) {
-            if let onBack {
-                AuthBackRow(onBack: onBack)
-            }
-        }
+        .overlay(alignment: .topLeading) { AuthBackRow(onBack: onNavigateBack) }
         .toolbar(.hidden, for: .navigationBar)
     }
 }
