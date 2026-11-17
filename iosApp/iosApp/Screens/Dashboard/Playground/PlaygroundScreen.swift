@@ -18,6 +18,8 @@ struct PlaygroundScreen: View {
     }
 }
 
+/// Same content as the Android home (wallet, daily, campaign level + draft, random generator),
+/// laid out the iOS way: large title with toolbar buttons, a wallet row, a hero daily card.
 private struct PlaygroundContent: View {
     let state: PlaygroundUiState
     let onNavigateToGame: (String) -> Void
@@ -26,41 +28,36 @@ private struct PlaygroundContent: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                Greeting(username: state.username)
-                DailyChallengeCard(
+            VStack(spacing: 16) {
+                WalletRow(
+                    stars: Int(state.stars),
+                    crystals: Int(state.crystals),
+                    crystalRefillMinutes: Int(state.crystalRefillMinutes)
+                )
+                DailyHeroCard(
                     isSolved: state.isDailySolved,
                     onPlayToday: { onNavigateToGame("daily-today-20") },
                     onPlayPast: { date in onNavigateToGame("daily-\(date)-20") }
                 )
-                LevelProgressCard(
+                CampaignCard(
                     currentLevel: Int(state.currentLevelNumber),
                     hasDraft: state.hasDraft,
                     draftSize: state.draftSize,
                     draftProgress: Int(state.draftProgress),
                     onContinue: { onNavigateToGame(state.currentLevelId) }
                 )
-                RandomPuzzleButton(action: { onNavigateToGame("random-10") })
+                RandomPuzzleRow(action: { onNavigateToGame("random-10") })
             }
             .padding(.horizontal, 18)
-            .padding(.top, 8)
+            .padding(.top, 4)
             .padding(.bottom, 24)
             .frame(maxWidth: 640)
             .frame(maxWidth: .infinity)
         }
-        .background {
-            ScreenBackground { WatermarkLogo() }
-        }
+        .background { ScreenBackground { EmptyView() } }
         .navigationTitle("Oyun Alanı")
-        .toolbarTitleDisplayMode(.inline)
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                WalletIndicator(
-                    stars: Int(state.stars),
-                    crystals: Int(state.crystals),
-                    crystalRefillMinutes: Int(state.crystalRefillMinutes)
-                )
-            }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Nasıl oynanır", systemImage: "questionmark.circle", action: onNavigateToTutorial)
                 Button("Ayarlar", systemImage: "gearshape", action: onNavigateToSettings)
@@ -69,87 +66,124 @@ private struct PlaygroundContent: View {
     }
 }
 
-/// Avatar initials and "Merhaba, name" in the display font at the top of the page.
-private struct Greeting: View {
-    let username: String
+// MARK: - Wallet
 
-    var body: some View {
-        HStack(spacing: 12) {
-            Text(username.prefix(2).uppercased())
-                .font(.app(15, .bold))
-                .foregroundStyle(Color.neonCyan)
-                .frame(width: 48, height: 48)
-                .background(Color.surfaceDark, in: Circle())
-                .overlay(Circle().stroke(Color.neonCyan, lineWidth: 2))
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Merhaba,")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.textSecondary)
-                Text(username)
-                    .font(.app(24, .bold))
-                    .foregroundStyle(Color.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            Spacer(minLength: 0)
-        }
-        .accessibilityElement(children: .combine)
-    }
-}
-
-/// Ranking stars and crystals (or the refill countdown at zero) as one toolbar item.
-private struct WalletIndicator: View {
+/// Ranking stars and the crystal fail pool side by side, in place of the Android greeting row.
+private struct WalletRow: View {
     let stars: Int
     let crystals: Int
     let crystalRefillMinutes: Int
 
+    /// Crystal cap for free players (DECISIONS §7); the server stays authoritative.
+    private let crystalCap = 5
+
     var body: some View {
-        HStack(spacing: 10) {
-            Label("\(stars)", systemImage: "star.fill")
-                .foregroundStyle(Color.gameGold)
-                .accessibilityLabel("\(stars) yıldız")
-            if crystals > 0 {
-                Label("\(crystals)", systemImage: "diamond.fill")
-                    .foregroundStyle(Color.neonCyan)
-                    .accessibilityLabel("\(crystals) kristal")
-            } else {
-                Label("\(crystalRefillMinutes)dk", systemImage: "timer")
-                    .foregroundStyle(Color.dangerRed)
-                    .accessibilityLabel("Yeni kristale \(crystalRefillMinutes) dakika")
+        HStack(spacing: 12) {
+            WalletTile(title: "YILDIZ", systemImage: "star.fill", tint: .gameGold) {
+                Text("\(stars)")
+                    .font(.app(28, .bold))
+                    .foregroundStyle(Color.textPrimary)
+                    .contentTransition(.numericText())
+            } footer: {
+                Text("Sıralama puanı")
+                    .font(.footnote)
+                    .foregroundStyle(Color.textMuted)
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(stars) yıldız")
+
+            WalletTile(title: "KRİSTAL", systemImage: "diamond.fill", tint: .neonCyan) {
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text("\(crystals)")
+                        .font(.app(28, .bold))
+                        .foregroundStyle(Color.textPrimary)
+                        .contentTransition(.numericText())
+                    Text("/\(crystalCap)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.textMuted)
+                }
+            } footer: {
+                HStack(spacing: 8) {
+                    HStack(spacing: 3) {
+                        ForEach(0..<crystalCap, id: \.self) { index in
+                            Capsule()
+                                .fill(index < crystals ? Color.neonCyan : Color.surfaceVariantDark)
+                                .frame(height: 5)
+                        }
+                    }
+                    if crystals < crystalCap {
+                        Label("\(crystalRefillMinutes) dk", systemImage: "timer")
+                            .labelStyle(.titleAndIcon)
+                            .font(.footnote.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(crystals == 0 ? Color.dangerRed : Color.textSecondary)
+                            .fixedSize()
+                    }
+                }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(crystalAccessibilityLabel)
         }
-        .labelStyle(.titleAndIcon)
-        .font(.subheadline.weight(.bold).monospacedDigit())
-        .padding(.horizontal, 6)
-        .fixedSize()
+    }
+
+    private var crystalAccessibilityLabel: String {
+        let count = "\(crystals) / \(crystalCap) kristal"
+        return crystals < crystalCap ? "\(count), yenisine \(crystalRefillMinutes) dakika" : count
     }
 }
 
-private struct WatermarkLogo: View {
+private struct WalletTile<Value: View, Footer: View>: View {
+    let title: String
+    let systemImage: String
+    let tint: Color
+    @ViewBuilder var value: Value
+    @ViewBuilder var footer: Footer
+
     var body: some View {
-        Image("Logo")
-            .resizable()
-            .frame(width: 180, height: 180)
-            .opacity(0.08)
-            .allowsHitTesting(false)
+        DashboardCard(cornerRadius: 20) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(tint)
+                    Text(title)
+                        .font(.app(11, .medium))
+                        .kerning(1)
+                        .foregroundStyle(Color.textMuted)
+                }
+                value
+                footer
+                    .frame(maxWidth: .infinity, minHeight: 18, alignment: .leading)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }
 
-private struct DailyChallengeCard: View {
+// MARK: - Daily
+
+private struct DailyHeroCard: View {
     let isSolved: Bool
     let onPlayToday: () -> Void
     let onPlayPast: (String) -> Void
 
     private static let locale = Locale(identifier: "tr_TR")
 
-    private var today: String { Self.format(Date(), "d MMMM") }
+    private struct PastDay: Identifiable {
+        let id: String  // yyyy-MM-dd, the daily puzzle key
+        let weekday: String
+        let day: String
+    }
 
-    private var pastDates: [(label: String, key: String)] {
-        (1...5).compactMap { daysAgo in
+    /// The five days before today, oldest first, like a calendar week row.
+    private var pastDays: [PastDay] {
+        (1...5).reversed().compactMap { daysAgo in
             Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()).map {
-                (Self.format($0, "d MMM"), Self.format($0, "yyyy-MM-dd"))
+                PastDay(
+                    id: Self.format($0, "yyyy-MM-dd"),
+                    weekday: Self.format($0, "EEE"),
+                    day: Self.format($0, "d")
+                )
             }
         }
     }
@@ -162,77 +196,79 @@ private struct DailyChallengeCard: View {
     }
 
     var body: some View {
-        DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 20) {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    HStack(spacing: 10) {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 20))
-                            .foregroundColor(isSolved ? .textMuted : .neonCyan)
-                            .frame(width: 46, height: 46)
-                            .background(isSolved ? Color.surfaceVariantDark : Color.neonCyan.opacity(0.13))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("GÜNÜN BULMACASI")
-                                .font(.app(11, .medium))
-                                .kerning(1)
-                                .foregroundColor(isSolved ? .textMuted : .neonCyan)
-                            Text(today)
-                                .font(.app(18, .bold))
-                                .foregroundColor(.textPrimary)
-                        }
+        DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 24) {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack(alignment: .center, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("GÜNÜN BULMACASI")
+                            .font(.app(11, .medium))
+                            .kerning(1)
+                            .foregroundStyle(isSolved ? Color.textMuted : Color.neonCyan)
+                        Text(Self.format(Date(), "d MMMM"))
+                            .font(.app(30, .bold))
+                            .foregroundStyle(Color.textPrimary)
+                        Text(Self.format(Date(), "EEEE"))
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
                     }
-                    Spacer()
-                    if isSolved {
-                        HStack(spacing: 5) {
-                            Image(systemName: "checkmark.circle.fill").font(.system(size: 13))
-                            Text("Çözüldü").font(.subheadline.weight(.medium))
-                        }
-                        .foregroundColor(.neonCyan)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(Color.surfaceVariantDark)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                    } else {
-                        PlayButton(title: "Oyna", action: onPlayToday)
-                    }
+                    Spacer(minLength: 0)
+                    Image("Logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 88, height: 88)
+                        .shadow(color: .neonCyan.opacity(isSolved ? 0 : 0.45), radius: 18)
+                        .saturation(isSolved ? 0.2 : 1)
+                        .accessibilityHidden(true)
                 }
 
-                Rectangle().fill(Color.borderDark).frame(height: 0.5)
-                    .padding(.top, 16)
-                    .padding(.bottom, 14)
+                if isSolved {
+                    Label("Bugünün bulmacası çözüldü", systemImage: "checkmark.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.neonCyan)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.surfaceVariantDark, in: Capsule())
+                } else {
+                    PlayButton(title: "Oyna", systemImage: "play.fill", action: onPlayToday)
+                }
 
-                Text("GEÇMİŞ GÜNLER")
-                    .font(.app(11))
-                    .kerning(1)
-                    .foregroundColor(.textMuted)
-
-                HStack(spacing: 7) {
-                    ForEach(pastDates, id: \.key) { date in
-                        Button {
-                            onPlayPast(date.key)
-                        } label: {
-                            Text(date.label)
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(Color.textSecondary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("GEÇMİŞ GÜNLER")
+                        .font(.app(11))
+                        .kerning(1)
+                        .foregroundStyle(Color.textMuted)
+                    HStack(spacing: 0) {
+                        ForEach(pastDays) { day in
+                            Button {
+                                onPlayPast(day.id)
+                            } label: {
+                                VStack(spacing: 6) {
+                                    Text(day.weekday)
+                                        .font(.caption2.weight(.semibold))
+                                        .foregroundStyle(Color.textMuted)
+                                    Text(day.day)
+                                        .font(.app(16, .bold))
+                                        .foregroundStyle(Color.textPrimary)
+                                        .frame(width: 40, height: 40)
+                                        .background(Color.surfaceVariantDark, in: Circle())
+                                }
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(Color.surfaceVariantDark, in: Capsule())
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("\(day.day) \(day.weekday) bulmacasını oyna")
                         }
-                        .buttonStyle(.plain)
                     }
                 }
-                .padding(.top, 10)
             }
-            .padding(18)
+            .padding(20)
         }
     }
 }
 
-private struct LevelProgressCard: View {
+// MARK: - Campaign
+
+private struct CampaignCard: View {
     let currentLevel: Int
     let hasDraft: Bool
     let draftSize: String
@@ -240,46 +276,63 @@ private struct LevelProgressCard: View {
     let onContinue: () -> Void
 
     var body: some View {
-        DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 20) {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
+        DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 24) {
+            VStack(spacing: 18) {
+                HStack(spacing: 14) {
+                    Text("\(currentLevel)")
+                        .font(.app(30, .bold))
+                        .foregroundStyle(Color.neonCyan)
+                        .frame(width: 64, height: 64)
+                        .background(Color.neonCyan.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .accessibilityHidden(true)
+
                     VStack(alignment: .leading, spacing: 3) {
                         Text("MEVCUT SEVİYE")
                             .font(.app(11))
                             .kerning(1)
-                            .foregroundColor(.textMuted)
-                        Text("\(currentLevel)")
-                            .font(.app(36, .bold))
-                            .foregroundColor(.neonCyan)
-                    }
-                    Spacer()
-                    PlayButton(title: hasDraft ? "Devam Et" : "Başla", action: onContinue)
-                }
-
-                if hasDraft {
-                    Rectangle().fill(Color.borderDark).frame(height: 0.5)
-                        .padding(.vertical, 14)
-
-                    HStack(spacing: 10) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.purpleAccent)
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Yarım kalan bölüm: \(draftSize) · %\(draftProgress)")
-                                .font(.subheadline)
+                            .foregroundStyle(Color.textMuted)
+                        Text("Seviye \(currentLevel)")
+                            .font(.app(20, .bold))
+                            .foregroundStyle(Color.textPrimary)
+                        if hasDraft {
+                            Text("Yarım kalan bölüm · \(draftSize)")
+                                .font(.footnote)
                                 .foregroundStyle(Color.textSecondary)
-                            ProgressView(value: Double(draftProgress), total: 100)
-                                .tint(.purpleAccent)
                         }
                     }
+                    .accessibilityElement(children: .combine)
+
+                    Spacer(minLength: 0)
+
+                    if hasDraft {
+                        Gauge(value: Double(draftProgress), in: 0...100) {
+                            EmptyView()
+                        } currentValueLabel: {
+                            Text("%\(draftProgress)")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Color.textPrimary)
+                        }
+                        .gaugeStyle(.accessoryCircularCapacity)
+                        .tint(.purpleAccent)
+                        .accessibilityLabel("Yarım kalan bölüm ilerlemesi")
+                        .accessibilityValue("%\(draftProgress)")
+                    }
                 }
+
+                PlayButton(
+                    title: hasDraft ? "Devam Et" : "Başla",
+                    systemImage: hasDraft ? "arrow.uturn.forward" : "play.fill",
+                    action: onContinue
+                )
             }
-            .padding(18)
+            .padding(20)
         }
     }
 }
 
-private struct RandomPuzzleButton: View {
+// MARK: - Random
+
+private struct RandomPuzzleRow: View {
     let action: () -> Void
 
     var body: some View {
@@ -287,45 +340,45 @@ private struct RandomPuzzleButton: View {
             HStack(spacing: 14) {
                 Image(systemName: "shuffle")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.purpleAccent)
+                    .foregroundStyle(Color.purpleAccent)
                     .frame(width: 44, height: 44)
-                    .background(Color.purpleAccent.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background(Color.purpleAccent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Rastgele Bölüm Oluştur")
                         .font(.app(15, .semibold))
-                        .foregroundColor(.textPrimary)
+                        .foregroundStyle(Color.textPrimary)
                     Text("İnternetsiz de çalışır")
                         .font(.footnote)
-                        .foregroundColor(.textMuted)
+                        .foregroundStyle(Color.textMuted)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.textMuted)
+                    .foregroundStyle(Color.textMuted)
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 16)
-            .background(Color.surfaceDark)
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.borderDark, lineWidth: 0.5))
+            .background(Color.surfaceDark, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.borderDark, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
     }
 }
 
-/// Primary action inside a dashboard card: prominent glass tinted neon cyan.
+/// Full-width primary action inside a card: prominent glass tinted neon cyan.
 private struct PlayButton: View {
     let title: String
+    let systemImage: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.app(15, .bold))
+            Label(title, systemImage: systemImage)
+                .font(.app(17, .bold))
                 .foregroundStyle(Color.onNeon)
-                .padding(.horizontal, 4)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
         }
         .buttonStyle(.appGlassProminent)
         .tint(.neonCyan)
