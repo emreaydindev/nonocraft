@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,17 +21,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Help
-import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Diamond
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,11 +43,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -104,33 +115,53 @@ fun PlaygroundContent(
             .background(BackgroundDark),
     ) {
         GridBackground()
-        WatermarkLogo()
 
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
-            Column(
+            BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 18.dp)
-                    .padding(top = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                    .fillMaxWidth(),
             ) {
-                PlaygroundHeader(
-                    username = state.username,
-                    stars = state.stars,
-                    crystals = state.crystals,
-                    crystalRefillMinutes = state.crystalRefillMinutes,
-                    onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToTutorial = onNavigateToTutorial
-                )
+                val density = LocalDensity.current
+                var topContentHeight by remember { mutableStateOf(0.dp) }
+                val gap = maxHeight - topContentHeight
+                // Same as iOS: the mascot sits centred between the daily card and the level card.
+                if (gap > 64.dp) {
+                    WatermarkLogo(
+                        modifier = Modifier
+                            .padding(top = topContentHeight)
+                            .height(gap),
+                        logoSize = minOf(180.dp, gap - 24.dp),
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .onSizeChanged { topContentHeight = with(density) { it.height.toDp() } }
+                        .padding(horizontal = 18.dp)
+                        .padding(top = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    PlaygroundHeader(
+                        onNavigateToSettings = onNavigateToSettings,
+                        onNavigateToTutorial = onNavigateToTutorial
+                    )
 
-                DailyChallengeCard(
-                    isSolved = state.isDailySolved,
-                    onPlayToday = { onNavigateToGame("daily-today-20") },
-                    onPlayPast = { date -> onNavigateToGame("daily-$date-20") },
-                )
+                    WalletStrip(
+                        stars = state.stars,
+                        crystals = state.crystals,
+                        crystalRefillMinutes = state.crystalRefillMinutes,
+                    )
+
+                    DailyChallengeCard(
+                        isSolved = state.isDailySolved,
+                        onPlayToday = { onNavigateToGame("daily-today-20") },
+                        onPlayPast = { date -> onNavigateToGame("daily-$date-20") },
+                    )
+                }
             }
 
             Column(
@@ -260,12 +291,9 @@ private fun LevelProgressCard(
     }
 }
 
+/** Wordmark with help and settings, the same structure as the iOS toolbar. */
 @Composable
 private fun PlaygroundHeader(
-    username: String,
-    stars: Int,
-    crystals: Int,
-    crystalRefillMinutes: Int,
     onNavigateToSettings: () -> Unit,
     onNavigateToTutorial: () -> Unit
 ) {
@@ -274,149 +302,161 @@ private fun PlaygroundHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(SurfaceDark)
-                    .border(2.dp, NeonCyan, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = username.take(2).uppercase(),
-                    color = NeonCyan,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont,
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(color = TextPrimary)) { append("Nono") }
+                withStyle(SpanStyle(color = NeonCyan)) { append("craft") }
+            },
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = AppFont,
+            modifier = Modifier.semantics { heading() },
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onNavigateToTutorial) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.HelpOutline,
+                    contentDescription = "Nasıl oynanır",
+                    tint = PurpleAccent,
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                Text(
-                    text = "Merhaba,",
-                    color = TextMuted,
-                    fontSize = 12.sp,
-                    fontFamily = AppFont,
-                )
-                Text(
-                    text = username,
-                    color = TextPrimary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont,
+            IconButton(onClick = onNavigateToSettings) {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = "Ayarlar",
+                    tint = PurpleAccent,
                 )
             }
         }
+    }
+}
 
+/** Crystal cap for free players (DECISIONS §7); the server stays authoritative. */
+private const val CRYSTAL_CAP = 5
+
+/** Ranking stars and the crystal fail pool on one slim row. */
+@Composable
+private fun WalletStrip(
+    stars: Int,
+    crystals: Int,
+    crystalRefillMinutes: Int,
+) {
+    DashboardCard(
+        modifier = Modifier.fillMaxWidth(),
+        cornerRadius = 18,
+    ) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(GameGold.copy(alpha = 0.13f))
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier.semantics(mergeDescendants = true) {
+                    contentDescription = "$stars yıldız"
+                },
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Star,
                     contentDescription = null,
                     tint = GameGold,
-                    modifier = Modifier.size(15.dp),
+                    modifier = Modifier.size(18.dp),
                 )
                 Text(
                     text = "$stars",
-                    color = GameGold,
-                    fontSize = 13.sp,
+                    color = TextPrimary,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = AppFont,
                 )
             }
 
-            if (crystals > 0) {
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(NeonCyan.copy(alpha = 0.10f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.AutoAwesome,
-                        contentDescription = null,
-                        tint = NeonCyan,
-                        modifier = Modifier.size(15.dp),
-                    )
-                    Text(
-                        text = "$crystals",
-                        color = NeonCyan,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = AppFont,
-                    )
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(22.dp)
+                    .background(BorderDark),
+            )
+
+            Row(
+                modifier = Modifier.semantics(mergeDescendants = true) {
+                    contentDescription = "$crystals / $CRYSTAL_CAP kristal"
+                },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Diamond,
+                    contentDescription = null,
+                    tint = NeonCyan,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = "$crystals/$CRYSTAL_CAP",
+                    color = TextPrimary,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppFont,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    repeat(CRYSTAL_CAP) { index ->
+                        Box(
+                            modifier = Modifier
+                                .width(10.dp)
+                                .height(5.dp)
+                                .clip(CircleShape)
+                                .background(if (index < crystals) NeonCyan else SurfaceVariantDark),
+                        )
+                    }
                 }
-            } else {
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            if (crystals < CRYSTAL_CAP) {
+                val timerColor = if (crystals == 0) DangerRed else TextSecondary
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(DangerRed.copy(alpha = 0.10f))
-                        .border(1.dp, DangerRed.copy(alpha = 0.30f), RoundedCornerShape(24.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.semantics(mergeDescendants = true) {
+                        contentDescription = "Yeni kristale $crystalRefillMinutes dakika"
+                    },
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Timer,
                         contentDescription = null,
-                        tint = DangerRed,
-                        modifier = Modifier.size(14.dp),
+                        tint = timerColor,
+                        modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "${crystalRefillMinutes}dk",
-                        color = DangerRed,
+                        text = "$crystalRefillMinutes dk",
+                        color = timerColor,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         fontFamily = AppFont,
                     )
                 }
             }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.Help,
-                contentDescription = null,
-                tint = TextMuted,
-                modifier = Modifier
-                    .size(22.dp)
-                    .clickable(onClick = onNavigateToTutorial),
-            )
-
-            Icon(
-                imageVector = Icons.Rounded.Settings,
-                contentDescription = null,
-                tint = TextMuted,
-                modifier = Modifier
-                    .size(22.dp)
-                    .clickable(onClick = onNavigateToSettings),
-            )
         }
     }
 }
 
 @Composable
-private fun WatermarkLogo(modifier: Modifier = Modifier) {
+private fun WatermarkLogo(
+    logoSize: Dp,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(logoSize * 1.55f)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -432,7 +472,7 @@ private fun WatermarkLogo(modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.ic_neon_cube_logo),
             contentDescription = null,
             modifier = Modifier
-                .size(180.dp)
+                .size(logoSize)
                 .alpha(0.08f)
         )
     }
@@ -449,13 +489,17 @@ private fun DailyChallengeCard(
         val calendar = Calendar.getInstance()
         SimpleDateFormat("d MMMM", locale).format(calendar.time)
     }
-    val pastDates = remember {
-        (1..5).map { daysAgo ->
+    // This week as a calendar row: the six days before today, then today.
+    val week = remember {
+        (6 downTo 0).map { daysAgo ->
             val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
-            val label = SimpleDateFormat("d MMM", locale).format(calendar.time)
-            val key = SimpleDateFormat("yyyy-MM-dd", locale).format(calendar.time)
-            label to key
+            WeekDay(
+                key = SimpleDateFormat("yyyy-MM-dd", locale).format(calendar.time),
+                weekday = if (daysAgo == 0) "Bugün" else SimpleDateFormat("EEE", locale).format(calendar.time),
+                number = SimpleDateFormat("d", locale).format(calendar.time),
+                isToday = daysAgo == 0,
+            )
         }
     }
 
@@ -557,51 +601,58 @@ private fun DailyChallengeCard(
             }
 
             Spacer(Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(0.5.dp)
-                    .background(BorderDark),
-            )
-            Spacer(Modifier.height(14.dp))
 
-            Text(
-                text = "GEÇMİŞ GÜNLER",
-                color = TextMuted,
-                fontSize = 11.sp,
-                letterSpacing = 1.sp,
-                fontFamily = AppFont,
-            )
-            Spacer(Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
-            ) {
-                pastDates.forEach { (label, key) ->
-                    Box(
+            Row(modifier = Modifier.fillMaxWidth()) {
+                week.forEach { day ->
+                    Column(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(SurfaceVariantDark)
-                            .rippleClickable { onPlayPast(key) }
-                            .padding(vertical = 9.dp),
-                        contentAlignment = Alignment.Center,
+                            .clip(RoundedCornerShape(12.dp))
+                            .rippleClickable { if (day.isToday) onPlayToday() else onPlayPast(day.key) }
+                            .padding(vertical = 4.dp)
+                            .semantics(mergeDescendants = true) {
+                                contentDescription =
+                                    if (day.isToday) "Bugünün bulmacası" else "${day.number} ${day.weekday} bulmacası"
+                            },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Text(
-                            text = label,
-                            color = TextSecondary,
+                            text = day.weekday,
+                            color = if (day.isToday) NeonCyan else TextMuted,
                             fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
                             fontFamily = AppFont,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
                         )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(if (day.isToday) NeonCyan else SurfaceVariantDark),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = day.number,
+                                color = if (day.isToday) Color(0xFF0A0A0F) else TextPrimary,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppFont,
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
+private data class WeekDay(
+    val key: String,
+    val weekday: String,
+    val number: String,
+    val isToday: Boolean,
+)
 
 @Composable
 private fun RandomPuzzleButton(onClick: () -> Unit) {
