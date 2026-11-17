@@ -77,7 +77,11 @@ struct DashboardScreen: View {
         return NavigationStack(path: path(for: tab)) {
             root(push)
                 .background(Color.backgroundDark.ignoresSafeArea())
-                .navigationDestination(for: AppRoute.self) { destination($0, in: tab, push: push) }
+                .navigationDestination(for: AppRoute.self) {
+                    // Pushed pages cover the whole screen, as on Android: the tab bar only shows on tab roots.
+                    destination($0, in: tab, push: push)
+                        .toolbar(.hidden, for: .tabBar)
+                }
         }
     }
 
@@ -93,12 +97,9 @@ struct DashboardScreen: View {
         case .settingsSub(.changePassword): ChangePasswordScreen()
         case .settingsSub(.notifications): NotificationSettingsScreen()
         case .game(let id):
-            // Full screen: the floating control bar takes the tab bar's place.
             GameScreen(gameId: id, onNavigateBack: back)
-                .toolbar(.hidden, for: .tabBar)
         case .tutorial:
             TutorialScreen(onNavigateToDashboard: back)
-                .toolbar(.hidden, for: .tabBar)
         case .premium:
             // Presented as a sheet by `push`; kept for an exhaustive switch.
             EmptyView()
@@ -112,7 +113,6 @@ struct DashboardScreen: View {
             ProfileScreen(userId: userId, onNavigateToGame: { push(.game(id: $0)) })
         case .crafting:
             CraftingScreen()
-                .toolbar(.hidden, for: .tabBar)
         }
     }
 }
