@@ -12,97 +12,93 @@ struct FeedScreen: View {
     private var viewModel: FeedViewModel { model.viewModel }
 
     var body: some View {
-        ScreenBackground {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Keşfet")
-                    .font(.app(28, .bold))
-                    .foregroundColor(.textPrimary)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 16)
-
+        ScrollView {
+            LazyVStack(spacing: 20) {
                 filterRow
+                    .padding(.horizontal, -18)
 
-                ScrollView {
-                    LazyVStack(spacing: 24) {
-                        if uiState.isLoading {
-                            ProgressView().tint(.neonCyan).padding(32)
-                        } else if let error = uiState.error {
-                            Text(error).font(.app(14)).foregroundColor(.dangerRed).padding(32)
-                        } else if uiState.posts.isEmpty {
-                            Text("Henüz bir bulmaca bulunamadı.").font(.app(14)).foregroundColor(.textMuted).padding(32)
-                        } else {
-                            ForEach(uiState.posts, id: \.id) { post in
-                                PostCard(post: post, showFollowButton: uiState.selectedTab != .following) { action in
-                                    handle(action, for: post)
-                                }
-                            }
+                if uiState.isLoading {
+                    ProgressView().tint(.neonCyan).padding(32)
+                } else if let error = uiState.error {
+                    ContentUnavailableView(error, systemImage: "wifi.exclamationmark")
+                        .foregroundStyle(Color.dangerRed)
+                } else if uiState.posts.isEmpty {
+                    ContentUnavailableView("Henüz bir bulmaca bulunamadı.", systemImage: "square.grid.3x3")
+                } else {
+                    ForEach(uiState.posts, id: \.id) { post in
+                        PostCard(post: post, showFollowButton: uiState.selectedTab != .following) { action in
+                            handle(action, for: post)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 88)
                 }
             }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
         }
-        .overlay(alignment: .bottomTrailing) {
-            Button(action: onNavigateToCrafting) {
-                HStack(spacing: 8) {
-                    Image(systemName: "paintbrush.fill")
-                    Text("Oluştur").font(.app(15, .bold))
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 20)
-                .frame(height: 56)
-                .background(Color.purpleAccent)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
-            }
-            .buttonStyle(.plain)
-            .padding(20)
-        }
-        .confirmationDialog(
-            uiState.selectedTab.label,
-            isPresented: .init(get: { uiState.showTimeRangeDropdown }, set: { if !$0 { viewModel.dismissTimeRangeDropdown() } }),
-            titleVisibility: .visible
-        ) {
-            ForEach(TimeRange.allCases, id: \.self) { range in
-                Button(range == uiState.selectedTimeRange ? "✓ \(range.label)" : range.label) {
-                    viewModel.selectTimeRange(range: range)
-                }
+        .background { ScreenBackground { EmptyView() } }
+        .navigationTitle("Keşfet")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Oluştur", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
             }
         }
         .postSheets(sheets)
     }
 
+    /// Feed tabs as glass chips. The selected Newest / Most liked chip opens a menu with the time range.
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(FeedTab.allCases, id: \.self) { tab in
                     let isSelected = tab == uiState.selectedTab
                     let supportsTimeRange = tab == .latest || tab == .mostLiked
-                    Button { viewModel.selectTab(tab: tab) } label: {
-                        HStack(spacing: 2) {
-                            Text(tab.label).font(.app(13, isSelected ? .bold : .medium))
-                            if supportsTimeRange {
-                                Image(systemName: "arrowtriangle.down.fill").font(.system(size: 7))
-                                    .padding(.leading, 4)
+                    if isSelected && supportsTimeRange {
+                        Menu {
+                            Picker("Zaman aralığı", selection: timeRange) {
+                                ForEach(TimeRange.allCases, id: \.self) { Text($0.label).tag($0) }
                             }
+                        } label: {
+                            // Menus ignore custom button styles, so the selected look is drawn here:
+                            // same capsule and size as the prominent glass chip.
+                            chipLabel(tab.label, showsMenuIndicator: true, isSelected: true)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 6)
+                                .background(Color.neonCyan, in: Capsule())
+                                .contentShape(Capsule())
                         }
-                        .foregroundColor(isSelected ? .backgroundDark : .textMuted)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(isSelected ? Color.neonCyan : Color.surfaceDark)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(isSelected ? Color.neonCyan : Color.borderDark, lineWidth: 1))
+                        .accessibilityAddTraits(.isSelected)
+                    } else {
+                        Button { viewModel.selectTab(tab: tab) } label: {
+                            chipLabel(tab.label, showsMenuIndicator: supportsTimeRange, isSelected: isSelected)
+                        }
+                        .buttonStyle(isSelected ? AppGlassButtonStyle.appGlassProminent : .appGlass)
+                        .tint(.neonCyan)
+                        .accessibilityAddTraits(isSelected ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(isSelected ? .isSelected : [])
                 }
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 4)
         }
+        .scrollClipDisabled()
+    }
+
+    private func chipLabel(_ title: String, showsMenuIndicator: Bool, isSelected: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+            if showsMenuIndicator {
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.bold))
+            }
+        }
+        .font(.subheadline.weight(isSelected ? .bold : .medium))
+        .foregroundStyle(isSelected ? Color.onNeon : Color.textPrimary)
+    }
+
+    private var timeRange: Binding<TimeRange> {
+        Binding(get: { uiState.selectedTimeRange }, set: { viewModel.selectTimeRange(range: $0) })
     }
 
     private func handle(_ action: PostCardAction, for post: PostItem) {

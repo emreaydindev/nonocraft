@@ -40,7 +40,7 @@ struct PostCard: View {
                             .font(.app(14, .bold))
                             .foregroundColor(.textPrimary)
                         Text(post.timeAgo)
-                            .font(.app(11))
+                            .font(.caption)
                             .foregroundColor(.textMuted)
                     }
                 }
@@ -50,21 +50,16 @@ struct PostCard: View {
             Spacer()
 
             if showFollowButton {
-                Button { onAction(.follow) } label: {
-                    Text(post.isFollowed ? "Takipte" : "Takip Et")
-                        .font(.app(11, .bold))
-                        .foregroundColor(post.isFollowed ? .textPrimary : .backgroundDark)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(post.isFollowed ? Color.surfaceVariantDark : Color.neonCyan)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .buttonStyle(.plain)
+                Button(post.isFollowed ? "Takipte" : "Takip Et") { onAction(.follow) }
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(post.isFollowed ? Color.textPrimary : Color.onNeon)
+                    .buttonStyle(post.isFollowed ? AppGlassButtonStyle.appGlass : .appGlassProminent)
+                    .tint(.neonCyan)
+                    .controlSize(.small)
             }
 
             Button { onAction(.more) } label: {
                 Image(systemName: "ellipsis")
-                    .rotationEffect(.degrees(90))
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.textMuted)
                     .frame(width: 32, height: 32)
@@ -134,22 +129,17 @@ struct PostCard: View {
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
                 Text("\(post.size) · \(post.difficulty)")
-                    .font(.app(12))
+                    .font(.footnote)
                     .foregroundColor(.textMuted)
             }
             Spacer()
             Button { onAction(.play) } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "play.fill").font(.system(size: 12))
-                    Text("Oyna").font(.app(13, .bold))
-                }
-                .foregroundColor(.backgroundDark)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.neonCyan)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                Label("Oyna", systemImage: "play.fill")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.onNeon)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.appGlassProminent)
+            .tint(.neonCyan)
         }
         .padding(12)
         .background(Color.surfaceVariantDark)

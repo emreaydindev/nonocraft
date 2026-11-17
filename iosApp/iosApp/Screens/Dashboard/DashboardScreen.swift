@@ -25,8 +25,6 @@ struct DashboardScreen: View {
                         onNavigateToProfile: { push(.profile(userId: $0)) },
                         onNavigateToCrafting: { push(.crafting) }
                     )
-                    // Still draws its own header; moves to the toolbar in its own redesign step.
-                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
             Tab(DashboardTab.library.label, systemImage: DashboardTab.library.systemImage, value: .library) {
