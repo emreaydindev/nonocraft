@@ -51,7 +51,25 @@ struct GameScreen: View {
                 )
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle(state.puzzle?.title ?? "")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if let puzzle = state.puzzle, !isFinished {
+                ToolbarItem(placement: .principal) {
+                    GameTitle(
+                        title: puzzle.title,
+                        timeLimitSeconds: puzzle.timeLimitSeconds?.int64Value,
+                        timeElapsed: state.timeElapsed
+                    )
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HeartsIndicator(currentLives: Int(state.currentLives), maxLives: Int(puzzle.maxLives))
+                }
+            }
+        }
+        // The end-of-game overlay owns the screen; its button leaves the game.
+        .toolbar(isFinished ? .hidden : .automatic, for: .navigationBar)
+        .navigationBarBackButtonHidden(isFinished)
         .task {
             let heavy = UIImpactFeedbackGenerator(style: .heavy)
             let tick = UISelectionFeedbackGenerator()
@@ -66,16 +84,10 @@ struct GameScreen: View {
         }
     }
 
+    private var isFinished: Bool { state.isVictory || state.isGameOver }
+
     private func content(_ puzzle: Puzzle) -> some View {
         VStack(spacing: 0) {
-            GameTopBar(
-                title: puzzle.title,
-                timeLimitSeconds: puzzle.timeLimitSeconds?.int64Value,
-                timeElapsed: state.timeElapsed,
-                onBack: onNavigateBack
-            )
-            LivesBar(currentLives: Int(state.currentLives), maxLives: Int(puzzle.maxLives))
-
             GameGridArea(
                 size: Int(puzzle.size),
                 palette: palette,
@@ -118,60 +130,49 @@ extension Array {
     }
 }
 
-private struct GameTopBar: View {
+/// Toolbar title: puzzle name in the display font with the clock underneath.
+/// Counts down in red when the puzzle has a time limit, otherwise shows the time spent.
+private struct GameTitle: View {
     let title: String
     let timeLimitSeconds: Int64?
     let timeElapsed: Int64
-    let onBack: () -> Void
+
+    private var seconds: Int64 {
+        timeLimitSeconds.map { max(0, $0 - timeElapsed) } ?? timeElapsed
+    }
 
     var body: some View {
-        HStack {
-            Button(action: onBack) {
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.textPrimary)
-                    .frame(width: 48, height: 48)
-            }
-            .accessibilityLabel("Geri")
-            Spacer()
+        VStack(spacing: 0) {
             Text(title)
-                .font(.app(20, .bold))
-                .kerning(1)
-                .foregroundColor(.textPrimary)
+                .font(.app(17, .bold))
+                .kerning(0.5)
+                .foregroundStyle(Color.textPrimary)
                 .lineLimit(1)
-            Spacer()
-            Group {
-                if let timeLimitSeconds {
-                    let remaining = max(0, timeLimitSeconds - timeElapsed)
-                    Text(String(format: "%02d:%02d", remaining / 60, remaining % 60))
-                        .font(.app(16, .bold))
-                        .foregroundColor(.dangerRed)
-                } else {
-                    Color.clear
-                }
-            }
-            .frame(width: 48, height: 48, alignment: .trailing)
+            Label(String(format: "%02d:%02d", seconds / 60, seconds % 60), systemImage: timeLimitSeconds == nil ? "clock" : "timer")
+                .labelStyle(.titleAndIcon)
+                .font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(timeLimitSeconds == nil ? Color.textSecondary : Color.dangerRed)
+                .contentTransition(.numericText(countsDown: timeLimitSeconds != nil))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 8)
+        .accessibilityElement(children: .combine)
     }
 }
 
-private struct LivesBar: View {
+private struct HeartsIndicator: View {
     let currentLives: Int
     let maxLives: Int
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 2) {
             ForEach(0..<max(maxLives, 0), id: \.self) { index in
                 let hasLife = index < currentLives
                 Image(systemName: hasLife ? "heart.fill" : "heart")
-                    .font(.system(size: 20))
-                    .foregroundColor(hasLife ? .dangerRed : .dangerRed.opacity(0.3))
+                    .font(.system(size: maxLives > 3 ? 13 : 15, weight: .semibold))
+                    .foregroundStyle(hasLife ? Color.dangerRed : Color.dangerRed.opacity(0.35))
+                    .symbolEffect(.bounce, value: hasLife)
             }
         }
-        .padding(.bottom, 12)
+        .padding(.horizontal, 4)
         .accessibilityElement()
         .accessibilityLabel("\(currentLives) can kaldı")
     }
