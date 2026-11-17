@@ -86,35 +86,48 @@ struct GameScreen: View {
 
     private var isFinished: Bool { state.isVictory || state.isGameOver }
 
+    /// Board above the controls on phones and in portrait; board and controls side by side when the window
+    /// is clearly wider than tall (iPad landscape, wide multitasking windows). Decided from the space the
+    /// screen actually gets, not the device, and `AnyLayout` keeps the board's identity when it switches,
+    /// so a resize mid-game only rescales it.
     private func content(_ puzzle: Puzzle) -> some View {
-        VStack(spacing: 0) {
-            GameGridArea(
-                size: Int(puzzle.size),
-                palette: palette,
-                userGrid: state.userGrid.map { $0.map(\.intValue) },
-                rowClues: state.rowClues.map { $0.map(GridClue.init) },
-                colClues: state.colClues.map { $0.map(GridClue.init) },
-                cursor: state.isCursorVisible ? (Int(state.cursorRow), Int(state.cursorCol)) : nil,
-                onCellTouched: { row, col in viewModel.onCellClicked(row: Int32(row), col: Int32(col)) }
-            )
-            .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        GeometryReader { proxy in
+            let isSideBySide = proxy.size.width >= 700 && proxy.size.width > proxy.size.height * 1.15
+            let layout = isSideBySide ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
+            layout {
+                GameGridArea(
+                    size: Int(puzzle.size),
+                    palette: palette,
+                    userGrid: state.userGrid.map { $0.map(\.intValue) },
+                    rowClues: state.rowClues.map { $0.map(GridClue.init) },
+                    colClues: state.colClues.map { $0.map(GridClue.init) },
+                    cursor: state.isCursorVisible ? (Int(state.cursorRow), Int(state.cursorCol)) : nil,
+                    onCellTouched: { row, col in viewModel.onCellClicked(row: Int32(row), col: Int32(col)) }
+                )
+                // Less margin on small screens (iPhone Duo outer screen) so the clues get the room.
+                .padding(min(proxy.size.width, proxy.size.height) < 420 ? 8 : 16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                controlBar
+                    .frame(width: isSideBySide ? min(420, proxy.size.width * 0.38) : nil)
+                    .frame(maxHeight: isSideBySide ? .infinity : nil)
+            }
         }
-        // The board is laid out above the bar, so the glass never covers a cell.
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            GameControlBar(
-                palette: palette,
-                selectedColorIndex: Int(state.selectedColorIndex),
-                isCrossMode: state.isCrossMode,
-                hintsRemaining: Int(state.hintsRemaining),
-                onMove: { dRow, dCol in viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol)) },
-                onStickFocusChange: { viewModel.setAnalogFocus(isFocused: $0) },
-                onPlacePressed: { viewModel.setPlacePressed(isPressed: $0) },
-                onHint: { viewModel.useHint() },
-                onColorSelected: { viewModel.selectColor(colorIndex: Int32($0)) },
-                onCrossSelected: { viewModel.toggleCrossMode(isCross: true) }
-            )
-        }
+    }
+
+    private var controlBar: some View {
+        GameControlBar(
+            palette: palette,
+            selectedColorIndex: Int(state.selectedColorIndex),
+            isCrossMode: state.isCrossMode,
+            hintsRemaining: Int(state.hintsRemaining),
+            onMove: { dRow, dCol in viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol)) },
+            onStickFocusChange: { viewModel.setAnalogFocus(isFocused: $0) },
+            onPlacePressed: { viewModel.setPlacePressed(isPressed: $0) },
+            onHint: { viewModel.useHint() },
+            onColorSelected: { viewModel.selectColor(colorIndex: Int32($0)) },
+            onCrossSelected: { viewModel.toggleCrossMode(isCross: true) }
+        )
     }
 }
 
