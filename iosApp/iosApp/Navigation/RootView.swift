@@ -59,34 +59,44 @@ struct RootView: View {
                 onGoogleSignIn: { showGoogleUnavailable = true }
             )
             .navigationDestination(for: AuthRoute.self) { route in
-                switch route {
-                case .login:
-                    LoginScreen(
-                        onNavigateToRegister: { authPath = [.register] },
-                        onNavigateToForgotPassword: { authPath.append(.forgotPassword) },
-                        onGoogleSignIn: { showGoogleUnavailable = true },
-                        onLoginSuccess: enterDashboard
-                    )
-                case .forgotPassword:
-                    ForgotPasswordScreen(
-                        onNavigateBack: { _ = authPath.popLast() },
-                        onCodeSentSuccess: { authPath.append(.resetPassword) }
-                    )
-                case .resetPassword:
-                    ResetPasswordScreen(
-                        onResetSuccess: {
-                            authPath = [.login]
-                            showPasswordUpdated = true
-                        }
-                    )
-                case .register:
-                    RegisterScreen(
-                        onNavigateToLogin: { authPath = [.login] },
-                        onGoogleSignIn: { showGoogleUnavailable = true },
-                        onRegisterSuccess: enterDashboard
-                    )
-                }
+                authDestination(route)
+                    // The gateway has no title, so iOS 18 would label the back button "Back". Chevron only,
+                    // like the iOS 26 glass back button.
+                    .toolbarRole(.editor)
             }
+        }
+        // Same accent as the dashboard (back buttons, links); otherwise iOS 18 falls back to system blue.
+        .tint(.purpleAccent)
+    }
+
+    @ViewBuilder
+    private func authDestination(_ route: AuthRoute) -> some View {
+        switch route {
+        case .login:
+            LoginScreen(
+                onNavigateToRegister: { authPath = [.register] },
+                onNavigateToForgotPassword: { authPath.append(.forgotPassword) },
+                onGoogleSignIn: { showGoogleUnavailable = true },
+                onLoginSuccess: enterDashboard
+            )
+        case .forgotPassword:
+            ForgotPasswordScreen(
+                onNavigateBack: { _ = authPath.popLast() },
+                onCodeSentSuccess: { authPath.append(.resetPassword) }
+            )
+        case .resetPassword:
+            ResetPasswordScreen(
+                onResetSuccess: {
+                    authPath = [.login]
+                    showPasswordUpdated = true
+                }
+            )
+        case .register:
+            RegisterScreen(
+                onNavigateToLogin: { authPath = [.login] },
+                onGoogleSignIn: { showGoogleUnavailable = true },
+                onRegisterSuccess: enterDashboard
+            )
         }
     }
 
