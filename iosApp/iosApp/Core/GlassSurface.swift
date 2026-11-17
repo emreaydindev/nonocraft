@@ -216,22 +216,22 @@ private struct AppGlassButton: View {
     }
 }
 
-/// iOS 18–25 and accessibility look: capsule with the same padding as the system glass button.
+/// iOS 18–25 and accessibility look: capsule with the same padding as the system glass button, so a control
+/// is the same size on every version (a subheadline chip is 32 pt tall, like `.glass` on iOS 26).
 private struct FallbackGlassButtonStyle: ButtonStyle {
     let prominent: Bool
     let solid: Bool
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.controlSize) private var controlSize
 
     func makeBody(configuration: Configuration) -> some View {
         let shape = Capsule()
         configuration.label
             .font(.body.weight(prominent ? .semibold : .medium))
             .foregroundStyle(prominent ? AnyShapeStyle(Color.onNeon) : AnyShapeStyle(Color.textPrimary))
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .frame(minHeight: 44)
+            .padding(padding)
             .background {
                 if prominent {
                     shape.fill(.tint)
@@ -255,6 +255,17 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .brightness(configuration.isPressed ? 0.08 : 0)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+
+    /// Matches the system glass button per control size.
+    private var padding: EdgeInsets {
+        switch controlSize {
+        case .mini: EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10)
+        case .small: EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12)
+        case .large: EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
+        case .extraLarge: EdgeInsets(top: 14, leading: 24, bottom: 14, trailing: 24)
+        default: EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16)
+        }
     }
 }
 
