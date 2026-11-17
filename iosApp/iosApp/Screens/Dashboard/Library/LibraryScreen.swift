@@ -12,6 +12,7 @@ struct LibraryScreen: View {
 
     @StateObject private var model = ObservedViewModel({ $0.libraryViewModel() }, state: \.uiState)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showCreatePlaylist = false
     @State private var newPlaylistName = ""
     /// Section or playlist shown in the content pane of the two-pane layout.
@@ -111,70 +112,50 @@ struct LibraryScreen: View {
         }
     }
 
-    /// Phones and narrow windows: section cards and playlists in grids; each opens its own page.
+    /// Phones and narrow windows: section cards and playlists in grids; each opens its own page. At
+    /// accessibility text sizes the square cards can't hold their text, so the list rows are used instead.
     private var singleColumn: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(sections) { section in
-                        LibraryGridCard(
-                            title: section.title, subtitle: section.subtitle, icon: section.icon,
-                            tint: section.tint, isPremium: section.isPremium, action: section.action
-                        )
-                    }
+            if dynamicTypeSize.isAccessibilitySize {
+                rowList
+            } else {
+                cardGrids
+            }
+        }
+    }
+
+    private var cardGrids: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(sections) { section in
+                    LibraryGridCard(
+                        title: section.title, subtitle: section.subtitle, icon: section.icon,
+                        tint: section.tint, isPremium: section.isPremium, action: section.action
+                    )
                 }
+            }
 
-                playlistsHeader
-                    .padding(.top, 24)
+            playlistsHeader
+                .padding(.top, 24)
 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(uiState.playlists, id: \.id) { playlist in
-                        PlaylistGridCard(playlist: playlist) {
-                            send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
-                        }
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(uiState.playlists, id: \.id) { playlist in
+                    PlaylistGridCard(playlist: playlist) {
+                        send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
                     }
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 8)
-            .padding(.bottom, 24)
         }
+        .padding(.horizontal, 18)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
     }
 
     /// iPad, the iPhone Duo inner screen and wide windows: sections and playlists on the left, the picked
     /// one's posts on the right.
     private var twoPane: some View {
         HStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(sections) { section in
-                        LibrarySectionRow(
-                            title: section.title, subtitle: section.subtitle, isSelected: selectedId == section.id,
-                            isPremium: section.isPremium, action: section.action
-                        ) {
-                            LibrarySectionIcon(systemName: section.icon, tint: section.tint, shape: Circle())
-                        }
-                    }
-
-                    playlistsHeader
-                        .padding(.top, 16)
-
-                    ForEach(uiState.playlists, id: \.id) { playlist in
-                        let tint = Color(argb: playlist.coverColor)
-                        LibrarySectionRow(
-                            title: playlist.name, subtitle: "\(playlist.postCount) Bulmaca",
-                            isSelected: selectedId == playlist.id
-                        ) {
-                            send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
-                        } icon: {
-                            LibrarySectionIcon(systemName: "music.note.list", tint: tint, shape: RoundedRectangle(cornerRadius: 12))
-                        }
-                    }
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
-            }
+            ScrollView { rowList }
             .frame(width: 340)
 
             Rectangle()
@@ -192,6 +173,38 @@ struct LibraryScreen: View {
             .id(selectedId)
             .frame(maxWidth: .infinity)
         }
+    }
+
+    /// Sections and playlists as rows: the list pane on big screens, the whole page at accessibility sizes.
+    private var rowList: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(sections) { section in
+                LibrarySectionRow(
+                    title: section.title, subtitle: section.subtitle, isSelected: isTwoPane && selectedId == section.id,
+                    isPremium: section.isPremium, action: section.action
+                ) {
+                    LibrarySectionIcon(systemName: section.icon, tint: section.tint, shape: Circle())
+                }
+            }
+
+            playlistsHeader
+                .padding(.top, 16)
+
+            ForEach(uiState.playlists, id: \.id) { playlist in
+                let tint = Color(argb: playlist.coverColor)
+                LibrarySectionRow(
+                    title: playlist.name, subtitle: "\(playlist.postCount) Bulmaca",
+                    isSelected: isTwoPane && selectedId == playlist.id
+                ) {
+                    send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
+                } icon: {
+                    LibrarySectionIcon(systemName: "music.note.list", tint: tint, shape: RoundedRectangle(cornerRadius: 12))
+                }
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
     }
 
     private var playlistsHeader: some View {
@@ -303,11 +316,15 @@ private struct LibrarySectionIcon<S: Shape>: View {
     let tint: Color
     let shape: S
 
+    @ScaledMetric(relativeTo: .body) private var size: CGFloat = 44
+
     var body: some View {
+        // Grows with the text, but not so much that it squeezes the title at accessibility sizes.
+        let side = min(size, 56)
         Image(systemName: systemName)
-            .font(.system(size: 18, weight: .semibold))
+            .font(.system(size: side * 0.42, weight: .semibold))
             .foregroundColor(tint)
-            .frame(width: 44, height: 44)
+            .frame(width: side, height: side)
             .background(tint.opacity(0.15))
             .clipShape(shape)
     }
@@ -322,6 +339,8 @@ private struct LibrarySectionRow<Icon: View>: View {
     let action: () -> Void
     @ViewBuilder var icon: Icon
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
@@ -334,9 +353,13 @@ private struct LibrarySectionRow<Icon: View>: View {
                     Text(subtitle)
                         .font(.footnote)
                         .foregroundColor(.textMuted)
+                    if isPremium && dynamicTypeSize.isAccessibilitySize {
+                        ProBadge()
+                            .padding(.top, 4)
+                    }
                 }
                 Spacer(minLength: 0)
-                if isPremium {
+                if isPremium && !dynamicTypeSize.isAccessibilitySize {
                     ProBadge()
                 }
             }
