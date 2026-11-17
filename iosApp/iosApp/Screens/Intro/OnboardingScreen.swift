@@ -167,7 +167,7 @@ private struct VisualSolve: View {
                     Color.clear.frame(width: cell * 0.875, height: cell * 0.5)
                     ForEach(columnClues.indices, id: \.self) { index in
                         Text(columnClues[index])
-                            .font(.app(9, .medium))
+                            .font(.appFixed(9, .medium))
                             .foregroundColor(accent)
                             .frame(width: cell)
                     }
@@ -175,7 +175,7 @@ private struct VisualSolve: View {
                 ForEach(pattern.indices, id: \.self) { row in
                     HStack(spacing: cell * 0.125) {
                         Text("\(pattern[row].filter { $0 == 1 }.count)")
-                            .font(.app(9, .medium))
+                            .font(.appFixed(9, .medium))
                             .foregroundColor(accent)
                             .frame(width: cell * 0.875, alignment: .trailing)
                         ForEach(pattern[row].indices, id: \.self) { col in

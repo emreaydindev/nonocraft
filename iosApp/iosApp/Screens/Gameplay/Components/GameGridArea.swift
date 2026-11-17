@@ -122,7 +122,7 @@ struct GameGridArea: View {
         context.fill(Path(CGRect(x: origin.x - rowStripWidth, y: origin.y, width: rowStripWidth, height: board)), with: .color(clueBackground))
         context.fill(Path(CGRect(x: origin.x, y: origin.y - colStripHeight, width: board, height: colStripHeight)), with: .color(clueBackground))
 
-        let clueFont = Font.app(max(cell * 0.5, 8), .bold)
+        let clueFont = Font.appFixed(max(cell * 0.5, 8), .bold)
         func drawClue(_ clue: GridClue, in rect: CGRect) {
             guard clue.count > 0 else { return }
             let text = Text("\(clue.count)").font(clueFont).foregroundColor(palette[safe: clue.colorIndex - 1] ?? .neonCyan)

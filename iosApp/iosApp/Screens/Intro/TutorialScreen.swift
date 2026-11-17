@@ -300,7 +300,7 @@ private struct CompletedCheckmark: View {
             VStack(alignment: .trailing, spacing: 1) {
                 ForEach(rowClues.indices, id: \.self) { index in
                     Text(rowClues[index])
-                        .font(.app(9, .bold))
+                        .font(.appFixed(9, .bold))
                         .foregroundColor(color)
                         .frame(height: 18)
                 }
@@ -309,7 +309,7 @@ private struct CompletedCheckmark: View {
                 HStack(spacing: 1) {
                     ForEach(colClues.indices, id: \.self) { index in
                         Text(colClues[index])
-                            .font(.app(9, .bold))
+                            .font(.appFixed(9, .bold))
                             .foregroundColor(color)
                             .frame(width: 18)
                     }
