@@ -2,8 +2,6 @@ import Shared
 import SwiftUI
 
 struct SettingsScreen: View {
-    let onNavigateBack: () -> Void
-    let onNavigate: (SettingsRoute) -> Void
     let onLogoutSuccess: () -> Void
 
     @StateObject private var model = HeldViewModel { $0.settingsViewModel() }
@@ -19,44 +17,69 @@ struct SettingsScreen: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        SettingsScaffold(title: "Ayarlar", onBack: onNavigateBack) {
-            VStack(spacing: 24) {
-                SettingsGroup(title: "Görünüm & Özelleştirme") {
-                    SettingsRow(icon: "paintpalette.fill", label: "Uygulama Teması", value: "Karanlık") { onNavigate(.theme) }
-                    SettingsRow(icon: "app.badge.fill", label: "Uygulama İkonu", value: "Klasik", trailing: .premium) { onNavigate(.appIcon) }
-                    SettingsSwitchRow(icon: "sparkles", label: "Neon Efektleri", isOn: $isNeonEffectsEnabled)
-                }
-                SettingsGroup(title: "Oyun Deneyimi") {
-                    SettingsSwitchRow(icon: "iphone.radiowaves.left.and.right", label: "Titreşim", isOn: $isVibrationEnabled)
-                    SettingsSwitchRow(icon: "speaker.wave.2.fill", label: "Ses Efektleri", isOn: $isSoundEnabled)
-                    SettingsSwitchRow(icon: "exclamationmark.triangle.fill", label: "Hatalı Hamle Uyarısı", isOn: $isErrorWarningEnabled)
-                }
-                SettingsGroup(title: "Hesap & Güvenlik") {
-                    SettingsRow(icon: "person.crop.circle.badge.checkmark", label: "Hesap Bilgilerini Düzenle") { onNavigate(.editProfile) }
-                    SettingsRow(icon: "lock.fill", label: "Şifre Değiştir") { onNavigate(.changePassword) }
-                    SettingsRow(icon: "bell.fill", label: "Bildirim Tercihleri") { onNavigate(.notifications) }
-                }
-                SettingsGroup(title: "Destek & Yasal") {
-                    SettingsRow(icon: "envelope.fill", label: "Bize Ulaşın", trailing: .externalLink) {
-                        open("mailto:\(Constants.shared.SUPPORT_EMAIL)")
-                    }
-                    SettingsRow(icon: "checkmark.shield.fill", label: "Gizlilik Politikası", trailing: .externalLink) {
-                        open(Constants.shared.PRIVACY_POLICY_URL)
-                    }
-                    SettingsRow(icon: "doc.text.fill", label: "Kullanım Koşulları", trailing: .externalLink) {
-                        open(Constants.shared.TERMS_OF_SERVICE_URL)
+        SettingsForm(title: "Ayarlar", titleDisplayMode: .large) {
+            SettingsSection("Görünüm & Özelleştirme") {
+                NavigationLink(value: AppRoute.settingsSub(.theme)) {
+                    LabeledContent {
+                        Text("Karanlık")
+                    } label: {
+                        SettingsLabel(title: "Uygulama Teması", systemImage: "paintpalette.fill", tint: .purpleAccent)
                     }
                 }
-                SettingsGroup(title: "Oturum") {
-                    SettingsRow(icon: "rectangle.portrait.and.arrow.right", label: "Çıkış Yap", trailing: .none, isDestructive: true) {
-                        model.viewModel.logout()
+                NavigationLink(value: AppRoute.settingsSub(.appIcon)) {
+                    LabeledContent {
+                        HStack(spacing: 8) {
+                            Text("Klasik")
+                            ProBadge()
+                        }
+                    } label: {
+                        SettingsLabel(title: "Uygulama İkonu", systemImage: "app.badge.fill", tint: .gameGold)
                     }
-                    SettingsRow(icon: "trash.fill", label: "Hesabı Kalıcı Olarak Sil", trailing: .none, isDestructive: true) {
-                        showDeleteDialog = true
-                    }
+                }
+                Toggle(isOn: $isNeonEffectsEnabled) {
+                    SettingsLabel(title: "Neon Efektleri", systemImage: "sparkles")
                 }
             }
-            .padding(.bottom, 24)
+            SettingsSection("Oyun Deneyimi") {
+                Toggle(isOn: $isVibrationEnabled) {
+                    SettingsLabel(title: "Titreşim", systemImage: "iphone.radiowaves.left.and.right")
+                }
+                Toggle(isOn: $isSoundEnabled) {
+                    SettingsLabel(title: "Ses Efektleri", systemImage: "speaker.wave.2.fill")
+                }
+                Toggle(isOn: $isErrorWarningEnabled) {
+                    SettingsLabel(title: "Hatalı Hamle Uyarısı", systemImage: "exclamationmark.triangle.fill", tint: .dangerRed)
+                }
+            }
+            SettingsSection("Hesap & Güvenlik") {
+                NavigationLink(value: AppRoute.settingsSub(.editProfile)) {
+                    SettingsLabel(title: "Hesap Bilgilerini Düzenle", systemImage: "person.crop.circle.fill")
+                }
+                NavigationLink(value: AppRoute.settingsSub(.changePassword)) {
+                    SettingsLabel(title: "Şifre Değiştir", systemImage: "lock.fill")
+                }
+                NavigationLink(value: AppRoute.settingsSub(.notifications)) {
+                    SettingsLabel(title: "Bildirim Tercihleri", systemImage: "bell.badge.fill", tint: .dangerRed)
+                }
+            }
+            SettingsSection("Destek & Yasal") {
+                externalLink("Bize Ulaşın", systemImage: "envelope.fill", url: "mailto:\(Constants.shared.SUPPORT_EMAIL)")
+                externalLink("Gizlilik Politikası", systemImage: "checkmark.shield.fill", url: Constants.shared.PRIVACY_POLICY_URL)
+                externalLink("Kullanım Koşulları", systemImage: "doc.text.fill", url: Constants.shared.TERMS_OF_SERVICE_URL)
+            }
+            SettingsSection {
+                Button(role: .destructive) {
+                    model.viewModel.logout()
+                } label: {
+                    Label("Çıkış Yap", systemImage: "rectangle.portrait.and.arrow.right")
+                }
+                Button(role: .destructive) {
+                    showDeleteDialog = true
+                } label: {
+                    Label("Hesabı Kalıcı Olarak Sil", systemImage: "trash")
+                }
+            }
+            .foregroundStyle(Color.dangerRed)
         }
         .task {
             for await event in model.viewModel.uiEvent {
@@ -79,7 +102,18 @@ struct SettingsScreen: View {
         }
     }
 
-    private func open(_ string: String) {
-        if let url = URL(string: string) { openURL(url) }
+    private func externalLink(_ title: String, systemImage: String, url: String) -> some View {
+        Button {
+            if let url = URL(string: url) { openURL(url) }
+        } label: {
+            HStack {
+                SettingsLabel(title: title, systemImage: systemImage, tint: .textSecondary)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .foregroundStyle(Color.textPrimary)
     }
 }

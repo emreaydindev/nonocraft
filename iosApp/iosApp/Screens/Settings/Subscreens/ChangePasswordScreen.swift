@@ -2,8 +2,7 @@ import Shared
 import SwiftUI
 
 struct ChangePasswordScreen: View {
-    let onNavigateBack: () -> Void
-
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var model = HeldViewModel { $0.changePasswordViewModel() }
     @State private var currentPassword = ""
     @State private var newPassword = ""
@@ -15,23 +14,31 @@ struct ChangePasswordScreen: View {
     private var canSubmit: Bool { !currentPassword.isEmpty && !newPassword.isEmpty && passwordsMatch }
 
     var body: some View {
-        SettingsScaffold(title: "Şifre Değiştir", onBack: onNavigateBack) {
-            VStack(spacing: 20) {
-                OutlinedField(label: "Mevcut Şifre", text: $currentPassword, isSecure: true)
-                OutlinedField(label: "Yeni Şifre", text: $newPassword, isSecure: true)
-                OutlinedField(label: "Yeni Şifre (Tekrar)", text: $confirmPassword, isSecure: true)
-
+        SettingsForm(title: "Şifre Değiştir") {
+            SettingsSection {
+                SecureField("Mevcut Şifre", text: $currentPassword)
+                    .textContentType(.password)
+            }
+            SettingsSection(title: nil) {
+                SecureField("Yeni Şifre", text: $newPassword)
+                    .textContentType(.newPassword)
+                SecureField("Yeni Şifre (Tekrar)", text: $confirmPassword)
+                    .textContentType(.newPassword)
+            } footer: {
                 if !confirmPassword.isEmpty && !passwordsMatch {
-                    InfoBanner(message: "Şifreler eşleşmiyor", isError: true)
+                    Label("Şifreler eşleşmiyor", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Color.dangerRed)
                 } else if let errorMessage {
-                    InfoBanner(message: "Şifre güncellenemedi", subMessage: errorMessage, isError: true)
+                    Label("Şifre güncellenemedi: \(errorMessage)", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Color.dangerRed)
                 }
-
-                SettingsActionButton(title: "Şifreyi Güncelle", isLoading: isLoading, isEnabled: canSubmit) {
-                    errorMessage = nil
-                    model.viewModel.changePassword(oldPassword: currentPassword, newPassword: newPassword)
-                }
-                .padding(.top, 24)
+            }
+        }
+        .disabled(isLoading)
+        .toolbar {
+            ToolbarSaveButton(title: "Güncelle", isLoading: isLoading, isEnabled: canSubmit) {
+                errorMessage = nil
+                model.viewModel.changePassword(oldPassword: currentPassword, newPassword: newPassword)
             }
         }
         .task {
@@ -40,7 +47,7 @@ struct ChangePasswordScreen: View {
                 case .loading: isLoading = true
                 case .success:
                     isLoading = false
-                    onNavigateBack()
+                    dismiss()
                 case .error(let error):
                     isLoading = false
                     errorMessage = error.message

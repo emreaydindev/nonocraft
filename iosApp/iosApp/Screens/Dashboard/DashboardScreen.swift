@@ -76,16 +76,12 @@ struct DashboardScreen: View {
         let back = { _ = paths[tab]?.popLast() }
         switch route {
         case .settings:
-            SettingsScreen(
-                onNavigateBack: back,
-                onNavigate: { push(.settingsSub($0)) },
-                onLogoutSuccess: onNavigateToAuthGateway
-            )
-        case .settingsSub(.theme): ThemeScreen(onNavigateBack: back)
-        case .settingsSub(.appIcon): AppIconScreen(onNavigateBack: back)
-        case .settingsSub(.editProfile): EditProfileScreen(onNavigateBack: back)
-        case .settingsSub(.changePassword): ChangePasswordScreen(onNavigateBack: back)
-        case .settingsSub(.notifications): NotificationSettingsScreen(onNavigateBack: back)
+            SettingsScreen(onLogoutSuccess: onNavigateToAuthGateway)
+        case .settingsSub(.theme): ThemeScreen()
+        case .settingsSub(.appIcon): AppIconScreen()
+        case .settingsSub(.editProfile): EditProfileScreen()
+        case .settingsSub(.changePassword): ChangePasswordScreen()
+        case .settingsSub(.notifications): NotificationSettingsScreen()
         case .game(let id):
             // Full screen: the floating control bar takes the tab bar's place.
             GameScreen(gameId: id, onNavigateBack: back)

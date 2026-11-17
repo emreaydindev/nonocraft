@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct NotificationSettingsScreen: View {
-    let onNavigateBack: () -> Void
-
     // Not persisted yet, same as on Android.
     @State private var dailyPuzzle = true
     @State private var newFollowers = true
@@ -10,13 +8,19 @@ struct NotificationSettingsScreen: View {
     @State private var announcements = false
 
     var body: some View {
-        SettingsScaffold(title: "Bildirim Tercihleri", onBack: onNavigateBack) {
-            DashboardCard(cornerRadius: 20) {
-                VStack(spacing: 0) {
-                    SettingsSwitchRow(label: "Günün Bulmacası Hatırlatıcısı", isOn: $dailyPuzzle)
-                    SettingsSwitchRow(label: "Yeni Takipçiler", isOn: $newFollowers)
-                    SettingsSwitchRow(label: "Beğeni ve Yorumlar", isOn: $likesAndComments)
-                    SettingsSwitchRow(label: "Duyurular ve Etkinlikler", isOn: $announcements)
+        SettingsForm(title: "Bildirim Tercihleri") {
+            SettingsSection {
+                Toggle(isOn: $dailyPuzzle) {
+                    SettingsLabel(title: "Günün Bulmacası Hatırlatıcısı", systemImage: "calendar")
+                }
+                Toggle(isOn: $newFollowers) {
+                    SettingsLabel(title: "Yeni Takipçiler", systemImage: "person.badge.plus", tint: .purpleAccent)
+                }
+                Toggle(isOn: $likesAndComments) {
+                    SettingsLabel(title: "Beğeni ve Yorumlar", systemImage: "heart.fill", tint: .dangerRed)
+                }
+                Toggle(isOn: $announcements) {
+                    SettingsLabel(title: "Duyurular ve Etkinlikler", systemImage: "megaphone.fill", tint: .gameGold)
                 }
             }
         }

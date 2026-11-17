@@ -2,8 +2,7 @@ import Shared
 import SwiftUI
 
 struct EditProfileScreen: View {
-    let onNavigateBack: () -> Void
-
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var model = HeldViewModel { $0.editProfileViewModel() }
     @State private var username = ""
     @State private var email = ""
@@ -12,21 +11,34 @@ struct EditProfileScreen: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        SettingsScaffold(title: "Profili Düzenle", onBack: onNavigateBack) {
-            VStack(spacing: 20) {
-                OutlinedField(label: "Kullanıcı Adı", text: $username)
-                OutlinedField(label: "E-posta Adresi", text: $email, isEnabled: false)
-                OutlinedField(label: "Hakkımda", text: $bio, isMultiline: true)
-
+        SettingsForm(title: "Profili Düzenle") {
+            SettingsSection("Kullanıcı Adı") {
+                TextField("Kullanıcı Adı", text: $username)
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            SettingsSection(title: "E-posta Adresi") {
+                Text(email.isEmpty ? " " : email)
+                    .foregroundStyle(Color.textSecondary)
+            } footer: {
+                Text("E-posta adresi buradan değiştirilemez.")
+            }
+            SettingsSection(title: "Hakkımda") {
+                TextField("Kendinden bahset", text: $bio, axis: .vertical)
+                    .lineLimit(3...6)
+            } footer: {
                 if let errorMessage {
-                    InfoBanner(message: "Profil güncellenemedi", subMessage: errorMessage, isError: true)
+                    Label("Profil güncellenemedi: \(errorMessage)", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Color.dangerRed)
                 }
-
-                SettingsActionButton(title: "Değişiklikleri Kaydet", isLoading: isLoading, isEnabled: !username.isEmpty) {
-                    errorMessage = nil
-                    model.viewModel.updateProfile(username: username, bio: bio)
-                }
-                .padding(.top, 24)
+            }
+        }
+        .disabled(isLoading)
+        .toolbar {
+            ToolbarSaveButton(title: "Kaydet", isLoading: isLoading, isEnabled: !username.isEmpty) {
+                errorMessage = nil
+                model.viewModel.updateProfile(username: username, bio: bio)
             }
         }
         .task {
@@ -45,7 +57,7 @@ struct EditProfileScreen: View {
                 case .loading: isLoading = true
                 case .success:
                     isLoading = false
-                    onNavigateBack()
+                    dismiss()
                 case .error(let error):
                     isLoading = false
                     errorMessage = error.message
