@@ -3,7 +3,6 @@ import SwiftUI
 
 struct ProfileScreen: View {
     let userId: String
-    let onNavigateBack: () -> Void
     let onNavigateToGame: (String) -> Void
 
     @StateObject private var model = ObservedViewModel({ $0.profileViewModel() }, state: \.uiState)
@@ -12,32 +11,30 @@ struct ProfileScreen: View {
     private var viewModel: ProfileViewModel { model.viewModel }
 
     var body: some View {
-        ScreenBackground {
-            VStack(spacing: 0) {
-                ScreenTopBar(title: "Profil", onBack: onNavigateBack)
-                ScrollView {
-                    LazyVStack(spacing: 24) {
-                        header
-                        ForEach(uiState.posts, id: \.id) { post in
-                            PostCard(post: post, showFollowButton: false) { action in
-                                switch action {
-                                case .play: onNavigateToGame(post.id)
-                                case .like: viewModel.handlePostAction(action: PostActionLikeClick(postId: post.id))
-                                case .comment: viewModel.openComments(postId: post.id)
-                                case .more: viewModel.openMenu(postId: post.id)
-                                case .follow: viewModel.handlePostAction(action: PostActionFollowClick(postId: post.id))
-                                case .profile: break
-                                }
-                            }
+        ScrollView {
+            LazyVStack(spacing: 20) {
+                header
+                ForEach(uiState.posts, id: \.id) { post in
+                    PostCard(post: post, showFollowButton: false) { action in
+                        switch action {
+                        case .play: onNavigateToGame(post.id)
+                        case .like: viewModel.handlePostAction(action: PostActionLikeClick(postId: post.id))
+                        case .comment: viewModel.openComments(postId: post.id)
+                        case .more: viewModel.openMenu(postId: post.id)
+                        case .follow: viewModel.handlePostAction(action: PostActionFollowClick(postId: post.id))
+                        case .profile: break
                         }
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 16)
-                    .padding(.bottom, 24)
                 }
             }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .background { ScreenBackground { EmptyView() } }
+        .navigationTitle("@\(userId)")
+        .navigationBarTitleDisplayMode(.inline)
         .task { viewModel.loadUserPosts(userId: userId) }
         .postSheets(sheets)
     }
@@ -57,7 +54,7 @@ struct ProfileScreen: View {
                     .foregroundColor(.textPrimary)
                     .padding(.top, 12)
                 Text("Nonocraft Bulmaca Meraklısı")
-                    .font(.app(14))
+                    .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)
                 // Demo numbers, same as Android, until user stats come from the API.
@@ -77,7 +74,7 @@ struct ProfileScreen: View {
     private func stat(_ value: String, _ label: String) -> some View {
         VStack(spacing: 0) {
             Text(value).font(.app(22, .bold)).foregroundColor(.textPrimary)
-            Text(label).font(.app(12)).foregroundColor(.textMuted)
+            Text(label).font(.footnote).foregroundStyle(Color.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }

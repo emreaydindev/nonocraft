@@ -45,8 +45,6 @@ struct DashboardScreen: View {
                         onNavigateToCrafting: { push(.crafting) },
                         onNavigateToAuthGateway: onNavigateToAuthGateway
                     )
-                    // Still draws its own header; moves to the toolbar in its own redesign step.
-                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
         }
@@ -97,7 +95,7 @@ struct DashboardScreen: View {
                 onNavigateToProfile: { push(.profile(userId: $0)) }
             )
         case .profile(let userId):
-            ProfileScreen(userId: userId, onNavigateBack: back, onNavigateToGame: { push(.game(id: $0)) })
+            ProfileScreen(userId: userId, onNavigateToGame: { push(.game(id: $0)) })
         case .crafting:
             CraftingScreen(onNavigateBack: back)
                 .toolbar(.hidden, for: .tabBar)
