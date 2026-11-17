@@ -24,6 +24,12 @@ targets:
         CFBundleDisplayName: Nonocraft
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        # Phones stay portrait; iPad (and its multitasking windows) rotates freely (DECISIONS §15).
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         UIUserInterfaceStyle: Dark
         ITSAppUsesNonExemptEncryption: false
         UIAppFonts:
