@@ -71,7 +71,7 @@ struct OnboardingScreen: View {
                             .font(.app(15, .semibold))
                             .foregroundColor(.backgroundDark)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                            .frame(minHeight: 52)
                             .background(accent)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
@@ -91,41 +91,46 @@ struct OnboardingScreen: View {
         }
     }
 
+    /// A fixed slide; scrolls at accessibility text sizes.
     private func slideContent(_ slide: Slide, index: Int) -> some View {
-        VStack(spacing: 0) {
-            Text(slide.tag)
-                .font(.app(11, .semibold))
-                .kerning(2)
-                .foregroundColor(slide.accentColor.opacity(0.7))
-                .padding(.bottom, 24)
+        LargeTextScrollView {
+            VStack(spacing: 0) {
+                Text(slide.tag)
+                    .font(.app(11, .semibold))
+                    .kerning(2)
+                    .foregroundColor(slide.accentColor.opacity(0.7))
+                    .padding(.bottom, 24)
 
-            Group {
-                switch index {
-                case 0: VisualSolve(accent: slide.accentColor)
-                case 1: VisualCraft(colors: craftColors, selected: $selectedCraftColor)
-                default: VisualPremium(accent: slide.accentColor)
+                Group {
+                    switch index {
+                    case 0: VisualSolve(accent: slide.accentColor)
+                    case 1: VisualCraft(colors: craftColors, selected: $selectedCraftColor)
+                    default: VisualPremium(accent: slide.accentColor)
+                    }
                 }
+                .frame(maxWidth: .infinity, minHeight: 160, maxHeight: .infinity)
+                .aspectRatio(1.1, contentMode: .fit)
+                .background(Color.surfaceDark)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+                .overlay(RoundedRectangle(cornerRadius: 24).stroke(slide.accentColor.opacity(0.30), lineWidth: 1))
+
+                title(slide)
+                    .font(.app(26, .bold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 32)
+                    .padding(.bottom, 12)
+
+                Text(slide.description)
+                    .font(.app(14))
+                    .lineSpacing(5)
+                    .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .aspectRatio(1.1, contentMode: .fit)
-            .background(Color.surfaceDark)
-            .clipShape(RoundedRectangle(cornerRadius: 24))
-            .overlay(RoundedRectangle(cornerRadius: 24).stroke(slide.accentColor.opacity(0.30), lineWidth: 1))
-
-            title(slide)
-                .font(.app(26, .bold))
-                .multilineTextAlignment(.center)
-                .padding(.top, 32)
-                .padding(.bottom, 12)
-
-            Text(slide.description)
-                .font(.app(14))
-                .lineSpacing(5)
-                .foregroundColor(.textSecondary)
-                .multilineTextAlignment(.center)
+            .padding(.horizontal, 28)
+            .frame(maxHeight: .infinity)
         }
-        .padding(.horizontal, 28)
-        .frame(maxHeight: .infinity)
     }
 
     private func title(_ slide: Slide) -> Text {

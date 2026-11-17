@@ -25,29 +25,34 @@ struct TutorialScreen: View {
 
     var body: some View {
         ScreenBackground {
-            VStack(spacing: 0) {
-                header
-                stepText
-                    .frame(height: 130, alignment: .top)
+            // A fixed page; scrolls at accessibility text sizes.
+            LargeTextScrollView {
+                VStack(spacing: 0) {
+                    header
+                    stepText
+                        // Full height for long text at large sizes; the page scrolls instead of truncating it.
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(minHeight: 130, alignment: .top)
 
-                stepContent
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    stepContent
+                        .frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity)
 
-                if page == 3 {
-                    Button(action: onNavigateToDashboard) {
-                        Text("Başla")
-                            .font(.app(15, .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .background(successGreen)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                    if page == 3 {
+                        Button(action: onNavigateToDashboard) {
+                            Text("Başla")
+                                .font(.app(15, .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(minHeight: 52)
+                                .background(successGreen)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(24)
+                    } else {
+                        toolRow
+                            .padding(.bottom, 50)
                     }
-                    .buttonStyle(.plain)
-                    .padding(24)
-                } else {
-                    toolRow
-                        .padding(.bottom, 50)
                 }
             }
             .readableWidth()
