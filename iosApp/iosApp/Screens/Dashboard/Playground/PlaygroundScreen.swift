@@ -99,9 +99,11 @@ private struct WalletStrip: View {
     /// Crystal cap for free players (DECISIONS §7); the server stays authoritative.
     private let crystalCap = 5
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         DashboardCard(cornerRadius: 18) {
-            HStack(spacing: 14) {
+            AdaptiveStack(spacing: 14) {
                 HStack(spacing: 6) {
                     Image(systemName: "star.fill")
                         .foregroundStyle(Color.gameGold)
@@ -113,9 +115,11 @@ private struct WalletStrip: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("\(stars) yıldız")
 
-                Rectangle()
-                    .fill(Color.borderDark)
-                    .frame(width: 1, height: 22)
+                if !dynamicTypeSize.isAccessibilitySize {
+                    Rectangle()
+                        .fill(Color.borderDark)
+                        .frame(width: 1, height: 22)
+                }
 
                 HStack(spacing: 8) {
                     Image(systemName: "diamond.fill")
@@ -124,12 +128,8 @@ private struct WalletStrip: View {
                         .font(.app(17, .bold))
                         .foregroundStyle(Color.textPrimary)
                         .contentTransition(.numericText())
-                    HStack(spacing: 3) {
-                        ForEach(0..<crystalCap, id: \.self) { index in
-                            Capsule()
-                                .fill(index < crystals ? Color.neonCyan : Color.surfaceVariantDark)
-                                .frame(width: 10, height: 5)
-                        }
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        crystalDots
                     }
                 }
                 .accessibilityElement(children: .ignore)
@@ -146,9 +146,20 @@ private struct WalletStrip: View {
                         .accessibilityLabel("Yeni kristale \(crystalRefillMinutes) dakika")
                 }
             }
-            .font(.system(size: 14, weight: .bold))
+            .font(.subheadline.weight(.bold))
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
+        }
+    }
+
+    private var crystalDots: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<crystalCap, id: \.self) { index in
+                Capsule()
+                    .fill(index < crystals ? Color.neonCyan : Color.surfaceVariantDark)
+                    .frame(width: 10, height: 5)
+            }
         }
     }
 }
@@ -161,6 +172,9 @@ private struct DailyCard: View {
     let onPlayPast: (String) -> Void
 
     private static let locale = Locale(identifier: "tr_TR")
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .subheadline) private var dayCircle: CGFloat = 36
 
     private struct Day: Identifiable {
         let id: String  // yyyy-MM-dd, the daily puzzle key
@@ -193,7 +207,7 @@ private struct DailyCard: View {
     var body: some View {
         DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 22) {
             VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 14) {
+                AdaptiveStack(spacing: 14) {
                     Image(systemName: "calendar")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(isSolved ? Color.textMuted : Color.neonCyan)
@@ -226,32 +240,48 @@ private struct DailyCard: View {
                     }
                 }
 
-                HStack(spacing: 0) {
-                    ForEach(week) { day in
-                        Button {
-                            day.isToday ? onPlayToday() : onPlayPast(day.id)
-                        } label: {
-                            VStack(spacing: 6) {
-                                Text(day.weekday)
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(day.isToday ? Color.neonCyan : Color.textMuted)
-                                    .lineLimit(1)
-                                    .fixedSize()
-                                Text(day.number)
-                                    .font(.app(15, .bold))
-                                    .foregroundStyle(day.isToday ? Color.onNeon : Color.textPrimary)
-                                    .frame(width: 36, height: 36)
-                                    .background(day.isToday ? Color.neonCyan : Color.surfaceVariantDark, in: Circle())
-                            }
-                            .frame(maxWidth: .infinity)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(day.isToday ? "Bugünün bulmacası" : "\(day.number) \(day.weekday) bulmacası")
-                    }
-                }
+                weekRow
             }
             .padding(18)
+        }
+    }
+
+    /// Seven equal columns; at accessibility sizes the days keep their size and the row scrolls sideways.
+    @ViewBuilder
+    private var weekRow: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) { days }
+            }
+            .scrollClipDisabled()
+            .defaultScrollAnchor(.trailing)
+        } else {
+            HStack(spacing: 0) { days }
+        }
+    }
+
+    private var days: some View {
+        ForEach(week) { day in
+            Button {
+                day.isToday ? onPlayToday() : onPlayPast(day.id)
+            } label: {
+                VStack(spacing: 6) {
+                    Text(day.weekday)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(day.isToday ? Color.neonCyan : Color.textMuted)
+                        .lineLimit(1)
+                        .fixedSize()
+                    Text(day.number)
+                        .font(.app(15, .bold))
+                        .foregroundStyle(day.isToday ? Color.onNeon : Color.textPrimary)
+                        .frame(width: dayCircle, height: dayCircle)
+                        .background(day.isToday ? Color.neonCyan : Color.surfaceVariantDark, in: Circle())
+                }
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(day.isToday ? "Bugünün bulmacası" : "\(day.number) \(day.weekday) bulmacası")
         }
     }
 }
@@ -281,7 +311,7 @@ private struct LevelProgressCard: View {
     var body: some View {
         DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 22) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
+                AdaptiveStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("MEVCUT SEVİYE")
                             .font(.app(11))
