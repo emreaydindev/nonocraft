@@ -196,7 +196,15 @@ struct ToolPaletteBar: View {
                     tint: color, isSelected: !isCrossMode && selectedColorIndex == colorIndex,
                     label: "Renk \(colorIndex)", action: { onColorSelected(colorIndex) }
                 ) {
-                    RoundedRectangle(cornerRadius: 4).fill(color).frame(width: 24, height: 24)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(color)
+                        .overlay {
+                            // Dark swatches (e.g. black) vanish on the dark glass without an outline.
+                            if color.isDark {
+                                RoundedRectangle(cornerRadius: 4).stroke(Color.textPrimary.opacity(0.5), lineWidth: 1)
+                            }
+                        }
+                        .frame(width: 24, height: 24)
                 }
             }
         }

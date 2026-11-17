@@ -46,3 +46,12 @@ extension Color {
         }
     }
 }
+
+extension Color {
+    /// True when the colour's relative luminance is low enough to disappear on the dark surfaces.
+    var isDark: Bool {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        guard UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: &alpha) else { return false }
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue < 0.2
+    }
+}
