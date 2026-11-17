@@ -1,11 +1,10 @@
 import Shared
 import SwiftUI
 
-/// Paywall. The purchase is simulated by the shared PremiumViewModel (no store integration yet),
-/// exactly as on Android.
+/// Paywall, presented as a sheet. The purchase is simulated by the shared PremiumViewModel
+/// (no store integration yet), exactly as on Android.
 struct PremiumScreen: View {
-    let onNavigateBack: () -> Void
-
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var model = HeldViewModel { $0.premiumViewModel() }
     @State private var isProcessing = false
     @State private var showSuccess = false
@@ -71,29 +70,15 @@ struct PremiumScreen: View {
     private var selectedPlan: Plan { plans.first { $0.id == selectedPlanId } ?? plans[1] }
 
     var body: some View {
-        ZStack {
-            Color.backgroundDark.ignoresSafeArea()
-
+        NavigationStack {
             VStack(spacing: 0) {
-                AuthBackRow(onBack: onNavigateBack)
-
                 TabView(selection: $page) {
                     ForEach(slides.indices, id: \.self) { index in
                         FeatureSlideContent(slide: slides[index]).tag(index)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-
-                HStack(spacing: 8) {
-                    ForEach(slides.indices, id: \.self) { index in
-                        Capsule()
-                            .fill(index == page ? slides[index].color : Color.borderDark)
-                            .frame(width: index == page ? 24 : 8, height: 8)
-                    }
-                }
-                .animation(.easeInOut(duration: 0.25), value: page)
-                .padding(.vertical, 16)
-                .accessibilityHidden(true)
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                .indexViewStyle(.page(backgroundDisplayMode: .interactive))
 
                 VStack(spacing: 12) {
                     ForEach(plans) { plan in
@@ -101,67 +86,73 @@ struct PremiumScreen: View {
                             selectedPlanId = plan.id
                         }
                     }
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 8)
 
-                Button {
-                    model.viewModel.purchasePremium(planId: selectedPlan.id)
-                } label: {
-                    Group {
-                        if isProcessing {
-                            ProgressView().tint(.backgroundDark)
-                        } else {
-                            Text("Devam Et (\(selectedPlan.price)\(selectedPlan.period))")
-                                .font(.app(16, .bold))
-                                .foregroundColor(.backgroundDark)
-                        }
+                    Button {
+                        model.viewModel.purchasePremium(planId: selectedPlan.id)
+                    } label: {
+                        Text("Devam Et (\(selectedPlan.price)\(selectedPlan.period))")
+                            .font(.app(17, .bold))
+                            .foregroundStyle(Color.onNeon)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(selectedPlan.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .buttonStyle(.appGlassProminent)
+                    .tint(selectedPlan.accent)
+                    .disabled(isProcessing)
+                    .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
+                    .padding(.top, 8)
+
+                    Text("Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.")
+                        .font(.caption2)
+                        .foregroundStyle(Color.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
                 }
-                .buttonStyle(.plain)
-                .disabled(isProcessing)
-                .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
                 .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-
-                Text("Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.")
-                    .font(.app(10))
-                    .foregroundColor(.textMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
+                .padding(.bottom, 16)
+                .frame(maxWidth: 560)
             }
-
-            if isProcessing {
-                overlay(opacity: 0.85) {
-                    ProgressView().tint(.gameGold).controlSize(.large)
-                    Text("İşleminiz tamamlanıyor...")
-                        .font(.app(16, .medium))
-                        .foregroundColor(.textPrimary)
+            .background { ScreenBackground { EmptyView() } }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Kapat", systemImage: "xmark") { dismiss() }
+                }
+                ToolbarItem(placement: .principal) {
+                    Label("Nonocraft Pro", systemImage: "crown.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(.app(17, .bold))
+                        .foregroundStyle(Color.gameGold)
                 }
             }
-            if showSuccess {
-                overlay(opacity: 0.95) {
-                    Image(systemName: "rosette")
-                        .font(.system(size: 36))
-                        .foregroundColor(.gameGold)
-                        .frame(width: 80, height: 80)
-                        .background(Color.gameGold.opacity(0.2))
-                        .clipShape(Circle())
-                    Text("Aramıza Hoş Geldin!")
-                        .font(.app(24, .bold))
-                        .foregroundColor(.gameGold)
-                    Text("Tüm premium özellikler aktif edildi.")
-                        .font(.app(14))
-                        .foregroundColor(.textSecondary)
+            .navigationBarTitleDisplayMode(.inline)
+            .overlay {
+                if isProcessing {
+                    overlay(opacity: 0.85) {
+                        ProgressView().tint(.gameGold).controlSize(.large)
+                        Text("İşleminiz tamamlanıyor...")
+                            .font(.headline)
+                            .foregroundStyle(Color.textPrimary)
+                    }
+                }
+                if showSuccess {
+                    overlay(opacity: 0.95) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 36))
+                            .foregroundStyle(Color.gameGold)
+                            .frame(width: 80, height: 80)
+                            .background(Color.gameGold.opacity(0.2), in: Circle())
+                            .symbolEffect(.bounce, value: showSuccess)
+                        Text("Aramıza Hoş Geldin!")
+                            .font(.app(24, .bold))
+                            .foregroundStyle(Color.gameGold)
+                        Text("Tüm premium özellikler aktif edildi.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
+                    }
                 }
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .interactiveDismissDisabled(isProcessing)
         .task {
             for await processing in model.viewModel.isProcessing {
                 isProcessing = processing.boolValue
@@ -173,7 +164,7 @@ struct PremiumScreen: View {
                 case .purchaseSuccess:
                     showSuccess = true
                     try? await Task.sleep(for: .milliseconds(2500))
-                    onNavigateBack()
+                    dismiss()
                 }
             }
         }
@@ -207,7 +198,7 @@ struct PremiumScreen: View {
                         .padding(.top, 24)
 
                     Text(slide.description)
-                        .font(.app(14))
+                        .font(.subheadline)
                         .foregroundColor(.textSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 16)
@@ -221,17 +212,17 @@ struct PremiumScreen: View {
                                     .foregroundColor(slide.color)
                                     .frame(width: 20, height: 20)
                                 Text(point)
-                                    .font(.app(14))
-                                    .lineSpacing(3)
+                                    .font(.subheadline)
                                     .foregroundColor(.textPrimary)
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 32)
+                    .padding(.top, 28)
                 }
                 .padding(.horizontal, 32)
-                .padding(.vertical, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 48)
             }
         }
     }
@@ -250,7 +241,7 @@ struct PremiumScreen: View {
                             .foregroundColor(.textPrimary)
                         if let equivalent = plan.monthlyEquivalent {
                             Text(equivalent)
-                                .font(.app(12))
+                                .font(.footnote)
                                 .foregroundColor(.textMuted)
                         }
                     }
@@ -260,7 +251,7 @@ struct PremiumScreen: View {
                             .font(.app(20, .bold))
                             .foregroundColor(.textPrimary)
                         Text(plan.period)
-                            .font(.app(12))
+                            .font(.footnote)
                             .foregroundColor(.textMuted)
                     }
                 }

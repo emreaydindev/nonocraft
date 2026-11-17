@@ -6,6 +6,7 @@ struct DashboardScreen: View {
     @State private var currentTab: DashboardTab = .playground
     /// Each tab keeps its own navigation history, like every system app with a tab bar.
     @State private var paths: [DashboardTab: [AppRoute]] = [:]
+    @State private var isPremiumPresented = false
 
     var body: some View {
         TabView(selection: $currentTab) {
@@ -51,6 +52,11 @@ struct DashboardScreen: View {
         // Bottom bar on iPhone, sidebar-adaptable on iPad and big screens (DECISIONS §15).
         .tabViewStyle(.sidebarAdaptable)
         .tint(.purpleAccent)
+        // The paywall is modal, not part of any tab's history.
+        .sheet(isPresented: $isPremiumPresented) {
+            PremiumScreen()
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private func path(for tab: DashboardTab) -> Binding<[AppRoute]> {
@@ -61,7 +67,13 @@ struct DashboardScreen: View {
         _ tab: DashboardTab,
         @ViewBuilder root: (_ push: @escaping (AppRoute) -> Void) -> Root
     ) -> some View {
-        let push: (AppRoute) -> Void = { paths[tab, default: []].append($0) }
+        let push: (AppRoute) -> Void = { route in
+            if route == .premium {
+                isPremiumPresented = true
+            } else {
+                paths[tab, default: []].append(route)
+            }
+        }
         return NavigationStack(path: path(for: tab)) {
             root(push)
                 .background(Color.backgroundDark.ignoresSafeArea())
@@ -87,7 +99,9 @@ struct DashboardScreen: View {
         case .tutorial:
             TutorialScreen(onNavigateToDashboard: back)
                 .toolbar(.hidden, for: .tabBar)
-        case .premium: PremiumScreen(onNavigateBack: back)
+        case .premium:
+            // Presented as a sheet by `push`; kept for an exhaustive switch.
+            EmptyView()
         case .libraryDetail(let id):
             LibraryDetailScreen(
                 categoryId: id,
