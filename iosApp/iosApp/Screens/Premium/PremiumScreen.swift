@@ -152,6 +152,8 @@ struct PremiumScreen: View {
                 }
             }
         }
+        // Sheets don't inherit the dashboard tint on iOS 18, so the close button would turn system blue.
+        .tint(.purpleAccent)
         .interactiveDismissDisabled(isProcessing)
         .task {
             for await processing in model.viewModel.isProcessing {
