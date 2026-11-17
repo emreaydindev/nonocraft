@@ -39,6 +39,8 @@ struct FeedScreen: View {
         }
         .background { ScreenBackground { EmptyView() } }
         .navigationTitle("Keşfet")
+        // Large title on the same row as the toolbar button instead of a row below it.
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Oluştur", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)

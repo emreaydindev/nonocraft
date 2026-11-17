@@ -82,6 +82,8 @@ struct LibraryScreen: View {
         }
         .background { ScreenBackground { EmptyView() } }
         .navigationTitle("Kütüphanem")
+        // Large title on the same row as the toolbar button instead of a row below it.
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Tasarım Stüdyosu", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
