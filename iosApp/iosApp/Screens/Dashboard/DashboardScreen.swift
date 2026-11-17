@@ -25,6 +25,8 @@ struct DashboardScreen: View {
                         onNavigateToProfile: { push(.profile(userId: $0)) },
                         onNavigateToCrafting: { push(.crafting) }
                     )
+                    // Still draws its own header; moves to the toolbar in its own redesign step.
+                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
             Tab(DashboardTab.library.label, systemImage: DashboardTab.library.systemImage, value: .library) {
@@ -35,6 +37,8 @@ struct DashboardScreen: View {
                         onNavigateToCategory: { push(.libraryDetail(id: $0)) },
                         onNavigateToPlaylist: { push(.libraryDetail(id: $0)) }
                     )
+                    // Still draws its own header; moves to the toolbar in its own redesign step.
+                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
             Tab(DashboardTab.account.label, systemImage: DashboardTab.account.systemImage, value: .account) {
@@ -45,6 +49,8 @@ struct DashboardScreen: View {
                         onNavigateToCrafting: { push(.crafting) },
                         onNavigateToAuthGateway: onNavigateToAuthGateway
                     )
+                    // Still draws its own header; moves to the toolbar in its own redesign step.
+                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
         }
@@ -65,8 +71,6 @@ struct DashboardScreen: View {
         return NavigationStack(path: path(for: tab)) {
             root(push)
                 .background(Color.backgroundDark.ignoresSafeArea())
-                // Tab roots still draw their own headers; they move to toolbars screen by screen.
-                .toolbar(.hidden, for: .navigationBar)
                 .navigationDestination(for: AppRoute.self) { destination($0, in: tab, push: push) }
         }
     }

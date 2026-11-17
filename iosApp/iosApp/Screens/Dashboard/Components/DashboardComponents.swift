@@ -36,23 +36,3 @@ struct DashboardCard<Content: View>: View {
             .overlay(RoundedRectangle(cornerRadius: cornerRadius).stroke(borderColor, lineWidth: 0.5))
     }
 }
-
-/// Neon pill button used inside dashboard cards ("Oyna", "Devam Et").
-struct NeonPillButton: View {
-    let title: String
-    var verticalPadding: CGFloat = 10
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.app(14, .bold))
-                .foregroundColor(.onNeon)
-                .padding(.horizontal, 18)
-                .padding(.vertical, verticalPadding)
-                .background(Color.neonCyan)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-        }
-        .buttonStyle(.plain)
-    }
-}

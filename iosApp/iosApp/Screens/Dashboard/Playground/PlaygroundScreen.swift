@@ -25,131 +25,105 @@ private struct PlaygroundContent: View {
     let onNavigateToTutorial: () -> Void
 
     var body: some View {
-        ScreenBackground {
-            WatermarkLogo()
-
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        PlaygroundHeader(
-                            username: state.username,
-                            stars: Int(state.stars),
-                            crystals: Int(state.crystals),
-                            crystalRefillMinutes: Int(state.crystalRefillMinutes),
-                            onNavigateToSettings: onNavigateToSettings,
-                            onNavigateToTutorial: onNavigateToTutorial
-                        )
-                        DailyChallengeCard(
-                            isSolved: state.isDailySolved,
-                            onPlayToday: { onNavigateToGame("daily-today-20") },
-                            onPlayPast: { date in onNavigateToGame("daily-\(date)-20") }
-                        )
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 20)
-                }
-                .scrollBounceBehavior(.basedOnSize)
-
-                VStack(spacing: 20) {
-                    LevelProgressCard(
-                        currentLevel: Int(state.currentLevelNumber),
-                        hasDraft: state.hasDraft,
-                        draftSize: state.draftSize,
-                        draftProgress: Int(state.draftProgress),
-                        onContinue: { onNavigateToGame(state.currentLevelId) }
-                    )
-                    RandomPuzzleButton(action: { onNavigateToGame("random-10") })
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, 20)
-                .padding(.bottom, 32)
+        ScrollView {
+            VStack(spacing: 20) {
+                Greeting(username: state.username)
+                DailyChallengeCard(
+                    isSolved: state.isDailySolved,
+                    onPlayToday: { onNavigateToGame("daily-today-20") },
+                    onPlayPast: { date in onNavigateToGame("daily-\(date)-20") }
+                )
+                LevelProgressCard(
+                    currentLevel: Int(state.currentLevelNumber),
+                    hasDraft: state.hasDraft,
+                    draftSize: state.draftSize,
+                    draftProgress: Int(state.draftProgress),
+                    onContinue: { onNavigateToGame(state.currentLevelId) }
+                )
+                RandomPuzzleButton(action: { onNavigateToGame("random-10") })
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
+        }
+        .background {
+            ScreenBackground { WatermarkLogo() }
+        }
+        .navigationTitle("Oyun Alanı")
+        .toolbarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                WalletIndicator(
+                    stars: Int(state.stars),
+                    crystals: Int(state.crystals),
+                    crystalRefillMinutes: Int(state.crystalRefillMinutes)
+                )
+            }
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button("Nasıl oynanır", systemImage: "questionmark.circle", action: onNavigateToTutorial)
+                Button("Ayarlar", systemImage: "gearshape", action: onNavigateToSettings)
             }
         }
     }
 }
 
-private struct PlaygroundHeader: View {
+/// Avatar initials and "Merhaba, name" in the display font at the top of the page.
+private struct Greeting: View {
     let username: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(username.prefix(2).uppercased())
+                .font(.app(15, .bold))
+                .foregroundStyle(Color.neonCyan)
+                .frame(width: 48, height: 48)
+                .background(Color.surfaceDark, in: Circle())
+                .overlay(Circle().stroke(Color.neonCyan, lineWidth: 2))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Merhaba,")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.textSecondary)
+                Text(username)
+                    .font(.app(24, .bold))
+                    .foregroundStyle(Color.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Ranking stars and crystals (or the refill countdown at zero) as one toolbar item.
+private struct WalletIndicator: View {
     let stars: Int
     let crystals: Int
     let crystalRefillMinutes: Int
-    let onNavigateToSettings: () -> Void
-    let onNavigateToTutorial: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 12) {
-                Text(username.prefix(2).uppercased())
-                    .font(.app(14, .bold))
-                    .foregroundColor(.neonCyan)
-                    .frame(width: 44, height: 44)
-                    .background(Color.surfaceDark)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.neonCyan, lineWidth: 2))
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Merhaba,")
-                        .font(.app(12))
-                        .foregroundColor(.textMuted)
-                    Text(username)
-                        .font(.app(16, .bold))
-                        .foregroundColor(.textPrimary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                }
-            }
-
-            Spacer(minLength: 8)
-
-            StatChip(icon: "star.fill", text: "\(stars)", tint: .gameGold, background: 0.13)
-
+        HStack(spacing: 10) {
+            Label("\(stars)", systemImage: "star.fill")
+                .foregroundStyle(Color.gameGold)
+                .accessibilityLabel("\(stars) yıldız")
             if crystals > 0 {
-                StatChip(icon: "sparkles", text: "\(crystals)", tint: .neonCyan, background: 0.10)
+                Label("\(crystals)", systemImage: "diamond.fill")
+                    .foregroundStyle(Color.neonCyan)
+                    .accessibilityLabel("\(crystals) kristal")
             } else {
-                StatChip(icon: "timer", text: "\(crystalRefillMinutes)dk", tint: .dangerRed, background: 0.10, bordered: true)
+                Label("\(crystalRefillMinutes)dk", systemImage: "timer")
+                    .foregroundStyle(Color.dangerRed)
+                    .accessibilityLabel("Yeni kristale \(crystalRefillMinutes) dakika")
             }
-
-            HeaderIconButton(icon: "questionmark.circle.fill", label: "Nasıl oynanır", action: onNavigateToTutorial)
-            HeaderIconButton(icon: "gearshape.fill", label: "Ayarlar", action: onNavigateToSettings)
         }
-    }
-}
-
-private struct StatChip: View {
-    let icon: String
-    let text: String
-    let tint: Color
-    let background: Double
-    var bordered = false
-
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon).font(.system(size: 12, weight: .bold))
-            Text(text).font(.app(13, .bold))
-        }
-        .foregroundColor(tint)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(tint.opacity(background))
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(tint.opacity(bordered ? 0.30 : 0), lineWidth: 1))
-    }
-}
-
-private struct HeaderIconButton: View {
-    let icon: String
-    let label: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 19))
-                .foregroundColor(.textMuted)
-                .frame(width: 22, height: 22)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        .labelStyle(.titleAndIcon)
+        .font(.subheadline.weight(.bold).monospacedDigit())
+        .padding(.horizontal, 6)
+        .fixedSize()
     }
 }
 
@@ -213,7 +187,7 @@ private struct DailyChallengeCard: View {
                     if isSolved {
                         HStack(spacing: 5) {
                             Image(systemName: "checkmark.circle.fill").font(.system(size: 13))
-                            Text("Çözüldü").font(.app(13, .medium))
+                            Text("Çözüldü").font(.subheadline.weight(.medium))
                         }
                         .foregroundColor(.neonCyan)
                         .padding(.horizontal, 14)
@@ -221,7 +195,7 @@ private struct DailyChallengeCard: View {
                         .background(Color.surfaceVariantDark)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     } else {
-                        NeonPillButton(title: "Oyna", action: onPlayToday)
+                        PlayButton(title: "Oyna", action: onPlayToday)
                     }
                 }
 
@@ -240,14 +214,13 @@ private struct DailyChallengeCard: View {
                             onPlayPast(date.key)
                         } label: {
                             Text(date.label)
-                                .font(.app(11, .medium))
-                                .foregroundColor(.textSecondary)
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(Color.textSecondary)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.8)
+                                .minimumScaleFactor(0.7)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 9)
-                                .background(Color.surfaceVariantDark)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .padding(.vertical, 10)
+                                .background(Color.surfaceVariantDark, in: Capsule())
                         }
                         .buttonStyle(.plain)
                     }
@@ -280,7 +253,7 @@ private struct LevelProgressCard: View {
                             .foregroundColor(.neonCyan)
                     }
                     Spacer()
-                    NeonPillButton(title: hasDraft ? "Devam Et" : "Başla", verticalPadding: 11, action: onContinue)
+                    PlayButton(title: hasDraft ? "Devam Et" : "Başla", action: onContinue)
                 }
 
                 if hasDraft {
@@ -291,9 +264,13 @@ private struct LevelProgressCard: View {
                         Image(systemName: "pencil")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.purpleAccent)
-                        Text("Yarım kalan bölüm: \(draftSize) · %\(draftProgress)")
-                            .font(.app(13))
-                            .foregroundColor(.textSecondary)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Yarım kalan bölüm: \(draftSize) · %\(draftProgress)")
+                                .font(.subheadline)
+                                .foregroundStyle(Color.textSecondary)
+                            ProgressView(value: Double(draftProgress), total: 100)
+                                .tint(.purpleAccent)
+                        }
                     }
                 }
             }
@@ -320,7 +297,7 @@ private struct RandomPuzzleButton: View {
                         .font(.app(15, .semibold))
                         .foregroundColor(.textPrimary)
                     Text("İnternetsiz de çalışır")
-                        .font(.app(12))
+                        .font(.footnote)
                         .foregroundColor(.textMuted)
                 }
                 Spacer()
@@ -335,5 +312,22 @@ private struct RandomPuzzleButton: View {
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.borderDark, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Primary action inside a dashboard card: prominent glass tinted neon cyan.
+private struct PlayButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.app(15, .bold))
+                .foregroundStyle(Color.onNeon)
+                .padding(.horizontal, 4)
+        }
+        .buttonStyle(.appGlassProminent)
+        .tint(.neonCyan)
     }
 }
