@@ -87,6 +87,7 @@ struct OnboardingScreen: View {
                 .padding(.top, 24)
                 .padding(.bottom, 24)
             }
+            .readableWidth()
         }
     }
 

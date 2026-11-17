@@ -37,6 +37,7 @@ struct AuthGatewayScreen: View {
             }
             .padding(.horizontal, 28)
             .padding(.bottom, 24)
+            .readableWidth()
         }
         .toolbar(.hidden, for: .navigationBar)
     }

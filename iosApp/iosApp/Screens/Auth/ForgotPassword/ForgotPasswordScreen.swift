@@ -60,6 +60,7 @@ struct ForgotPasswordScreen: View {
                 .padding(.horizontal, 28)
                 .padding(.bottom, 24)
             }
+            .readableWidth()
         }
         // System back button on a transparent bar; the heading stays in the content.
         .toolbarBackground(.hidden, for: .navigationBar)

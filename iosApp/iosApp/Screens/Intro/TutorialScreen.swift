@@ -50,6 +50,7 @@ struct TutorialScreen: View {
                         .padding(.bottom, 50)
                 }
             }
+            .readableWidth()
         }
         .toolbar(.hidden, for: .navigationBar)
     }
