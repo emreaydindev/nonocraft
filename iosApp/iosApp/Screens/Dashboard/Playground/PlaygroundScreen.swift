@@ -19,12 +19,15 @@ struct PlaygroundScreen: View {
 }
 
 /// Same content as the Android home (wallet, daily, campaign level + draft, random generator),
-/// laid out the iOS way and sized so everything fits on a phone screen without scrolling.
+/// in the same structure, with native controls.
 private struct PlaygroundContent: View {
     let state: PlaygroundUiState
     let onNavigateToGame: (String) -> Void
     let onNavigateToSettings: () -> Void
     let onNavigateToTutorial: () -> Void
+
+    /// Scroll view height between the navigation bar and the tab bar.
+    @State private var visibleHeight: CGFloat = 0
 
     var body: some View {
         ScrollView {
@@ -39,7 +42,11 @@ private struct PlaygroundContent: View {
                     onPlayToday: { onNavigateToGame("daily-today-20") },
                     onPlayPast: { date in onNavigateToGame("daily-\(date)-20") }
                 )
-                CampaignCard(
+                // Like Android: the mascot fills the gap and the level card and random row sit at the bottom.
+                Color.clear
+                    .frame(maxWidth: .infinity, minHeight: 24, maxHeight: .infinity)
+                    .overlay { WatermarkLogo() }
+                LevelProgressCard(
                     currentLevel: Int(state.currentLevelNumber),
                     hasDraft: state.hasDraft,
                     draftSize: state.draftSize,
@@ -50,9 +57,14 @@ private struct PlaygroundContent: View {
             }
             .padding(.horizontal, 18)
             .padding(.top, 4)
-            .padding(.bottom, 24)
+            .padding(.bottom, 16)
             .frame(maxWidth: 640)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: visibleHeight)
+        }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.containerSize.height
+        } action: { _, height in
+            visibleHeight = height
         }
         .background { ScreenBackground { EmptyView() } }
         // The title still names the page for VoiceOver and the back-button menu; the wordmark replaces it on screen.
@@ -61,14 +73,8 @@ private struct PlaygroundContent: View {
         .toolbar(removing: .title)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                HStack(spacing: 8) {
-                    Image("Logo")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    BrandName(size: 22)
-                }
-                .fixedSize()
+                BrandName(size: 24)
+                    .fixedSize()
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Nonocraft")
                 .accessibilityAddTraits(.isHeader)
@@ -188,8 +194,15 @@ private struct DailyCard: View {
         DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 22) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 14) {
-                    MysteryGrid(seed: Self.format(Date(), "yyyyMMdd"), isRevealed: isSolved)
-                        .frame(width: 50, height: 50)
+                    Image(systemName: "calendar")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(isSolved ? Color.textMuted : Color.neonCyan)
+                        .frame(width: 46, height: 46)
+                        .background(
+                            isSolved ? Color.surfaceVariantDark : Color.neonCyan.opacity(0.13),
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                        .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("GÜNÜN BULMACASI")
@@ -243,51 +256,22 @@ private struct DailyCard: View {
     }
 }
 
-/// A tiny mirrored 5×5 nonogram that changes every day: a teaser for today's puzzle.
-private struct MysteryGrid: View {
-    let seed: String
-    let isRevealed: Bool
-
-    private var cells: [[Bool]] {
-        var state = UInt64(seed) ?? 1
-        func nextBit() -> Bool {
-            state = state &* 6364136223846793005 &+ 1442695040888963407
-            return (state >> 33) % 100 < 55
-        }
-        return (0..<5).map { _ in
-            let left = (0..<3).map { _ in nextBit() }
-            return left + [left[1], left[0]]
-        }
-    }
-
+private struct WatermarkLogo: View {
     var body: some View {
-        let grid = cells
-        GeometryReader { proxy in
-            let spacing: CGFloat = 2
-            let side = (min(proxy.size.width, proxy.size.height) - spacing * 4) / 5
-            VStack(spacing: spacing) {
-                ForEach(0..<5, id: \.self) { row in
-                    HStack(spacing: spacing) {
-                        ForEach(0..<5, id: \.self) { column in
-                            RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                .fill(grid[row][column] ? filled : Color.surfaceVariantDark)
-                                .frame(width: side, height: side)
-                        }
-                    }
-                }
-            }
-        }
-        .padding(6)
-        .background(Color.backgroundDark, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityHidden(true)
+        Image("Logo")
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: 180, maxHeight: 180)
+            .opacity(0.08)
+            .padding(.vertical, 8)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
-
-    private var filled: Color { isRevealed ? .textMuted : .neonCyan }
 }
 
 // MARK: - Campaign
 
-private struct CampaignCard: View {
+private struct LevelProgressCard: View {
     let currentLevel: Int
     let hasDraft: Bool
     let draftSize: String
@@ -296,50 +280,35 @@ private struct CampaignCard: View {
 
     var body: some View {
         DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 22) {
-            VStack(spacing: 14) {
-                HStack(spacing: 14) {
-                    Text("\(currentLevel)")
-                        .font(.app(24, .bold))
-                        .foregroundStyle(Color.neonCyan)
-                        .frame(width: 50, height: 50)
-                        .background(Color.neonCyan.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .accessibilityHidden(true)
-
-                    VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text("MEVCUT SEVİYE")
                             .font(.app(11))
                             .kerning(1)
                             .foregroundStyle(Color.textMuted)
-                        Text("Seviye \(currentLevel)")
-                            .font(.app(20, .bold))
-                            .foregroundStyle(Color.textPrimary)
+                        Text("\(currentLevel)")
+                            .font(.app(36, .bold))
+                            .foregroundStyle(Color.neonCyan)
                     }
-                    .accessibilityElement(children: .combine)
-
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Mevcut seviye \(currentLevel)")
                     Spacer(minLength: 0)
-
                     CompactPlayButton(title: hasDraft ? "Devam Et" : "Başla", action: onContinue)
                 }
 
                 if hasDraft {
-                    VStack(spacing: 8) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color.purpleAccent)
-                            Text("Yarım kalan bölüm · \(draftSize)")
-                                .font(.footnote)
-                                .foregroundStyle(Color.textSecondary)
-                            Spacer(minLength: 0)
-                            Text("%\(draftProgress)")
-                                .font(.footnote.weight(.bold).monospacedDigit())
-                                .foregroundStyle(Color.purpleAccent)
-                        }
-                        ProgressView(value: Double(draftProgress), total: 100)
-                            .tint(.purpleAccent)
+                    Rectangle().fill(Color.borderDark).frame(height: 0.5)
+                        .padding(.vertical, 14)
+                    Label {
+                        Text("Yarım kalan bölüm: \(draftSize) · %\(draftProgress)")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.textSecondary)
+                    } icon: {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(Color.purpleAccent)
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Yarım kalan bölüm, \(draftSize), yüzde \(draftProgress)")
                 }
             }
             .padding(18)
