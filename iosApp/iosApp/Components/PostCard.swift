@@ -12,6 +12,8 @@ struct PostCard: View {
 
     private var accent: Color { Color(argb: post.accentColor) }
 
+    @ScaledMetric(relativeTo: .subheadline) private var avatarSize: CGFloat = 36
+
     var body: some View {
         DashboardCard(cornerRadius: 20) {
             VStack(spacing: 16) {
@@ -25,13 +27,13 @@ struct PostCard: View {
     }
 
     private var header: some View {
-        HStack {
+        AdaptiveStack(spacing: 8) {
             Button { onAction(.profile) } label: {
                 HStack(spacing: 12) {
                     Text(post.author.prefix(1).uppercased())
                         .font(.app(14, .bold))
                         .foregroundColor(accent)
-                        .frame(width: 36, height: 36)
+                        .frame(width: avatarSize, height: avatarSize)
                         .background(Color.surfaceVariantDark)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(accent.opacity(0.5), lineWidth: 1))
@@ -47,26 +49,29 @@ struct PostCard: View {
             }
             .buttonStyle(.plain)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            if showFollowButton {
-                Button(post.isFollowed ? "Takipte" : "Takip Et") { onAction(.follow) }
-                    .font(.footnote.weight(.bold))
-                    .foregroundStyle(post.isFollowed ? Color.textPrimary : Color.onNeon)
-                    .buttonStyle(post.isFollowed ? AppGlassButtonStyle.appGlass : .appGlassProminent)
-                    .tint(.neonCyan)
-                    .controlSize(.small)
-            }
+            HStack(spacing: 8) {
+                if showFollowButton {
+                    Button(post.isFollowed ? "Takipte" : "Takip Et") { onAction(.follow) }
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(post.isFollowed ? Color.textPrimary : Color.onNeon)
+                        .buttonStyle(post.isFollowed ? AppGlassButtonStyle.appGlass : .appGlassProminent)
+                        .tint(.neonCyan)
+                        .controlSize(.small)
+                }
 
-            Button { onAction(.more) } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.textMuted)
-                    .frame(width: 32, height: 32)
+                Button { onAction(.more) } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.textMuted)
+                        .frame(minWidth: 32, minHeight: 32)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Diğer seçenekler")
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Diğer seçenekler")
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var preview: some View {
@@ -95,7 +100,7 @@ struct PostCard: View {
             Button { onAction(.like) } label: {
                 HStack(spacing: 6) {
                     Image(systemName: post.isLiked ? "heart.fill" : "heart")
-                        .font(.system(size: 20))
+                        .font(.title3)
                         .foregroundColor(post.isLiked ? .dangerRed : .textPrimary)
                     Text("\(post.likes)")
                         .font(.app(14, .medium))
@@ -108,7 +113,7 @@ struct PostCard: View {
             Button { onAction(.comment) } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "bubble.left")
-                        .font(.system(size: 18))
+                        .font(.title3)
                     Text("\(post.comments)")
                         .font(.app(14, .medium))
                 }
@@ -122,7 +127,7 @@ struct PostCard: View {
     }
 
     private var footer: some View {
-        HStack {
+        AdaptiveStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(post.title)
                     .font(.app(15, .bold))
@@ -132,7 +137,7 @@ struct PostCard: View {
                     .font(.footnote)
                     .foregroundColor(.textMuted)
             }
-            Spacer()
+            Spacer(minLength: 0)
             Button { onAction(.play) } label: {
                 Label("Oyna", systemImage: "play.fill")
                     .font(.subheadline.weight(.bold))
@@ -141,6 +146,7 @@ struct PostCard: View {
             .buttonStyle(.appGlassProminent)
             .tint(.neonCyan)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(Color.surfaceVariantDark)
         .clipShape(RoundedRectangle(cornerRadius: 14))
