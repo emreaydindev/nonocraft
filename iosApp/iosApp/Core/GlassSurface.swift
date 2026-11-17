@@ -258,6 +258,21 @@ private struct FallbackGlassButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Toolbar
+
+extension ToolbarContent {
+    /// Drops the shared glass capsule iOS 26 puts behind toolbar items, for content that is not a
+    /// control (e.g. the wordmark). No-op on iOS 18–25, which never draws one.
+    @ToolbarContentBuilder
+    func appGlassBackgroundHidden() -> some ToolbarContent {
+        if #available(iOS 26, *) {
+            sharedBackgroundVisibility(.hidden)
+        } else {
+            self
+        }
+    }
+}
+
 // MARK: - Preview
 
 #Preview("Glass wrapper") {

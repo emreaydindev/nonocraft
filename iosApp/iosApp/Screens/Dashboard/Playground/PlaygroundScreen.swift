@@ -19,7 +19,7 @@ struct PlaygroundScreen: View {
 }
 
 /// Same content as the Android home (wallet, daily, campaign level + draft, random generator),
-/// laid out the iOS way: large title with toolbar buttons, a wallet row, a hero daily card.
+/// laid out the iOS way and sized so everything fits on a phone screen without scrolling.
 private struct PlaygroundContent: View {
     let state: PlaygroundUiState
     let onNavigateToGame: (String) -> Void
@@ -28,13 +28,13 @@ private struct PlaygroundContent: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                WalletRow(
+            VStack(spacing: 14) {
+                WalletStrip(
                     stars: Int(state.stars),
                     crystals: Int(state.crystals),
                     crystalRefillMinutes: Int(state.crystalRefillMinutes)
                 )
-                DailyHeroCard(
+                DailyCard(
                     isSolved: state.isDailySolved,
                     onPlayToday: { onNavigateToGame("daily-today-20") },
                     onPlayPast: { date in onNavigateToGame("daily-\(date)-20") }
@@ -55,9 +55,25 @@ private struct PlaygroundContent: View {
             .frame(maxWidth: .infinity)
         }
         .background { ScreenBackground { EmptyView() } }
+        // The title still names the page for VoiceOver and the back-button menu; the wordmark replaces it on screen.
         .navigationTitle("Oyun Alanı")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.inline)
+        .toolbar(removing: .title)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                HStack(spacing: 8) {
+                    Image("Logo")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    BrandName(size: 22)
+                }
+                .fixedSize()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Nonocraft")
+                .accessibilityAddTraits(.isHeader)
+            }
+            .appGlassBackgroundHidden()
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Nasıl oynanır", systemImage: "questionmark.circle", action: onNavigateToTutorial)
                 Button("Ayarlar", systemImage: "gearshape", action: onNavigateToSettings)
@@ -68,8 +84,8 @@ private struct PlaygroundContent: View {
 
 // MARK: - Wallet
 
-/// Ranking stars and the crystal fail pool side by side, in place of the Android greeting row.
-private struct WalletRow: View {
+/// Ranking stars and the crystal fail pool on one slim row, in place of the Android greeting row.
+private struct WalletStrip: View {
     let stars: Int
     let crystals: Int
     let crystalRefillMinutes: Int
@@ -78,111 +94,84 @@ private struct WalletRow: View {
     private let crystalCap = 5
 
     var body: some View {
-        HStack(spacing: 12) {
-            WalletTile(title: "YILDIZ", systemImage: "star.fill", tint: .gameGold) {
-                Text("\(stars)")
-                    .font(.app(28, .bold))
-                    .foregroundStyle(Color.textPrimary)
-                    .contentTransition(.numericText())
-            } footer: {
-                Text("Sıralama puanı")
-                    .font(.footnote)
-                    .foregroundStyle(Color.textMuted)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(stars) yıldız")
-
-            WalletTile(title: "KRİSTAL", systemImage: "diamond.fill", tint: .neonCyan) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text("\(crystals)")
-                        .font(.app(28, .bold))
+        DashboardCard(cornerRadius: 18) {
+            HStack(spacing: 14) {
+                HStack(spacing: 6) {
+                    Image(systemName: "star.fill")
+                        .foregroundStyle(Color.gameGold)
+                    Text("\(stars)")
+                        .font(.app(17, .bold))
                         .foregroundStyle(Color.textPrimary)
                         .contentTransition(.numericText())
-                    Text("/\(crystalCap)")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.textMuted)
                 }
-            } footer: {
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(stars) yıldız")
+
+                Rectangle()
+                    .fill(Color.borderDark)
+                    .frame(width: 1, height: 22)
+
                 HStack(spacing: 8) {
+                    Image(systemName: "diamond.fill")
+                        .foregroundStyle(Color.neonCyan)
+                    Text("\(crystals)/\(crystalCap)")
+                        .font(.app(17, .bold))
+                        .foregroundStyle(Color.textPrimary)
+                        .contentTransition(.numericText())
                     HStack(spacing: 3) {
                         ForEach(0..<crystalCap, id: \.self) { index in
                             Capsule()
                                 .fill(index < crystals ? Color.neonCyan : Color.surfaceVariantDark)
-                                .frame(height: 5)
+                                .frame(width: 10, height: 5)
                         }
                     }
-                    if crystals < crystalCap {
-                        Label("\(crystalRefillMinutes) dk", systemImage: "timer")
-                            .labelStyle(.titleAndIcon)
-                            .font(.footnote.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(crystals == 0 ? Color.dangerRed : Color.textSecondary)
-                            .fixedSize()
-                    }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(crystals) / \(crystalCap) kristal")
+
+                Spacer(minLength: 0)
+
+                if crystals < crystalCap {
+                    Label("\(crystalRefillMinutes) dk", systemImage: "timer")
+                        .labelStyle(.titleAndIcon)
+                        .font(.footnote.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(crystals == 0 ? Color.dangerRed : Color.textSecondary)
+                        .fixedSize()
+                        .accessibilityLabel("Yeni kristale \(crystalRefillMinutes) dakika")
                 }
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(crystalAccessibilityLabel)
-        }
-    }
-
-    private var crystalAccessibilityLabel: String {
-        let count = "\(crystals) / \(crystalCap) kristal"
-        return crystals < crystalCap ? "\(count), yenisine \(crystalRefillMinutes) dakika" : count
-    }
-}
-
-private struct WalletTile<Value: View, Footer: View>: View {
-    let title: String
-    let systemImage: String
-    let tint: Color
-    @ViewBuilder var value: Value
-    @ViewBuilder var footer: Footer
-
-    var body: some View {
-        DashboardCard(cornerRadius: 20) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: systemImage)
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(tint)
-                    Text(title)
-                        .font(.app(11, .medium))
-                        .kerning(1)
-                        .foregroundStyle(Color.textMuted)
-                }
-                value
-                footer
-                    .frame(maxWidth: .infinity, minHeight: 18, alignment: .leading)
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .font(.system(size: 14, weight: .bold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
     }
 }
 
 // MARK: - Daily
 
-private struct DailyHeroCard: View {
+private struct DailyCard: View {
     let isSolved: Bool
     let onPlayToday: () -> Void
     let onPlayPast: (String) -> Void
 
     private static let locale = Locale(identifier: "tr_TR")
 
-    private struct PastDay: Identifiable {
+    private struct Day: Identifiable {
         let id: String  // yyyy-MM-dd, the daily puzzle key
         let weekday: String
-        let day: String
+        let number: String
+        let isToday: Bool
     }
 
-    /// The five days before today, oldest first, like a calendar week row.
-    private var pastDays: [PastDay] {
-        (1...5).reversed().compactMap { daysAgo in
+    /// This week as a calendar row: the six days before today, then today.
+    private var week: [Day] {
+        (0...6).reversed().compactMap { daysAgo in
             Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()).map {
-                PastDay(
+                Day(
                     id: Self.format($0, "yyyy-MM-dd"),
-                    weekday: Self.format($0, "EEE"),
-                    day: Self.format($0, "d")
+                    weekday: daysAgo == 0 ? "Bugün" : Self.format($0, "EEE"),
+                    number: Self.format($0, "d"),
+                    isToday: daysAgo == 0
                 )
             }
         }
@@ -196,74 +185,104 @@ private struct DailyHeroCard: View {
     }
 
     var body: some View {
-        DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 24) {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .center, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
+        DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 22) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 14) {
+                    MysteryGrid(seed: Self.format(Date(), "yyyyMMdd"), isRevealed: isSolved)
+                        .frame(width: 50, height: 50)
+
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("GÜNÜN BULMACASI")
                             .font(.app(11, .medium))
                             .kerning(1)
                             .foregroundStyle(isSolved ? Color.textMuted : Color.neonCyan)
                         Text(Self.format(Date(), "d MMMM"))
-                            .font(.app(30, .bold))
+                            .font(.app(22, .bold))
                             .foregroundStyle(Color.textPrimary)
-                        Text(Self.format(Date(), "EEEE"))
-                            .font(.subheadline)
-                            .foregroundStyle(Color.textSecondary)
                     }
+                    .accessibilityElement(children: .combine)
+
                     Spacer(minLength: 0)
-                    Image("Logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 88, height: 88)
-                        .shadow(color: .neonCyan.opacity(isSolved ? 0 : 0.45), radius: 18)
-                        .saturation(isSolved ? 0.2 : 1)
-                        .accessibilityHidden(true)
+
+                    if isSolved {
+                        Label("Çözüldü", systemImage: "checkmark.seal.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.neonCyan)
+                    } else {
+                        CompactPlayButton(title: "Oyna", action: onPlayToday)
+                    }
                 }
 
-                if isSolved {
-                    Label("Bugünün bulmacası çözüldü", systemImage: "checkmark.circle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.neonCyan)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.surfaceVariantDark, in: Capsule())
-                } else {
-                    PlayButton(title: "Oyna", systemImage: "play.fill", action: onPlayToday)
-                }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("GEÇMİŞ GÜNLER")
-                        .font(.app(11))
-                        .kerning(1)
-                        .foregroundStyle(Color.textMuted)
-                    HStack(spacing: 0) {
-                        ForEach(pastDays) { day in
-                            Button {
-                                onPlayPast(day.id)
-                            } label: {
-                                VStack(spacing: 6) {
-                                    Text(day.weekday)
-                                        .font(.caption2.weight(.semibold))
-                                        .foregroundStyle(Color.textMuted)
-                                    Text(day.day)
-                                        .font(.app(16, .bold))
-                                        .foregroundStyle(Color.textPrimary)
-                                        .frame(width: 40, height: 40)
-                                        .background(Color.surfaceVariantDark, in: Circle())
-                                }
-                                .frame(maxWidth: .infinity)
-                                .contentShape(Rectangle())
+                HStack(spacing: 0) {
+                    ForEach(week) { day in
+                        Button {
+                            day.isToday ? onPlayToday() : onPlayPast(day.id)
+                        } label: {
+                            VStack(spacing: 6) {
+                                Text(day.weekday)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(day.isToday ? Color.neonCyan : Color.textMuted)
+                                    .lineLimit(1)
+                                    .fixedSize()
+                                Text(day.number)
+                                    .font(.app(15, .bold))
+                                    .foregroundStyle(day.isToday ? Color.onNeon : Color.textPrimary)
+                                    .frame(width: 36, height: 36)
+                                    .background(day.isToday ? Color.neonCyan : Color.surfaceVariantDark, in: Circle())
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("\(day.day) \(day.weekday) bulmacasını oyna")
+                            .frame(maxWidth: .infinity)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(day.isToday ? "Bugünün bulmacası" : "\(day.number) \(day.weekday) bulmacası")
+                    }
+                }
+            }
+            .padding(18)
+        }
+    }
+}
+
+/// A tiny mirrored 5×5 nonogram that changes every day: a teaser for today's puzzle.
+private struct MysteryGrid: View {
+    let seed: String
+    let isRevealed: Bool
+
+    private var cells: [[Bool]] {
+        var state = UInt64(seed) ?? 1
+        func nextBit() -> Bool {
+            state = state &* 6364136223846793005 &+ 1442695040888963407
+            return (state >> 33) % 100 < 55
+        }
+        return (0..<5).map { _ in
+            let left = (0..<3).map { _ in nextBit() }
+            return left + [left[1], left[0]]
+        }
+    }
+
+    var body: some View {
+        let grid = cells
+        GeometryReader { proxy in
+            let spacing: CGFloat = 2
+            let side = (min(proxy.size.width, proxy.size.height) - spacing * 4) / 5
+            VStack(spacing: spacing) {
+                ForEach(0..<5, id: \.self) { row in
+                    HStack(spacing: spacing) {
+                        ForEach(0..<5, id: \.self) { column in
+                            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                .fill(grid[row][column] ? filled : Color.surfaceVariantDark)
+                                .frame(width: side, height: side)
                         }
                     }
                 }
             }
-            .padding(20)
         }
+        .padding(6)
+        .background(Color.backgroundDark, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityHidden(true)
     }
+
+    private var filled: Color { isRevealed ? .textMuted : .neonCyan }
 }
 
 // MARK: - Campaign
@@ -276,17 +295,17 @@ private struct CampaignCard: View {
     let onContinue: () -> Void
 
     var body: some View {
-        DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 24) {
-            VStack(spacing: 18) {
+        DashboardCard(borderColor: .neonCyan.opacity(0.22), cornerRadius: 22) {
+            VStack(spacing: 14) {
                 HStack(spacing: 14) {
                     Text("\(currentLevel)")
-                        .font(.app(30, .bold))
+                        .font(.app(24, .bold))
                         .foregroundStyle(Color.neonCyan)
-                        .frame(width: 64, height: 64)
-                        .background(Color.neonCyan.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .frame(width: 50, height: 50)
+                        .background(Color.neonCyan.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .accessibilityHidden(true)
 
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text("MEVCUT SEVİYE")
                             .font(.app(11))
                             .kerning(1)
@@ -294,38 +313,36 @@ private struct CampaignCard: View {
                         Text("Seviye \(currentLevel)")
                             .font(.app(20, .bold))
                             .foregroundStyle(Color.textPrimary)
-                        if hasDraft {
-                            Text("Yarım kalan bölüm · \(draftSize)")
-                                .font(.footnote)
-                                .foregroundStyle(Color.textSecondary)
-                        }
                     }
                     .accessibilityElement(children: .combine)
 
                     Spacer(minLength: 0)
 
-                    if hasDraft {
-                        Gauge(value: Double(draftProgress), in: 0...100) {
-                            EmptyView()
-                        } currentValueLabel: {
-                            Text("%\(draftProgress)")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(Color.textPrimary)
-                        }
-                        .gaugeStyle(.accessoryCircularCapacity)
-                        .tint(.purpleAccent)
-                        .accessibilityLabel("Yarım kalan bölüm ilerlemesi")
-                        .accessibilityValue("%\(draftProgress)")
-                    }
+                    CompactPlayButton(title: hasDraft ? "Devam Et" : "Başla", action: onContinue)
                 }
 
-                PlayButton(
-                    title: hasDraft ? "Devam Et" : "Başla",
-                    systemImage: hasDraft ? "arrow.uturn.forward" : "play.fill",
-                    action: onContinue
-                )
+                if hasDraft {
+                    VStack(spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.purpleAccent)
+                            Text("Yarım kalan bölüm · \(draftSize)")
+                                .font(.footnote)
+                                .foregroundStyle(Color.textSecondary)
+                            Spacer(minLength: 0)
+                            Text("%\(draftProgress)")
+                                .font(.footnote.weight(.bold).monospacedDigit())
+                                .foregroundStyle(Color.purpleAccent)
+                        }
+                        ProgressView(value: Double(draftProgress), total: 100)
+                            .tint(.purpleAccent)
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Yarım kalan bölüm, \(draftSize), yüzde \(draftProgress)")
+                }
             }
-            .padding(20)
+            .padding(18)
         }
     }
 }
@@ -358,7 +375,7 @@ private struct RandomPuzzleRow: View {
                     .foregroundStyle(Color.textMuted)
             }
             .padding(.horizontal, 18)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .background(Color.surfaceDark, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.borderDark, lineWidth: 0.5))
         }
@@ -366,19 +383,17 @@ private struct RandomPuzzleRow: View {
     }
 }
 
-/// Full-width primary action inside a card: prominent glass tinted neon cyan.
-private struct PlayButton: View {
+/// Primary action inside a card: prominent glass tinted neon cyan.
+private struct CompactPlayButton: View {
     let title: String
-    let systemImage: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage)
-                .font(.app(17, .bold))
+            Text(title)
+                .font(.app(15, .bold))
                 .foregroundStyle(Color.onNeon)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 4)
         }
         .buttonStyle(.appGlassProminent)
         .tint(.neonCyan)
