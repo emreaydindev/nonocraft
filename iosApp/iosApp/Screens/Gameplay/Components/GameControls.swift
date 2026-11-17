@@ -73,9 +73,53 @@ struct AnalogStick: View {
     }
 }
 
+/// Floating glass bar under the board: tool palette on top, stick and actions below.
+/// The controls inside are flat (no glass on glass); only the bar itself is glass.
+struct GameControlBar: View {
+    let palette: [Color]
+    let selectedColorIndex: Int
+    let isCrossMode: Bool
+    let hintsRemaining: Int
+    let onMove: (_ dRow: Int, _ dCol: Int) -> Void
+    let onStickFocusChange: (Bool) -> Void
+    let onPlacePressed: (Bool) -> Void
+    let onHint: () -> Void
+    let onColorSelected: (Int) -> Void
+    let onCrossSelected: () -> Void
+
+    var body: some View {
+        GlassSurface(cornerRadius: 32, padding: EdgeInsets(top: 12, leading: 16, bottom: 16, trailing: 16)) {
+            VStack(spacing: 12) {
+                ToolPaletteBar(
+                    palette: palette,
+                    selectedColorIndex: selectedColorIndex,
+                    isCrossMode: isCrossMode,
+                    onColorSelected: onColorSelected,
+                    onCrossSelected: onCrossSelected
+                )
+                HStack {
+                    AnalogStick(onMove: onMove, onFocusChange: onStickFocusChange)
+                    Spacer(minLength: 16)
+                    GameActionButtons(
+                        hintsRemaining: hintsRemaining,
+                        selectedColor: isCrossMode ? .dangerRed : palette[safe: selectedColorIndex - 1] ?? .neonCyan,
+                        isCrossMode: isCrossMode,
+                        onPlacePressed: onPlacePressed,
+                        onHint: onHint
+                    )
+                }
+            }
+        }
+        .frame(maxWidth: 560)
+        .padding(.horizontal, 12)
+        .padding(.bottom, 4)
+    }
+}
+
 struct GameActionButtons: View {
     let hintsRemaining: Int
     let selectedColor: Color
+    let isCrossMode: Bool
     let onPlacePressed: (Bool) -> Void
     let onHint: () -> Void
 
@@ -90,7 +134,7 @@ struct GameActionButtons: View {
                 }
                 .foregroundColor(.neonCyan)
                 .frame(width: 64, height: 64)
-                .background(Color.surfaceDark)
+                .background(Color.neonCyan.opacity(0.1))
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.neonCyan.opacity(0.5), lineWidth: 2))
             }
@@ -98,7 +142,7 @@ struct GameActionButtons: View {
             .accessibilityLabel("İpucu, \(hintsRemaining) kaldı")
 
             // Held down while the stick moves, it fills every cell the cursor enters.
-            Image(systemName: "pencil")
+            Image(systemName: isCrossMode ? "xmark" : "pencil")
                 .font(.system(size: 30, weight: .bold))
                 .foregroundColor(selectedColor)
                 .frame(width: 76, height: 76)
@@ -118,7 +162,7 @@ struct GameActionButtons: View {
                             onPlacePressed(false)
                         }
                 )
-                .accessibilityLabel("Doldur")
+                .accessibilityLabel(isCrossMode ? "Çarpı koy" : "Doldur")
                 .accessibilityAddTraits(.isButton)
         }
     }
@@ -132,7 +176,15 @@ struct ToolPaletteBar: View {
     let onCrossSelected: () -> Void
 
     var body: some View {
-        HStack(spacing: 16) {
+        // Centred when it fits, scrolls sideways for large palettes.
+        ViewThatFits(in: .horizontal) {
+            items
+            ScrollView(.horizontal, showsIndicators: false) { items }
+        }
+    }
+
+    private var items: some View {
+        HStack(spacing: 12) {
             ToolItem(tint: .dangerRed, isSelected: isCrossMode, label: "Çarpı", action: onCrossSelected) {
                 Image(systemName: "xmark")
                     .font(.system(size: 22, weight: .bold))
@@ -148,9 +200,7 @@ struct ToolPaletteBar: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 2)
     }
 }
 
@@ -164,7 +214,7 @@ private struct ToolItem<Content: View>: View {
     var body: some View {
         Button(action: action) {
             content
-                .frame(width: 54, height: 54)
+                .frame(width: 48, height: 48)
                 .background(isSelected ? tint.opacity(0.2) : .clear)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(isSelected ? tint : Color.borderDark, lineWidth: 2))

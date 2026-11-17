@@ -87,31 +87,21 @@ struct GameScreen: View {
             )
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            HStack {
-                AnalogStick(
-                    onMove: { dRow, dCol in viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol)) },
-                    onFocusChange: { viewModel.setAnalogFocus(isFocused: $0) }
-                )
-                Spacer()
-                GameActionButtons(
-                    hintsRemaining: Int(state.hintsRemaining),
-                    selectedColor: palette[safe: Int(state.selectedColorIndex) - 1] ?? .neonCyan,
-                    onPlacePressed: { viewModel.setPlacePressed(isPressed: $0) },
-                    onHint: { viewModel.useHint() }
-                )
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 8)
-
-            ToolPaletteBar(
+        }
+        // The board is laid out above the bar, so the glass never covers a cell.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            GameControlBar(
                 palette: palette,
                 selectedColorIndex: Int(state.selectedColorIndex),
                 isCrossMode: state.isCrossMode,
+                hintsRemaining: Int(state.hintsRemaining),
+                onMove: { dRow, dCol in viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol)) },
+                onStickFocusChange: { viewModel.setAnalogFocus(isFocused: $0) },
+                onPlacePressed: { viewModel.setPlacePressed(isPressed: $0) },
+                onHint: { viewModel.useHint() },
                 onColorSelected: { viewModel.selectColor(colorIndex: Int32($0)) },
                 onCrossSelected: { viewModel.toggleCrossMode(isCross: true) }
             )
-            .padding(.top, 8)
         }
     }
 }

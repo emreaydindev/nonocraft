@@ -115,7 +115,8 @@ struct GameGridArea: View {
         }
 
         // Clue strips
-        let clueBackground = Color.surfaceDark.opacity(0.5)
+        // Opaque so clues stay high-contrast over the patterned background (same tone as before).
+        let clueBackground = Color(hex: 0x171717)
         let rowStripWidth = CGFloat(layout.maxRowClues) * cell
         let colStripHeight = CGFloat(layout.maxColClues) * cell
         context.fill(Path(CGRect(x: origin.x - rowStripWidth, y: origin.y, width: rowStripWidth, height: board)), with: .color(clueBackground))
