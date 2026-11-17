@@ -65,7 +65,10 @@ The Android screens are the feature reference. **iOS no longer copies the Androi
 - [ ] Win celebration (Lottie on Android, native animation on iOS) + picture reveal.
 
 ### iOS native redesign (D§15)
-- [ ] Raise deployment target per D§15 (iOS 26 proposed) and rebuild screens natively: Liquid Glass `TabView`, glass toolbars/buttons (`glassEffect`, `.buttonStyle(.glass)`), native sheets with detents, `NavigationStack`/`NavigationSplitView`, SF Symbols, large titles where fitting; keep neon accent colours and Chakra Petch for display text.
+- [x] Deployment target iOS 18 in `project.yml` (D§15).
+- [ ] Build the shared glass wrapper in `iosApp/iosApp/Core/` (`GlassSurface` / `.appGlass(in: shape)` modifier + `AppGlassButtonStyle`): iOS 26 `glassEffect` / `.buttonStyle(.glass)` (and `GlassEffectContainer` for grouped elements), fallback `.ultraThinMaterial` + same shape/stroke on iOS 18–25, solid background when Reduce Transparency is on. Only this file checks `#available(iOS 26, *)`.
+- [ ] Rebuild screens natively for the iOS 26 look: system `TabView` bottom bar, `NavigationStack`/`NavigationSplitView` with system back buttons and toolbars (no custom top bars replacing them, e.g. retire `ScreenTopBar` where a toolbar fits), native sheets with detents, SF Symbols, large titles where fitting; keep neon accent colours and Chakra Petch for display text. Custom glass only through the wrapper.
+- [ ] Check every screen on an iOS 18 simulator as well as iOS 26 (fallback look, no missing APIs).
 - [ ] Game screen: glass control bar floating over the board; board stays opaque and high-contrast.
 - [ ] Respect Reduce Transparency / Increase Contrast (glass falls back to solid).
 
