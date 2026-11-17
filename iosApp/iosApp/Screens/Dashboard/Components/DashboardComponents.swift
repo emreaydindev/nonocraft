@@ -12,48 +12,13 @@ enum DashboardTab: CaseIterable, Hashable {
         }
     }
 
-    func icon(selected: Bool) -> String {
+    /// SF Symbol for the system tab bar, which fills it when selected.
+    var systemImage: String {
         switch self {
-        case .playground: selected ? "gamecontroller.fill" : "gamecontroller"
-        case .feed: selected ? "safari.fill" : "safari"
-        case .library: selected ? "star.square.on.square.fill" : "star.square.on.square"
-        case .account: selected ? "person.crop.circle.fill" : "person.crop.circle"
-        }
-    }
-}
-
-struct DashboardBottomNavBar: View {
-    @Binding var currentTab: DashboardTab
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(DashboardTab.allCases, id: \.self) { tab in
-                let isSelected = tab == currentTab
-                Button {
-                    currentTab = tab
-                } label: {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon(selected: isSelected))
-                            .font(.system(size: 20))
-                            .frame(width: 64, height: 32)
-                            .background(isSelected ? Color.purpleAccent.opacity(0.15) : .clear)
-                            .clipShape(Capsule())
-                        Text(tab.label)
-                            .font(.app(11, isSelected ? .semibold : .medium))
-                    }
-                    .foregroundColor(isSelected ? .purpleAccent : .textMuted)
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
-            }
-        }
-        .padding(.top, 12)
-        .padding(.bottom, 4)
-        .background(Color.surfaceDark.ignoresSafeArea(edges: .bottom))
-        .overlay(alignment: .top) {
-            Rectangle().fill(Color.borderDark).frame(height: 0.5)
+        case .playground: "gamecontroller"
+        case .feed: "safari"
+        case .library: "star.square.on.square"
+        case .account: "person.crop.circle"
         }
     }
 }

@@ -4,59 +4,81 @@ struct DashboardScreen: View {
     let onNavigateToAuthGateway: () -> Void
 
     @State private var currentTab: DashboardTab = .playground
-    @State private var path: [AppRoute] = []
+    /// Each tab keeps its own navigation history, like every system app with a tab bar.
+    @State private var paths: [DashboardTab: [AppRoute]] = [:]
 
     var body: some View {
-        NavigationStack(path: $path) {
-            VStack(spacing: 0) {
-                Group {
-                    switch currentTab {
-                    case .playground:
-                        PlaygroundScreen(
-                            onNavigateToGame: { path.append(.game(id: $0)) },
-                            onNavigateToSettings: { path.append(.settings) },
-                            onNavigateToTutorial: { path.append(.tutorial) }
-                        )
-                    case .feed:
-                        FeedScreen(
-                            onNavigateToGame: { path.append(.game(id: $0)) },
-                            onNavigateToProfile: { path.append(.profile(userId: $0)) },
-                            onNavigateToCrafting: { path.append(.crafting) }
-                        )
-                    case .library:
-                        LibraryScreen(
-                            onNavigateToCrafting: { path.append(.crafting) },
-                            onNavigateToPremium: { path.append(.premium) },
-                            onNavigateToCategory: { path.append(.libraryDetail(id: $0)) },
-                            onNavigateToPlaylist: { path.append(.libraryDetail(id: $0)) }
-                        )
-                    case .account:
-                        AccountScreen(
-                            onNavigateToPremium: { path.append(.premium) },
-                            onNavigateToSettings: { path.append(.settings) },
-                            onNavigateToCrafting: { path.append(.crafting) },
-                            onNavigateToAuthGateway: onNavigateToAuthGateway
-                        )
-                    }
+        TabView(selection: $currentTab) {
+            Tab(DashboardTab.playground.label, systemImage: DashboardTab.playground.systemImage, value: .playground) {
+                stack(.playground) { push in
+                    PlaygroundScreen(
+                        onNavigateToGame: { push(.game(id: $0)) },
+                        onNavigateToSettings: { push(.settings) },
+                        onNavigateToTutorial: { push(.tutorial) }
+                    )
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                DashboardBottomNavBar(currentTab: $currentTab)
             }
-            .background(Color.backgroundDark.ignoresSafeArea())
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: AppRoute.self, destination: destination)
+            Tab(DashboardTab.feed.label, systemImage: DashboardTab.feed.systemImage, value: .feed) {
+                stack(.feed) { push in
+                    FeedScreen(
+                        onNavigateToGame: { push(.game(id: $0)) },
+                        onNavigateToProfile: { push(.profile(userId: $0)) },
+                        onNavigateToCrafting: { push(.crafting) }
+                    )
+                }
+            }
+            Tab(DashboardTab.library.label, systemImage: DashboardTab.library.systemImage, value: .library) {
+                stack(.library) { push in
+                    LibraryScreen(
+                        onNavigateToCrafting: { push(.crafting) },
+                        onNavigateToPremium: { push(.premium) },
+                        onNavigateToCategory: { push(.libraryDetail(id: $0)) },
+                        onNavigateToPlaylist: { push(.libraryDetail(id: $0)) }
+                    )
+                }
+            }
+            Tab(DashboardTab.account.label, systemImage: DashboardTab.account.systemImage, value: .account) {
+                stack(.account) { push in
+                    AccountScreen(
+                        onNavigateToPremium: { push(.premium) },
+                        onNavigateToSettings: { push(.settings) },
+                        onNavigateToCrafting: { push(.crafting) },
+                        onNavigateToAuthGateway: onNavigateToAuthGateway
+                    )
+                }
+            }
+        }
+        // Bottom bar on iPhone, sidebar-adaptable on iPad and big screens (DECISIONS §15).
+        .tabViewStyle(.sidebarAdaptable)
+        .tint(.purpleAccent)
+    }
+
+    private func path(for tab: DashboardTab) -> Binding<[AppRoute]> {
+        Binding(get: { paths[tab] ?? [] }, set: { paths[tab] = $0 })
+    }
+
+    private func stack<Root: View>(
+        _ tab: DashboardTab,
+        @ViewBuilder root: (_ push: @escaping (AppRoute) -> Void) -> Root
+    ) -> some View {
+        let push: (AppRoute) -> Void = { paths[tab, default: []].append($0) }
+        return NavigationStack(path: path(for: tab)) {
+            root(push)
+                .background(Color.backgroundDark.ignoresSafeArea())
+                // Tab roots still draw their own headers; they move to toolbars screen by screen.
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(for: AppRoute.self) { destination($0, in: tab, push: push) }
         }
     }
 
     @ViewBuilder
-    private func destination(_ route: AppRoute) -> some View {
-        let back = { _ = path.popLast() }
+    private func destination(_ route: AppRoute, in tab: DashboardTab, push: @escaping (AppRoute) -> Void) -> some View {
+        let back = { _ = paths[tab]?.popLast() }
         switch route {
         case .settings:
             SettingsScreen(
                 onNavigateBack: back,
-                onNavigate: { path.append(.settingsSub($0)) },
+                onNavigate: { push(.settingsSub($0)) },
                 onLogoutSuccess: onNavigateToAuthGateway
             )
         case .settingsSub(.theme): ThemeScreen(onNavigateBack: back)
@@ -64,20 +86,26 @@ struct DashboardScreen: View {
         case .settingsSub(.editProfile): EditProfileScreen(onNavigateBack: back)
         case .settingsSub(.changePassword): ChangePasswordScreen(onNavigateBack: back)
         case .settingsSub(.notifications): NotificationSettingsScreen(onNavigateBack: back)
-        case .game(let id): GameScreen(gameId: id, onNavigateBack: back)
-        case .tutorial: TutorialScreen(onNavigateToDashboard: back)
+        case .game(let id):
+            // Full screen: the floating control bar takes the tab bar's place.
+            GameScreen(gameId: id, onNavigateBack: back)
+                .toolbar(.hidden, for: .tabBar)
+        case .tutorial:
+            TutorialScreen(onNavigateToDashboard: back)
+                .toolbar(.hidden, for: .tabBar)
         case .premium: PremiumScreen(onNavigateBack: back)
         case .libraryDetail(let id):
             LibraryDetailScreen(
                 categoryId: id,
                 onNavigateBack: back,
-                onNavigateToGame: { path.append(.game(id: $0)) },
-                onNavigateToProfile: { path.append(.profile(userId: $0)) }
+                onNavigateToGame: { push(.game(id: $0)) },
+                onNavigateToProfile: { push(.profile(userId: $0)) }
             )
         case .profile(let userId):
-            ProfileScreen(userId: userId, onNavigateBack: back, onNavigateToGame: { path.append(.game(id: $0)) })
+            ProfileScreen(userId: userId, onNavigateBack: back, onNavigateToGame: { push(.game(id: $0)) })
         case .crafting:
             CraftingScreen(onNavigateBack: back)
+                .toolbar(.hidden, for: .tabBar)
         }
     }
 }
