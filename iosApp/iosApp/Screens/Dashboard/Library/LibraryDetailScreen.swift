@@ -1,8 +1,28 @@
 import Shared
 import SwiftUI
 
+/// A library section or playlist as its own page (phones, narrow windows).
 struct LibraryDetailScreen: View {
     let categoryId: String
+    let onNavigateToGame: (String) -> Void
+    let onNavigateToProfile: (String) -> Void
+
+    var body: some View {
+        LibraryDetailContent(
+            categoryId: categoryId,
+            showsTitleHeader: false,
+            onNavigateToGame: onNavigateToGame,
+            onNavigateToProfile: onNavigateToProfile
+        )
+        .background { ScreenBackground { EmptyView() } }
+    }
+}
+
+/// Posts of one library section or playlist. Used as a page, and as the content pane of the Library's
+/// two-pane layout, where it shows its title as a heading instead of in the navigation bar.
+struct LibraryDetailContent: View {
+    let categoryId: String
+    let showsTitleHeader: Bool
     let onNavigateToGame: (String) -> Void
     let onNavigateToProfile: (String) -> Void
 
@@ -10,10 +30,12 @@ struct LibraryDetailScreen: View {
 
     init(
         categoryId: String,
+        showsTitleHeader: Bool,
         onNavigateToGame: @escaping (String) -> Void,
         onNavigateToProfile: @escaping (String) -> Void
     ) {
         self.categoryId = categoryId
+        self.showsTitleHeader = showsTitleHeader
         self.onNavigateToGame = onNavigateToGame
         self.onNavigateToProfile = onNavigateToProfile
         _model = StateObject(wrappedValue: ObservedViewModel(
@@ -27,6 +49,13 @@ struct LibraryDetailScreen: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 20) {
+                if showsTitleHeader {
+                    Text(uiState.title)
+                        .font(.app(22, .bold))
+                        .foregroundStyle(Color.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+                }
                 ForEach(uiState.posts, id: \.id) { post in
                     PostCard(post: post, showFollowButton: false) { action in
                         switch action {
@@ -52,9 +81,7 @@ struct LibraryDetailScreen: View {
                 ContentUnavailableView("Burada henüz bir şey yok.", systemImage: "tray")
             }
         }
-        .background { ScreenBackground { EmptyView() } }
-        .navigationTitle(uiState.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .modifier(InlineNavigationTitle(title: uiState.title, isEnabled: !showsTitleHeader))
         .postSheets(sheets)
     }
 
@@ -84,5 +111,22 @@ struct LibraryDetailScreen: View {
             onSelectPlaylist: { viewModel.addToPlaylist(playlistId: $0) },
             onCreatePlaylist: { viewModel.createAndAddToPlaylist(name: $0) }
         )
+    }
+}
+
+/// Sets the inline navigation title only when the content is a page of its own; as a pane it must not
+/// replace the title of the screen that hosts it.
+private struct InlineNavigationTitle: ViewModifier {
+    let title: String
+    let isEnabled: Bool
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+        } else {
+            content
+        }
     }
 }

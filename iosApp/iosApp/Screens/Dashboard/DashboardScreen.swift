@@ -34,7 +34,9 @@ struct DashboardScreen: View {
                         onNavigateToCrafting: { push(.crafting) },
                         onNavigateToPremium: { push(.premium) },
                         onNavigateToCategory: { push(.libraryDetail(id: $0)) },
-                        onNavigateToPlaylist: { push(.libraryDetail(id: $0)) }
+                        onNavigateToPlaylist: { push(.libraryDetail(id: $0)) },
+                        onNavigateToGame: { push(.game(id: $0)) },
+                        onNavigateToProfile: { push(.profile(userId: $0)) }
                     )
                 }
             }
