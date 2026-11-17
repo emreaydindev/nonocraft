@@ -48,14 +48,18 @@ struct SettingsLabel: View {
     let systemImage: String
     var tint: Color = .neonCyan
 
+    @ScaledMetric(relativeTo: .body) private var tileSize: CGFloat = 30
+
     var body: some View {
+        // The tile grows with the text, capped so it doesn't crowd the title at accessibility sizes.
+        let side = min(tileSize, 44)
         Label {
             Text(title)
         } icon: {
             Image(systemName: systemImage)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: side * 0.47, weight: .semibold))
                 .foregroundStyle(tint)
-                .frame(width: 30, height: 30)
+                .frame(width: side, height: side)
                 .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
     }
