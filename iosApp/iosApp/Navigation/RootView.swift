@@ -62,7 +62,6 @@ struct RootView: View {
                 switch route {
                 case .login:
                     LoginScreen(
-                        onNavigateBack: { authPath = [] },
                         onNavigateToRegister: { authPath = [.register] },
                         onNavigateToForgotPassword: { authPath.append(.forgotPassword) },
                         onGoogleSignIn: { showGoogleUnavailable = true },
@@ -75,7 +74,6 @@ struct RootView: View {
                     )
                 case .resetPassword:
                     ResetPasswordScreen(
-                        onNavigateBack: { _ = authPath.popLast() },
                         onResetSuccess: {
                             authPath = [.login]
                             showPasswordUpdated = true
@@ -83,7 +81,6 @@ struct RootView: View {
                     )
                 case .register:
                     RegisterScreen(
-                        onNavigateBack: { authPath = [] },
                         onNavigateToLogin: { authPath = [.login] },
                         onGoogleSignIn: { showGoogleUnavailable = true },
                         onRegisterSuccess: enterDashboard

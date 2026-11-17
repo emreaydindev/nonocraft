@@ -29,25 +29,6 @@ struct BrandName: View {
     }
 }
 
-struct AuthBackRow: View {
-    let onBack: () -> Void
-
-    var body: some View {
-        HStack {
-            Button(action: onBack) {
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.textPrimary)
-                    .frame(width: 48, height: 48)
-            }
-            .accessibilityLabel("Geri")
-            Spacer()
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-    }
-}
-
 struct GoogleSignInButton: View {
     let label: String
     var isLoading = false
@@ -57,26 +38,22 @@ struct GoogleSignInButton: View {
         Button(action: action) {
             Group {
                 if isLoading {
-                    ProgressView().tint(Color(hex: 0xB8B4B4))
+                    ProgressView()
                 } else {
                     HStack(spacing: 12) {
                         Image("GoogleIcon")
                             .resizable()
                             .frame(width: 20, height: 20)
                         Text(label)
-                            .font(.app(15, .semibold))
-                            .kerning(0.3)
-                            .foregroundColor(.textPrimary)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Color.textPrimary)
                     }
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(Color.surfaceDark.opacity(isLoading ? 0.35 : 1))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.borderDark, lineWidth: 1))
+            .padding(.vertical, 6)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appGlass)
         .disabled(isLoading)
     }
 }
@@ -296,6 +273,7 @@ struct PasswordRequirementRow: View {
     }
 }
 
+/// Full-width primary action: prominent glass tinted neon cyan.
 struct PrimaryAuthButton: View {
     let text: String
     var enabled = true
@@ -309,21 +287,21 @@ struct PrimaryAuthButton: View {
                     ProgressView().tint(.onNeon)
                 } else {
                     Text(text)
-                        .font(.app(15, .bold))
+                        .font(.app(16, .bold))
                         .kerning(0.5)
-                        .foregroundColor(enabled ? .onNeon : .textSecondary)
+                        .foregroundStyle(Color.onNeon)
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(Color.neonCyan.opacity(enabled ? 1 : 0.35))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.vertical, 6)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appGlassProminent)
+        .tint(.neonCyan)
         .disabled(!enabled || isLoading)
     }
 }
 
+/// Full-width secondary action: regular glass with neon text.
 struct OutlineAuthButton: View {
     let text: String
     let action: () -> Void
@@ -331,18 +309,16 @@ struct OutlineAuthButton: View {
     var body: some View {
         Button(action: action) {
             Text(text)
-                .font(.app(14, .semibold))
-                .kerning(0.3)
-                .foregroundColor(.neonCyan)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.neonCyan)
                 .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .contentShape(Rectangle())
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.neonCyan.opacity(0.50), lineWidth: 1.5))
+                .padding(.vertical, 6)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.appGlass)
     }
 }
 
+/// Low-emphasis text action.
 struct GhostAuthButton: View {
     let text: String
     let action: () -> Void
@@ -350,12 +326,10 @@ struct GhostAuthButton: View {
     var body: some View {
         Button(action: action) {
             Text(text)
-                .font(.app(13, .medium))
-                .foregroundColor(.textSecondary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.textSecondary)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Rectangle())
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.borderDark, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
     }

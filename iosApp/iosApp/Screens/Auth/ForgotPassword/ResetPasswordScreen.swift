@@ -2,7 +2,6 @@ import Shared
 import SwiftUI
 
 struct ResetPasswordScreen: View {
-    let onNavigateBack: () -> Void
     let onResetSuccess: () -> Void
 
     @StateObject private var model = ObservedViewModel({ $0.resetPasswordViewModel() }, state: \.state)
@@ -22,7 +21,6 @@ struct ResetPasswordScreen: View {
     var body: some View {
         ScreenBackground {
             VStack(spacing: 0) {
-                AuthBackRow(onBack: onNavigateBack)
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -94,7 +92,8 @@ struct ResetPasswordScreen: View {
                     .padding(.bottom, 24)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        // System back button on a transparent bar; the heading stays in the content.
+        .toolbarBackground(.hidden, for: .navigationBar)
         .onChange(of: uiState.isSuccess) { _, isSuccess in
             if isSuccess { onResetSuccess() }
         }

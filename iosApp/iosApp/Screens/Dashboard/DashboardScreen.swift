@@ -111,7 +111,7 @@ struct DashboardScreen: View {
         case .profile(let userId):
             ProfileScreen(userId: userId, onNavigateToGame: { push(.game(id: $0)) })
         case .crafting:
-            CraftingScreen(onNavigateBack: back)
+            CraftingScreen()
                 .toolbar(.hidden, for: .tabBar)
         }
     }
@@ -119,8 +119,6 @@ struct DashboardScreen: View {
 
 /// The puzzle editor has not been built on either platform yet (Android shows a stub too).
 struct CraftingScreen: View {
-    let onNavigateBack: () -> Void
-
     var body: some View {
         ScreenBackground {
             VStack(spacing: 8) {
@@ -128,9 +126,6 @@ struct CraftingScreen: View {
                     .font(.system(size: 32))
                     .foregroundColor(.purpleAccent)
                     .padding(.bottom, 8)
-                Text("Tasarım Stüdyosu")
-                    .font(.app(22, .bold))
-                    .foregroundColor(.textPrimary)
                 Text("Bulmaca tasarlama ekranı yakında burada olacak.")
                     .font(.app(13))
                     .foregroundColor(.textSecondary)
@@ -138,7 +133,7 @@ struct CraftingScreen: View {
             }
             .padding(32)
         }
-        .overlay(alignment: .topLeading) { AuthBackRow(onBack: onNavigateBack) }
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Tasarım Stüdyosu")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

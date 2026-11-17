@@ -2,7 +2,6 @@ import Shared
 import SwiftUI
 
 struct RegisterScreen: View {
-    let onNavigateBack: () -> Void
     let onNavigateToLogin: () -> Void
     let onGoogleSignIn: () -> Void
     let onRegisterSuccess: () -> Void
@@ -26,7 +25,6 @@ struct RegisterScreen: View {
     var body: some View {
         ScreenBackground {
             VStack(spacing: 0) {
-                AuthBackRow(onBack: onNavigateBack)
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -117,7 +115,8 @@ struct RegisterScreen: View {
                 .padding(.bottom, 24)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        // System back button on a transparent bar; the heading stays in the content.
+        .toolbarBackground(.hidden, for: .navigationBar)
         .onChange(of: uiState.isSuccess) { _, isSuccess in
             if isSuccess { onRegisterSuccess() }
         }

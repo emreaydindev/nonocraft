@@ -20,7 +20,6 @@ struct ForgotPasswordScreen: View {
     var body: some View {
         ScreenBackground {
             VStack(spacing: 0) {
-                AuthBackRow(onBack: onNavigateBack)
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -62,7 +61,8 @@ struct ForgotPasswordScreen: View {
                 .padding(.bottom, 24)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        // System back button on a transparent bar; the heading stays in the content.
+        .toolbarBackground(.hidden, for: .navigationBar)
         .onChange(of: uiState.isSent) { _, isSent in
             if isSent { onCodeSentSuccess() }
         }
