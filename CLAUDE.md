@@ -59,7 +59,9 @@ The Android screens are the feature reference. **iOS no longer copies the Androi
 - [ ] Alternate app icons (iOS `CFBundleAlternateIcons`, Android `activity-alias`); Pro icons locked.
 - [ ] Push: FCM both platforms, permission after the first daily solve, register with time zone/hour/locale, unregister on logout, notification settings.
 - [ ] Remote config / force update from `/config` at splash; maintenance message; AI kill switch hides AI entry points.
-- [ ] Sound (D§17, pending): SFX + optional music with separate toggles; iOS `.ambient` session, Android `SoundPool`; haptics respecting settings.
+- [ ] Sound (D§17): pick ~10 SFX from Kenney.nl (CC0) and one ambient loop from Pixabay; keep sources in `audio/CREDITS.md`; convert to `.caf`/`.m4a` (iOS) and `.ogg` (Android), < 3 MB total.
+- [ ] Audio player per platform behind one shared `SoundEffect` enum: iOS `.ambient` session, Android `SoundPool` + `MediaPlayer` with audio focus; music pauses in background.
+- [ ] Settings: "Sound effects" (default on), "Music" (default off), "Vibration"; haptics on fill, mistake, win.
 - [ ] Win celebration (Lottie on Android, native animation on iOS) + picture reveal.
 
 ### iOS native redesign (D§15)
