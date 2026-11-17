@@ -10,6 +10,7 @@ struct PremiumScreen: View {
     @State private var showSuccess = false
     @State private var selectedPlanId = "yearly"
     @State private var page = 0
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private struct Plan: Identifiable {
         let id: String
@@ -71,46 +72,31 @@ struct PremiumScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                TabView(selection: $page) {
-                    ForEach(slides.indices, id: \.self) { index in
-                        FeatureSlideContent(slide: slides[index]).tag(index)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .interactive))
-
-                VStack(spacing: 12) {
-                    ForEach(plans) { plan in
-                        PlanSelectionCard(plan: plan, isSelected: plan.id == selectedPlanId) {
-                            selectedPlanId = plan.id
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    // Large text: one scrolling page with every feature listed, then the plans.
+                    ScrollView {
+                        VStack(spacing: 32) {
+                            ForEach(slides.indices, id: \.self) { index in
+                                FeatureSlideContent(slide: slides[index], isEmbedded: true)
+                            }
+                            purchaseSection
                         }
+                        .readableWidth()
                     }
+                } else {
+                    VStack(spacing: 0) {
+                        TabView(selection: $page) {
+                            ForEach(slides.indices, id: \.self) { index in
+                                FeatureSlideContent(slide: slides[index], isEmbedded: false).tag(index)
+                            }
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .always))
+                        .indexViewStyle(.page(backgroundDisplayMode: .interactive))
 
-                    Button {
-                        model.viewModel.purchasePremium(planId: selectedPlan.id)
-                    } label: {
-                        Text("Devam Et (\(selectedPlan.price)\(selectedPlan.period))")
-                            .font(.app(17, .bold))
-                            .foregroundStyle(Color.onNeon)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 6)
+                        purchaseSection
                     }
-                    .buttonStyle(.appGlassProminent)
-                    .tint(selectedPlan.accent)
-                    .disabled(isProcessing)
-                    .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
-                    .padding(.top, 8)
-
-                    Text("Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.")
-                        .font(.caption2)
-                        .foregroundStyle(Color.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 8)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 16)
-                .frame(maxWidth: 560)
             }
             .background { ScreenBackground { EmptyView() } }
             .toolbar {
@@ -172,6 +158,42 @@ struct PremiumScreen: View {
         }
     }
 
+    private var purchaseSection: some View {
+        VStack(spacing: 12) {
+            ForEach(plans) { plan in
+                PlanSelectionCard(plan: plan, isSelected: plan.id == selectedPlanId) {
+                    selectedPlanId = plan.id
+                }
+            }
+
+            Button {
+                model.viewModel.purchasePremium(planId: selectedPlan.id)
+            } label: {
+                Text("Devam Et (\(selectedPlan.price)\(selectedPlan.period))")
+                    .font(.app(17, .bold))
+                    .foregroundStyle(Color.onNeon)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.appGlassProminent)
+            .tint(selectedPlan.accent)
+            .disabled(isProcessing)
+            .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
+            .padding(.top, 8)
+
+            Text("Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.")
+                .font(.caption2)
+                .foregroundStyle(Color.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
+        .frame(maxWidth: 560)
+    }
+
     private func overlay<Content: View>(opacity: Double, @ViewBuilder content: () -> Content) -> some View {
         ZStack {
             Color.backgroundDark.opacity(opacity).ignoresSafeArea()
@@ -182,50 +204,58 @@ struct PremiumScreen: View {
 
     private struct FeatureSlideContent: View {
         let slide: FeatureSlide
+        /// In the large-text page, which scrolls as a whole; otherwise a carousel page that scrolls itself.
+        let isEmbedded: Bool
 
         var body: some View {
-            CenteredScrollView {
-                VStack(spacing: 0) {
-                    Image(systemName: slide.icon)
-                        .font(.system(size: 32))
-                        .foregroundColor(slide.color)
-                        .frame(width: 72, height: 72)
-                        .background(slide.color.opacity(0.15))
-                        .clipShape(Circle())
+            if isEmbedded {
+                content
+            } else {
+                CenteredScrollView { content }
+            }
+        }
 
-                    Text(slide.title)
-                        .font(.app(24, .bold))
-                        .foregroundColor(.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 24)
+        private var content: some View {
+            VStack(spacing: 0) {
+                Image(systemName: slide.icon)
+                    .font(.system(size: 32))
+                    .foregroundColor(slide.color)
+                    .frame(width: 72, height: 72)
+                    .background(slide.color.opacity(0.15))
+                    .clipShape(Circle())
 
-                    Text(slide.description)
-                        .font(.subheadline)
-                        .foregroundColor(.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
+                Text(slide.title)
+                    .font(.app(24, .bold))
+                    .foregroundColor(.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 24)
 
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(slide.bulletPoints, id: \.self) { point in
-                            HStack(alignment: .top, spacing: 12) {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(slide.color)
-                                    .frame(width: 20, height: 20)
-                                Text(point)
-                                    .font(.subheadline)
-                                    .foregroundColor(.textPrimary)
-                            }
+                Text(slide.description)
+                    .font(.subheadline)
+                    .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(slide.bulletPoints, id: \.self) { point in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(slide.color)
+                                .frame(width: 20, height: 20)
+                            Text(point)
+                                .font(.subheadline)
+                                .foregroundColor(.textPrimary)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 28)
                 }
-                .padding(.horizontal, 32)
-                .padding(.top, 8)
-                .padding(.bottom, 48)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 28)
             }
+            .padding(.horizontal, 32)
+            .padding(.top, 8)
+            .padding(.bottom, isEmbedded ? 0 : 48)
         }
     }
 
@@ -234,9 +264,11 @@ struct PremiumScreen: View {
         let isSelected: Bool
         let action: () -> Void
 
+        @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
         var body: some View {
             Button(action: action) {
-                HStack {
+                AdaptiveStack(spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(plan.title)
                             .font(.app(16, .semibold))
@@ -247,8 +279,8 @@ struct PremiumScreen: View {
                                 .foregroundColor(.textMuted)
                         }
                     }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 0) {
+                    Spacer(minLength: 0)
+                    VStack(alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing, spacing: 0) {
                         Text(plan.price)
                             .font(.app(20, .bold))
                             .foregroundColor(.textPrimary)
@@ -257,6 +289,7 @@ struct PremiumScreen: View {
                             .foregroundColor(.textMuted)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(16)
                 .background(isSelected ? plan.accent.opacity(0.08) : Color.surfaceDark)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
