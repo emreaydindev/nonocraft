@@ -35,8 +35,6 @@ struct DashboardScreen: View {
                         onNavigateToCategory: { push(.libraryDetail(id: $0)) },
                         onNavigateToPlaylist: { push(.libraryDetail(id: $0)) }
                     )
-                    // Still draws its own header; moves to the toolbar in its own redesign step.
-                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
             Tab(DashboardTab.account.label, systemImage: DashboardTab.account.systemImage, value: .account) {
@@ -95,7 +93,6 @@ struct DashboardScreen: View {
         case .libraryDetail(let id):
             LibraryDetailScreen(
                 categoryId: id,
-                onNavigateBack: back,
                 onNavigateToGame: { push(.game(id: $0)) },
                 onNavigateToProfile: { push(.profile(userId: $0)) }
             )

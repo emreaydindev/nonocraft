@@ -12,73 +12,79 @@ struct LibraryScreen: View {
     @State private var newPlaylistName = ""
 
     private var uiState: LibraryUiState { model.state }
-    private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
+    /// Two columns on phones, more on iPad and the iPhone Duo inner screen.
+    private let columns = [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 16)]
 
     var body: some View {
-        ScreenBackground {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Kütüphanem")
-                        .font(.app(28, .bold))
-                        .foregroundColor(.textPrimary)
-                        .padding(.bottom, 8)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    LibraryGridCard(
+                        title: "Beğenilenler", subtitle: "\(uiState.likedArtsCount) Pixelart",
+                        icon: "heart.fill", tint: .dangerRed
+                    ) { send(LibraryActionOnCategoryClick(categoryId: "liked")) }
 
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        LibraryGridCard(
-                            title: "Beğenilenler", subtitle: "\(uiState.likedArtsCount) Pixelart",
-                            icon: "heart.fill", tint: .dangerRed
-                        ) { send(LibraryActionOnCategoryClick(categoryId: "liked")) }
-
-                        LibraryGridCard(
-                            title: "İndirilenler", subtitle: "\(uiState.downloadedLevelsCount) Bölüm",
-                            icon: "arrow.down.to.line", tint: .gameGold, isPremium: true
-                        ) {
-                            send(LibraryActionOnCategoryClick(categoryId: "downloaded"))
-                            onNavigateToPremium()
-                        }
-
-                        LibraryGridCard(
-                            title: "Paylaşılanlar", subtitle: "\(uiState.sharedArtsCount) Tasarım",
-                            icon: "paintpalette.fill", tint: .neonCyan
-                        ) { send(LibraryActionOnCategoryClick(categoryId: "shared")) }
-
-                        LibraryGridCard(
-                            title: "Taslaklar", subtitle: "\(uiState.draftArtsCount) Kayıt",
-                            icon: "pencil", tint: .textMuted
-                        ) {
-                            send(LibraryActionOnCategoryClick(categoryId: "drafts"))
-                            onNavigateToCrafting()
-                        }
-
-                        LibraryGridCard(
-                            title: "Çözülenler", subtitle: "\(uiState.completedLevelsCount) Bölüm",
-                            icon: "checkmark.circle.fill", tint: Color(hex: 0x4CAF50)
-                        ) { send(LibraryActionOnCategoryClick(categoryId: "completed")) }
-
-                        LibraryGridCard(
-                            title: "Günlük Serüven", subtitle: "\(uiState.completedDailiesCount) Çözüm",
-                            icon: "calendar", tint: Color(hex: 0xB388FF)
-                        ) { send(LibraryActionOnCategoryClick(categoryId: "dailies")) }
+                    LibraryGridCard(
+                        title: "İndirilenler", subtitle: "\(uiState.downloadedLevelsCount) Bölüm",
+                        icon: "arrow.down.to.line", tint: .gameGold, isPremium: true
+                    ) {
+                        send(LibraryActionOnCategoryClick(categoryId: "downloaded"))
+                        onNavigateToPremium()
                     }
 
-                    Text("Oynatma Listeleri")
-                        .font(.app(20, .bold))
-                        .foregroundColor(.textPrimary)
-                        .padding(.top, 24)
-                        .padding(.bottom, 8)
+                    LibraryGridCard(
+                        title: "Paylaşılanlar", subtitle: "\(uiState.sharedArtsCount) Tasarım",
+                        icon: "paintpalette.fill", tint: .neonCyan
+                    ) { send(LibraryActionOnCategoryClick(categoryId: "shared")) }
 
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        NewPlaylistCard { send(LibraryActionOnCreatePlaylist.shared) }
-                        ForEach(uiState.playlists, id: \.id) { playlist in
-                            PlaylistGridCard(playlist: playlist) {
-                                send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
-                            }
+                    LibraryGridCard(
+                        title: "Taslaklar", subtitle: "\(uiState.draftArtsCount) Kayıt",
+                        icon: "pencil", tint: .textMuted
+                    ) {
+                        send(LibraryActionOnCategoryClick(categoryId: "drafts"))
+                        onNavigateToCrafting()
+                    }
+
+                    LibraryGridCard(
+                        title: "Çözülenler", subtitle: "\(uiState.completedLevelsCount) Bölüm",
+                        icon: "checkmark.circle.fill", tint: Color(hex: 0x4CAF50)
+                    ) { send(LibraryActionOnCategoryClick(categoryId: "completed")) }
+
+                    LibraryGridCard(
+                        title: "Günlük Serüven", subtitle: "\(uiState.completedDailiesCount) Çözüm",
+                        icon: "calendar", tint: Color(hex: 0xB388FF)
+                    ) { send(LibraryActionOnCategoryClick(categoryId: "dailies")) }
+                }
+
+                HStack {
+                    Text("Oynatma Listeleri")
+                        .font(.app(22, .bold))
+                        .foregroundStyle(Color.textPrimary)
+                    Spacer()
+                    Button("Yeni Liste", systemImage: "plus") { send(LibraryActionOnCreatePlaylist.shared) }
+                        .labelStyle(.iconOnly)
+                        .font(.title3.weight(.semibold))
+                        .buttonStyle(.appGlass)
+                }
+                .padding(.top, 24)
+
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(uiState.playlists, id: \.id) { playlist in
+                        PlaylistGridCard(playlist: playlist) {
+                            send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
                         }
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 24)
-                .padding(.bottom, 40)
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
+        }
+        .background { ScreenBackground { EmptyView() } }
+        .navigationTitle("Kütüphanem")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Tasarım Stüdyosu", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
             }
         }
         .task {
@@ -143,13 +149,7 @@ private struct LibraryGridCard: View {
                         .clipShape(Circle())
                     Spacer()
                     if isPremium {
-                        Text("PRO")
-                            .font(.app(10, .bold))
-                            .foregroundColor(.gameGold)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.gameGold.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        ProBadge()
                     }
                 }
                 Spacer(minLength: 8)
@@ -158,33 +158,12 @@ private struct LibraryGridCard: View {
                     .foregroundColor(.textPrimary)
                     .multilineTextAlignment(.leading)
                 Text(subtitle)
-                    .font(.app(13))
+                    .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
-        }
-    }
-}
-
-private struct NewPlaylistCard: View {
-    let action: () -> Void
-
-    var body: some View {
-        LibraryCardFrame(action: action) {
-            VStack(spacing: 16) {
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(.textPrimary)
-                    .frame(width: 56, height: 56)
-                    .background(Color.surfaceVariantDark)
-                    .clipShape(Circle())
-                Text("Yeni Liste")
-                    .font(.app(15, .bold))
-                    .foregroundColor(.textPrimary)
-            }
-            .padding(16)
         }
     }
 }
@@ -209,7 +188,7 @@ private struct PlaylistGridCard: View {
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
                 Text("\(playlist.postCount) Bulmaca")
-                    .font(.app(13))
+                    .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)
             }

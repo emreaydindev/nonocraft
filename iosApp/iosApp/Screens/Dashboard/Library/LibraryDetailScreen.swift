@@ -3,7 +3,6 @@ import SwiftUI
 
 struct LibraryDetailScreen: View {
     let categoryId: String
-    let onNavigateBack: () -> Void
     let onNavigateToGame: (String) -> Void
     let onNavigateToProfile: (String) -> Void
 
@@ -11,12 +10,10 @@ struct LibraryDetailScreen: View {
 
     init(
         categoryId: String,
-        onNavigateBack: @escaping () -> Void,
         onNavigateToGame: @escaping (String) -> Void,
         onNavigateToProfile: @escaping (String) -> Void
     ) {
         self.categoryId = categoryId
-        self.onNavigateBack = onNavigateBack
         self.onNavigateToGame = onNavigateToGame
         self.onNavigateToProfile = onNavigateToProfile
         _model = StateObject(wrappedValue: ObservedViewModel(
@@ -28,40 +25,36 @@ struct LibraryDetailScreen: View {
     private var viewModel: LibraryDetailViewModel { model.viewModel }
 
     var body: some View {
-        ScreenBackground {
-            VStack(spacing: 0) {
-                ScreenTopBar(title: uiState.title, onBack: onNavigateBack)
-                if uiState.isLoading {
-                    ProgressView().tint(.neonCyan).frame(maxHeight: .infinity)
-                } else if uiState.posts.isEmpty {
-                    Text("Burada henüz bir şey yok.")
-                        .font(.app(15))
-                        .foregroundColor(.textMuted)
-                        .frame(maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 24) {
-                            ForEach(uiState.posts, id: \.id) { post in
-                                PostCard(post: post, showFollowButton: false) { action in
-                                    switch action {
-                                    case .play: onNavigateToGame(post.id)
-                                    case .profile: onNavigateToProfile(post.author)
-                                    case .like: viewModel.handlePostAction(action: PostActionLikeClick(postId: post.id))
-                                    case .comment: viewModel.openComments(postId: post.id)
-                                    case .more: viewModel.openMenu(postId: post.id)
-                                    case .follow: viewModel.handlePostAction(action: PostActionFollowClick(postId: post.id))
-                                    }
-                                }
-                            }
+        ScrollView {
+            LazyVStack(spacing: 20) {
+                ForEach(uiState.posts, id: \.id) { post in
+                    PostCard(post: post, showFollowButton: false) { action in
+                        switch action {
+                        case .play: onNavigateToGame(post.id)
+                        case .profile: onNavigateToProfile(post.author)
+                        case .like: viewModel.handlePostAction(action: PostActionLikeClick(postId: post.id))
+                        case .comment: viewModel.openComments(postId: post.id)
+                        case .more: viewModel.openMenu(postId: post.id)
+                        case .follow: viewModel.handlePostAction(action: PostActionFollowClick(postId: post.id))
                         }
-                        .padding(.horizontal, 18)
-                        .padding(.top, 16)
-                        .padding(.bottom, 24)
                     }
                 }
             }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
         }
-        .toolbar(.hidden, for: .navigationBar)
+        .overlay {
+            if uiState.isLoading {
+                ProgressView().tint(.neonCyan)
+            } else if uiState.posts.isEmpty {
+                ContentUnavailableView("Burada henüz bir şey yok.", systemImage: "tray")
+            }
+        }
+        .background { ScreenBackground { EmptyView() } }
+        .navigationTitle(uiState.title)
+        .navigationBarTitleDisplayMode(.inline)
         .postSheets(sheets)
     }
 
