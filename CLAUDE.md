@@ -75,10 +75,12 @@ The Android screens are the feature reference. **iOS no longer copies the Androi
 ### Adaptive layout: iPhone Duo, foldables, iPad, tablets (D§15)
 - [ ] iPhone Duo (small outer screen + large inner screen, the lit screen follows the hinge): no fixed sizes; check every screen closed, half-open and open in the simulator.
 - [ ] Game board rescales on a screen switch mid-game without losing state; clues readable on the outer screen.
-- [ ] Inner screen / iPad / tablets: landscape + two-pane layouts (Explore list + preview, Library sections + content, board + controls side by side), sidebar-adaptable tab bar. Phones stay portrait.
-- [ ] iPad: support multitasking resizing (no `UIRequiresFullScreen`).
+- [x] iOS inner screen / iPad: landscape + two-pane layouts (Explore list + preview, Library sections + content, board + controls side by side), sidebar-adaptable tab bar. Phones stay portrait. (Checked on iPad; the Duo inner screen only through an iPad window of similar size, since the installed simulator runtime can't run the iPhone Duo.)
+- [ ] Android tablets / foldables: landscape + two-pane layouts.
+- [x] iPad: support multitasking resizing (no `UIRequiresFullScreen`).
 - [ ] Android: `WindowSizeClass`, foldables incl. table-top posture (`WindowInfoTracker`), Chromebooks, config changes without state loss.
-- [ ] Dynamic Type / font scale to the largest sizes.
+- [x] iOS: Dynamic Type to the largest sizes.
+- [ ] Android: font scale to the largest sizes.
 
 ### Quality
 - [ ] Android: edge-to-edge, predictive back, system bars per theme, `data_extraction_rules.xml` excluding tokens, 16 KB page size.
