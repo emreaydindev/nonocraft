@@ -110,6 +110,9 @@ struct GameControlBar: View {
                 }
             }
         }
+        // Fixed-size round controls: the hint count may grow a little, never past its circle. VoiceOver reads
+        // the full count from the button label.
+        .dynamicTypeSize(...DynamicTypeSize.xLarge)
         .frame(maxWidth: 560)
         .padding(.horizontal, 12)
         .padding(.bottom, 4)

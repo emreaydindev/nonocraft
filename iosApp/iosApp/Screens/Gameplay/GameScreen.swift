@@ -216,7 +216,9 @@ private struct GameEndOverlay: View {
                     Text(buttonText)
                         .font(.app(16, .bold))
                         .foregroundColor(isVictory ? .backgroundDark : .textPrimary)
-                        .frame(width: 200, height: 56)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .frame(minWidth: 200, minHeight: 56)
                         .background(isVictory ? Color.neonCyan : Color.surfaceDark)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
