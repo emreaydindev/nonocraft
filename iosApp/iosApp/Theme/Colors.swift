@@ -21,11 +21,28 @@ extension Color {
     static let brightGreen = Color(hex: 0x3BE813)
 
     static let textPrimary = Color(hex: 0xF5F5F5)
-    static let textSecondary = Color(hex: 0x888888)
-    static let textMuted = Color(hex: 0x555555)
+    // Secondary and muted text meet 4.5:1 on every surface (background, surface, surface variant) and get
+    // brighter still with Increase Contrast.
+    static let textSecondary = Color(hex: 0xA0A0A0, increasedContrast: 0xC8C8C8)
+    static let textMuted = Color(hex: 0x8E8E8E, increasedContrast: 0xB4B4B4)
 
     /// Text and spinner colour on top of a neon button.
     static let onNeon = Color(hex: 0x0A0A0F)
+}
+
+extension Color {
+    /// A colour that switches to `increasedContrast` when Increase Contrast is on.
+    init(hex: UInt32, increasedContrast: UInt32) {
+        func uiColor(_ value: UInt32) -> UIColor {
+            UIColor(
+                red: CGFloat((value >> 16) & 0xFF) / 255, green: CGFloat((value >> 8) & 0xFF) / 255,
+                blue: CGFloat(value & 0xFF) / 255, alpha: 1
+            )
+        }
+        self.init(uiColor: UIColor { traits in
+            uiColor(traits.accessibilityContrast == .high ? increasedContrast : hex)
+        })
+    }
 }
 
 extension Color {

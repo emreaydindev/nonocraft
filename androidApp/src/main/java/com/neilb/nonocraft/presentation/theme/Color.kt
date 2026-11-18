@@ -15,5 +15,6 @@ val BrightGreen = Color(0xFF3BE813)
 
 // --- Metin Renkleri ---
 val TextPrimary = Color(0xFFF5F5F5)
-val TextSecondary = Color(0xFF888888)
-val TextMuted = Color(0xFF555555)
+// Secondary and muted text meet 4.5:1 on every surface (background, surface, surface variant).
+val TextSecondary = Color(0xFFA0A0A0)
+val TextMuted = Color(0xFF8E8E8E)

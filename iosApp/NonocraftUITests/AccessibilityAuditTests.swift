@@ -118,10 +118,15 @@ final class AccessibilityAuditTests: XCTestCase {
 
     private func report(_ screen: String) {
         print("AX-TREE \(screen)\n\(app.debugDescription)\nAX-TREE-END \(screen)")
+        // AX_SHOTS=<folder> saves a screenshot of each screen next to its audit (the simulator writes to the Mac).
+        if let folder = ProcessInfo.processInfo.environment["AX_SHOTS"] {
+            try? XCUIScreen.main.screenshot().pngRepresentation
+                .write(to: URL(fileURLWithPath: folder).appendingPathComponent("\(screen).png"))
+        }
         do {
             try app.performAccessibilityAudit { issue in
                 let element = issue.element.map { "\($0.elementType.rawValue) '\($0.label)' \($0.frame)" } ?? "-"
-                print("AX-ISSUE \(screen): \(issue.auditType) | \(issue.compactDescription) | \(element)")
+                print("AX-ISSUE \(screen): \(issue.auditType) | \(issue.compactDescription) | \(element) | \(issue.detailedDescription)")
                 return true
             }
         } catch {
