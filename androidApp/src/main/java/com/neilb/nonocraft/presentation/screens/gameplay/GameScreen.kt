@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
@@ -432,11 +433,16 @@ private fun GameTopBar(
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = AppFont,
-            letterSpacing = 1.sp
+            letterSpacing = 1.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
         )
 
+        // Grows with the font scale so the timer is never clipped; 48 dp keeps the title centred.
         Box(
-            modifier = Modifier.width(48.dp),
+            modifier = Modifier.widthIn(min = 48.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
             if (timeLimitSeconds != null) {
