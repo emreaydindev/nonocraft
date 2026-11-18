@@ -51,6 +51,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neilb.nonocraft.presentation.screens.gameplay.components.AnalogStick
 import com.neilb.nonocraft.presentation.screens.gameplay.components.GameActionButtons
+import com.neilb.nonocraft.presentation.screens.gameplay.components.GameBoardLayout
 import com.neilb.nonocraft.presentation.screens.gameplay.components.GameGridArea
 import com.neilb.nonocraft.presentation.screens.gameplay.components.ToolPaletteBar
 import com.neilb.nonocraft.presentation.screens.gameplay.components.toColor
@@ -197,12 +198,8 @@ fun GameScreen(
 }
 
 /**
- * Board and controls, arranged for the space the screen actually gets (not the device):
- * - table-top posture (foldable half open, hinge horizontal): board on the top half, controls on the bottom half;
- * - clearly wider than tall (tablet landscape, unfolded foldable, Chromebook, wide freeform window):
- *   board and controls side by side;
- * - otherwise (phones, portrait): board above the controls.
- * The board is movable content, so switching arrangement on a resize, fold or unfold only rescales it.
+ * Board and controls in [GameBoardLayout]. The board is movable content, so switching arrangement on a
+ * resize, fold or unfold only rescales it.
  */
 @Composable
 private fun GameContent(
@@ -210,9 +207,6 @@ private fun GameContent(
     viewModel: GameViewModel,
     modifier: Modifier = Modifier
 ) {
-    val tableTop = rememberTableTopPosture()
-    var topInWindow by remember { mutableFloatStateOf(0f) }
-
     val board = remember(viewModel) {
         movableContentOf { boardState: GameUiState, boardModifier: Modifier ->
             Box(modifier = boardModifier, contentAlignment = Alignment.Center) {
@@ -233,53 +227,11 @@ private fun GameContent(
         }
     }
 
-    BoxWithConstraints(
-        modifier = modifier.onGloballyPositioned { topInWindow = it.positionInWindow().y }
-    ) {
-        // Less margin on small screens (folded outer displays) so the clues get the room.
-        val boardPadding = if (minOf(maxWidth, maxHeight) < 420.dp) 8.dp else 16.dp
-        val heightPx = constraints.maxHeight.toFloat()
-        val controlsWidth = minOf(420.dp, maxWidth * 0.38f)
-        val hingeTop = tableTop?.let { it.hingeBounds.top - topInWindow }
-        val hingeBottom = tableTop?.let { it.hingeBounds.bottom - topInWindow }
-
-        when {
-            hingeTop != null && hingeBottom != null && hingeTop > 0f && hingeBottom < heightPx -> {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    board(state, Modifier.height(hingeTop.toInt().pxToDp()).fillMaxWidth().padding(boardPadding))
-                    Spacer(Modifier.height((hingeBottom - hingeTop).toInt().pxToDp()))
-                    Box(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = false)
-                    }
-                }
-            }
-
-            maxWidth >= 700.dp && maxWidth > maxHeight * 1.15f -> {
-                Row(modifier = Modifier.fillMaxSize()) {
-                    board(state, Modifier.weight(1f).fillMaxHeight().padding(boardPadding))
-                    Box(
-                        modifier = Modifier
-                            .width(controlsWidth)
-                            .fillMaxHeight()
-                            .verticalScroll(rememberScrollState()),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = true)
-                    }
-                }
-            }
-
-            else -> {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    board(state, Modifier.weight(1f).fillMaxWidth().padding(boardPadding))
-                    GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = false)
-                }
-            }
-        }
-    }
+    GameBoardLayout(
+        modifier = modifier,
+        board = { boardModifier -> board(state, boardModifier) },
+        controls = { isSideBySide -> GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = isSideBySide) }
+    )
 }
 
 /** Stick, hint and place buttons, then the colour / cross palette. Stacked when beside the board. */
