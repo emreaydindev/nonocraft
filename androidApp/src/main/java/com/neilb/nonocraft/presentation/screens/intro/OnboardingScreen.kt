@@ -374,6 +374,8 @@ private fun VisualSolve(accentColor: Color) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        // One phrase for the animated sample instead of its clue digits, as on iOS.
+        modifier = Modifier.clearAndSetSemantics { contentDescription = "Kalp şeklinde dolan örnek bulmaca" },
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Spacer(modifier = Modifier.width(28.dp))
