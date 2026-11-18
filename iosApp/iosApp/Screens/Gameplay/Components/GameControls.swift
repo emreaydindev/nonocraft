@@ -4,6 +4,11 @@ import SwiftUI
 struct AnalogStick: View {
     let onMove: (_ dRow: Int, _ dCol: Int) -> Void
     let onFocusChange: (Bool) -> Void
+    /// VoiceOver: the cell under the cursor ("Satır 2, sütun 3, boş").
+    let cursorDescription: String
+    /// VoiceOver moves: one cell up, down, left or right, or the next / previous cell in reading order.
+    let onAccessibilityMove: (_ dRow: Int, _ dCol: Int) -> Void
+    let onAccessibilityStep: (_ forward: Bool) -> Void
 
     private let stickSize: CGFloat = 100
     private let thumbSize: CGFloat = 44
@@ -46,7 +51,25 @@ struct AnalogStick: View {
                 .onEnded { _ in release() }
         )
         .onDisappear(perform: release)
-        .accessibilityLabel("İmleç kontrolü")
+        // The stick is the board cursor for VoiceOver: swipe up or down steps through the cells, the actions
+        // move it a cell at a time, and the place button then fills, crosses or clears the cell under it.
+        .accessibilityElement()
+        .accessibilityLabel("İmleç")
+        .accessibilityValue(cursorDescription)
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: onAccessibilityStep(true)
+            case .decrement: onAccessibilityStep(false)
+            @unknown default: break
+            }
+        }
+        .accessibilityActions {
+            // Declared in reverse: VoiceOver lists them Yukarı, Aşağı, Sola, Sağa.
+            Button("Sağa") { onAccessibilityMove(0, 1) }
+            Button("Sola") { onAccessibilityMove(0, -1) }
+            Button("Aşağı") { onAccessibilityMove(1, 0) }
+            Button("Yukarı") { onAccessibilityMove(-1, 0) }
+        }
     }
 
     private func startRepeating() {
@@ -77,10 +100,14 @@ struct AnalogStick: View {
 /// The controls inside are flat (no glass on glass); only the bar itself is glass.
 struct GameControlBar: View {
     let palette: [Color]
+    let colorLabels: [String]
     let selectedColorIndex: Int
     let isCrossMode: Bool
     let hintsRemaining: Int
+    let cursorDescription: String
     let onMove: (_ dRow: Int, _ dCol: Int) -> Void
+    let onAccessibilityMove: (_ dRow: Int, _ dCol: Int) -> Void
+    let onAccessibilityStep: (_ forward: Bool) -> Void
     let onStickFocusChange: (Bool) -> Void
     let onPlacePressed: (Bool) -> Void
     let onHint: () -> Void
@@ -92,13 +119,20 @@ struct GameControlBar: View {
             VStack(spacing: 12) {
                 ToolPaletteBar(
                     palette: palette,
+                    colorLabels: colorLabels,
                     selectedColorIndex: selectedColorIndex,
                     isCrossMode: isCrossMode,
                     onColorSelected: onColorSelected,
                     onCrossSelected: onCrossSelected
                 )
                 HStack {
-                    AnalogStick(onMove: onMove, onFocusChange: onStickFocusChange)
+                    AnalogStick(
+                        onMove: onMove,
+                        onFocusChange: onStickFocusChange,
+                        cursorDescription: cursorDescription,
+                        onAccessibilityMove: onAccessibilityMove,
+                        onAccessibilityStep: onAccessibilityStep
+                    )
                     Spacer(minLength: 16)
                     GameActionButtons(
                         hintsRemaining: hintsRemaining,
@@ -165,14 +199,20 @@ struct GameActionButtons: View {
                             onPlacePressed(false)
                         }
                 )
-                .accessibilityLabel(isCrossMode ? "Çarpı koy" : "Doldur")
+                .accessibilityLabel(isCrossMode ? "İmleçteki kareye çarpı koy" : "İmleçteki kareyi doldur")
                 .accessibilityAddTraits(.isButton)
+                // Held, it keeps placing while the stick moves; for VoiceOver a double tap places once.
+                .accessibilityAction {
+                    onPlacePressed(true)
+                    onPlacePressed(false)
+                }
         }
     }
 }
 
 struct ToolPaletteBar: View {
     let palette: [Color]
+    let colorLabels: [String]
     let selectedColorIndex: Int
     let isCrossMode: Bool
     let onColorSelected: (Int) -> Void
@@ -197,7 +237,7 @@ struct ToolPaletteBar: View {
                 let colorIndex = index + 1
                 ToolItem(
                     tint: color, isSelected: !isCrossMode && selectedColorIndex == colorIndex,
-                    label: "Renk \(colorIndex)", action: { onColorSelected(colorIndex) }
+                    label: colorLabels[safe: index] ?? "Renk \(colorIndex)", action: { onColorSelected(colorIndex) }
                 ) {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(color)

@@ -16,9 +16,13 @@ struct GameScreen: View {
     private var state: GameUiState { model.state }
     private var viewModel: GameViewModel { model.viewModel }
 
-    private var palette: [Color] {
-        (state.puzzle?.paletteHex ?? []).map { Color(hexString: $0) }
-    }
+    private var paletteHex: [String] { state.puzzle?.paletteHex ?? [] }
+
+    private var palette: [Color] { paletteHex.map { Color(hexString: $0) } }
+
+    private var userGrid: [[Int]] { state.userGrid.map { $0.map(\.intValue) } }
+
+    @FocusState private var isKeyboardFocused: Bool
 
     var body: some View {
         ScreenBackground {
@@ -50,6 +54,16 @@ struct GameScreen: View {
                     buttonText: "Tekrar Dene", isVictory: false, action: onNavigateBack
                 )
             }
+        }
+        // VoiceOver hears a lost heart, the win and game over as they happen.
+        .onChange(of: state.currentLives) { old, new in
+            if new < old && new > 0 { announce("Yanlış hamle, \(new) can kaldı") }
+        }
+        .onChange(of: state.isVictory) { _, isVictory in
+            if isVictory { announce("Tebrikler! Bulmaca çözüldü.") }
+        }
+        .onChange(of: state.isGameOver) { _, isGameOver in
+            if isGameOver { announce("Oyun bitti, tüm canların tükendi.") }
         }
         .navigationTitle(state.puzzle?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
@@ -98,11 +112,13 @@ struct GameScreen: View {
                 GameGridArea(
                     size: Int(puzzle.size),
                     palette: palette,
-                    userGrid: state.userGrid.map { $0.map(\.intValue) },
+                    paletteHex: paletteHex,
+                    userGrid: userGrid,
                     rowClues: state.rowClues.map { $0.map(GridClue.init) },
                     colClues: state.colClues.map { $0.map(GridClue.init) },
                     cursor: state.isCursorVisible ? (Int(state.cursorRow), Int(state.cursorCol)) : nil,
-                    onCellTouched: { row, col in viewModel.onCellClicked(row: Int32(row), col: Int32(col)) }
+                    onCellTouched: { row, col in viewModel.onCellClicked(row: Int32(row), col: Int32(col)) },
+                    cellActions: cellActions
                 )
                 // Less margin on small screens (iPhone Duo outer screen) so the clues get the room.
                 .padding(min(proxy.size.width, proxy.size.height) < 420 ? 8 : 16)
@@ -113,15 +129,141 @@ struct GameScreen: View {
                     .frame(maxHeight: isSideBySide ? .infinity : nil)
             }
         }
+        // Hardware keyboard play (iPad), as on Android: arrows or WASD move, space or return places,
+        // X picks the cross, digits pick a colour, H uses a hint, delete clears a cross.
+        .focusable()
+        .focusEffectDisabled()
+        .focused($isKeyboardFocused)
+        .onAppear { isKeyboardFocused = true }
+        .onKeyPress(phases: [.down, .up], action: handleKey)
+    }
+
+    private func handleKey(_ press: KeyPress) -> KeyPress.Result {
+        let isDown = press.phase == .down
+        let move: (Int, Int)? = switch press.key {
+        case .upArrow, "w": (-1, 0)
+        case .downArrow, "s": (1, 0)
+        case .leftArrow, "a": (0, -1)
+        case .rightArrow, "d": (0, 1)
+        default: nil
+        }
+        if let move {
+            if isDown {
+                viewModel.setAnalogFocus(isFocused: true)
+                viewModel.moveCursor(dRow: Int32(move.0), dCol: Int32(move.1))
+            } else {
+                viewModel.setAnalogFocus(isFocused: false)
+            }
+            return .handled
+        }
+        switch press.key {
+        case .space, .return:
+            if isDown {
+                viewModel.setAnalogFocus(isFocused: true)
+                viewModel.setPlacePressed(isPressed: true)
+            } else {
+                viewModel.setPlacePressed(isPressed: false)
+                viewModel.setAnalogFocus(isFocused: false)
+            }
+            return .handled
+        case "x":
+            if isDown { viewModel.toggleCrossMode(isCross: true) }
+            return .handled
+        case .delete, .deleteForward:
+            if isDown { cellActions.clear(Int(state.cursorRow), Int(state.cursorCol)) }
+            return .handled
+        case "h":
+            if isDown { viewModel.useHint() }
+            return .handled
+        default:
+            if let digit = Int(press.characters), (1...paletteHex.count).contains(digit) {
+                if isDown { viewModel.selectColor(colorIndex: Int32(digit)) }
+                return .handled
+            }
+            return .ignored
+        }
+    }
+
+    /// Single-cell moves for VoiceOver and the keyboard, made from the view model's own moves (pick a tool,
+    /// touch the cell); the player's tool is put back afterwards.
+    private var cellActions: BoardCellActions {
+        let viewModel = viewModel
+        func value(_ row: Int, _ col: Int) -> Int? {
+            let grid = viewModel.state.value.userGrid
+            guard grid.indices.contains(row), grid[row].indices.contains(col) else { return nil }
+            return grid[row][col].intValue
+        }
+        func withCrossTool(_ move: () -> Void) {
+            let wasCrossMode = viewModel.state.value.isCrossMode
+            viewModel.toggleCrossMode(isCross: true)
+            move()
+            if !wasCrossMode { viewModel.toggleCrossMode(isCross: false) }
+        }
+        return BoardCellActions(
+            fill: { row, col, colorIndex in
+                let before = viewModel.state.value
+                viewModel.selectColor(colorIndex: Int32(colorIndex))
+                viewModel.onCellClicked(row: Int32(row), col: Int32(col))
+                if before.isCrossMode {
+                    viewModel.toggleCrossMode(isCross: true)
+                } else if Int(before.selectedColorIndex) != colorIndex {
+                    viewModel.selectColor(colorIndex: before.selectedColorIndex)
+                }
+            },
+            cross: { row, col in
+                if value(row, col) == 0 { withCrossTool { viewModel.onCellClicked(row: Int32(row), col: Int32(col)) } }
+            },
+            clear: { row, col in
+                if value(row, col) == -1 { withCrossTool { viewModel.onCellClicked(row: Int32(row), col: Int32(col)) } }
+            }
+        )
+    }
+
+    private func cursorDescription(row: Int, col: Int) -> String {
+        BoardSpeech.cellPosition(row: row, col: col) + ", "
+            + BoardSpeech.cellState(userGrid[safe: row]?[safe: col] ?? 0, paletteHex: paletteHex)
+    }
+
+    /// Moves the cursor for VoiceOver and says where it landed (custom actions do not re-read the value).
+    private func accessibilityMove(dRow: Int, dCol: Int) {
+        let size = Int(state.puzzle?.size ?? 0)
+        guard size > 0 else { return }
+        let row = min(max(Int(state.cursorRow) + dRow, 0), size - 1)
+        let col = min(max(Int(state.cursorCol) + dCol, 0), size - 1)
+        viewModel.setAnalogFocus(isFocused: true)
+        viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol))
+        viewModel.setAnalogFocus(isFocused: false)
+        announce(cursorDescription(row: row, col: col))
+    }
+
+    /// Next or previous cell in reading order, wrapping to the next or previous row.
+    private func accessibilityStep(forward: Bool) {
+        let size = Int(state.puzzle?.size ?? 0)
+        let col = Int(state.cursorCol)
+        if forward {
+            col < size - 1 ? accessibilityMove(dRow: 0, dCol: 1) : accessibilityMove(dRow: 1, dCol: -(size - 1))
+        } else {
+            col > 0 ? accessibilityMove(dRow: 0, dCol: -1) : accessibilityMove(dRow: -1, dCol: size - 1)
+        }
+    }
+
+    private func announce(_ text: String) {
+        AccessibilityNotification.Announcement(text).post()
     }
 
     private var controlBar: some View {
         GameControlBar(
             palette: palette,
+            colorLabels: paletteHex.indices.map { index in
+                paletteHex.count > 1 ? BoardSpeech.colorLabel(index + 1, paletteHex: paletteHex).capitalizedFirst : "Doldur"
+            },
             selectedColorIndex: Int(state.selectedColorIndex),
             isCrossMode: state.isCrossMode,
             hintsRemaining: Int(state.hintsRemaining),
+            cursorDescription: cursorDescription(row: Int(state.cursorRow), col: Int(state.cursorCol)),
             onMove: { dRow, dCol in viewModel.moveCursor(dRow: Int32(dRow), dCol: Int32(dCol)) },
+            onAccessibilityMove: { dRow, dCol in accessibilityMove(dRow: dRow, dCol: dCol) },
+            onAccessibilityStep: { accessibilityStep(forward: $0) },
             onStickFocusChange: { viewModel.setAnalogFocus(isFocused: $0) },
             onPlacePressed: { viewModel.setPlacePressed(isPressed: $0) },
             onHint: { viewModel.useHint() },
@@ -135,6 +277,10 @@ extension GridClue {
     init(_ clue: Clue) {
         self.init(count: Int(clue.count), colorIndex: Int(clue.colorIndex))
     }
+}
+
+private extension String {
+    var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
 
 extension Array {
@@ -167,7 +313,10 @@ private struct GameTitle: View {
                 .foregroundStyle(timeLimitSeconds == nil ? Color.textSecondary : Color.dangerRed)
                 .contentTransition(.numericText(countsDown: timeLimitSeconds != nil))
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue("\(timeLimitSeconds == nil ? "Geçen süre" : "Kalan süre"): \(seconds / 60) dakika \(seconds % 60) saniye")
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -186,6 +335,8 @@ private struct HeartsIndicator: View {
             }
         }
         .padding(.horizontal, 4)
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
         .accessibilityElement()
         .accessibilityLabel("\(currentLives) can kaldı")
     }
@@ -207,6 +358,7 @@ private struct GameEndOverlay: View {
                     .kerning(4)
                     .foregroundColor(isVictory ? .neonCyan : .dangerRed)
                     .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
                 Text(subtitle)
                     .font(.app(16))
                     .foregroundColor(.textSecondary)
@@ -227,6 +379,9 @@ private struct GameEndOverlay: View {
             }
             .padding(24)
         }
+        // VoiceOver stays inside the overlay; the board behind it is finished.
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isModal)
         .transition(.opacity)
     }
 }

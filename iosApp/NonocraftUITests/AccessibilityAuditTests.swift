@@ -61,6 +61,38 @@ final class AccessibilityAuditTests: XCTestCase {
         }
     }
 
+    /// The board's VoiceOver elements: clues, cells with state, the cursor stick (adjustable) and the place
+    /// button. Custom actions are checked in the Accessibility Inspector; XCUITest cannot run them.
+    func testGameBoard() throws {
+        for skip in ["Atla", "Misafir olarak devam et", "Atla"] where app.buttons[skip].waitForExistence(timeout: 6) {
+            app.buttons[skip].tap()
+        }
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
+        app.tabBars.buttons["Keşfet"].tap()
+        var play = app.buttons["Oyna"].firstMatch
+        if !play.waitForExistence(timeout: 8) {
+            app.buttons["En Yeniler"].tap(); sleep(2)
+            app.buttons["Öne Çıkanlar"].tap()
+            play = app.buttons["Oyna"].firstMatch
+        }
+        XCTAssertTrue(play.waitForExistence(timeout: 8))
+        play.tap()
+        let cell = app.buttons["Satır 1, sütun 2"]
+        XCTAssertTrue(cell.waitForExistence(timeout: 8))
+        report("GameBoard")
+        print("AX-GAME cell r1c2 value=\(cell.value ?? "-") frame=\(cell.frame)")
+        print("AX-GAME clue row1=\(app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Satır 1:'")).firstMatch.label)")
+        cell.tap()
+        sleep(1)
+        print("AX-GAME cell r1c2 after tap value=\(app.buttons["Satır 1, sütun 2"].value ?? "-")")
+        let stick = app.descendants(matching: .any)["İmleç"].firstMatch
+        print("AX-GAME stick exists=\(stick.exists) value=\(stick.value ?? "-")")
+        app.buttons["İmleçteki kareyi doldur"].tap(); sleep(1)
+        print("AX-GAME after place r1c3=\(app.buttons["Satır 1, sütun 3"].value ?? "-") hearts=\(app.otherElements.matching(NSPredicate(format: "label ENDSWITH 'can kaldı'")).firstMatch.label)")
+        // AX_HOLD=<seconds> (TEST_RUNNER_AX_HOLD from xcodebuild) keeps the game open for the Accessibility Inspector.
+        sleep(UInt32(ProcessInfo.processInfo.environment["AX_HOLD"] ?? "") ?? 0)
+    }
+
     private func report(_ screen: String) {
         print("AX-TREE \(screen)\n\(app.debugDescription)\nAX-TREE-END \(screen)")
         do {

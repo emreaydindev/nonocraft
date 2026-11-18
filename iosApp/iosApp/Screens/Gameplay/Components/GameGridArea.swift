@@ -10,11 +10,13 @@ struct GridClue {
 struct GameGridArea: View {
     let size: Int
     let palette: [Color]
+    let paletteHex: [String]
     let userGrid: [[Int]]
     let rowClues: [[GridClue]]
     let colClues: [[GridClue]]
     let cursor: (row: Int, col: Int)?
     let onCellTouched: (Int, Int) -> Void
+    var cellActions: BoardCellActions? = nil
 
     @State private var lastTouched: (Int, Int)?
 
@@ -68,9 +70,74 @@ struct GameGridArea: View {
                     }
                     .onEnded { _ in lastTouched = nil }
             )
+            .accessibilityHidden(true)
+            .overlay { accessibilityNodes(layout: layout) }
         }
-        .accessibilityElement()
-        .accessibilityLabel("Bulmaca ızgarası, \(size) x \(size)")
+    }
+
+    /// Invisible VoiceOver elements over the drawn board: one per clue line ("Satır 3: 1, 1, 1") and one per
+    /// cell ("Satır 3, sütun 2" with its state). Activating a cell uses the current tool like a touch; the
+    /// actions fill with any palette colour, cross an empty cell or clear a cross. They take no touches, so
+    /// drawing on the board is unchanged, and VoiceOver reads them top to bottom, each row's clue first.
+    private func accessibilityNodes(layout: Layout) -> some View {
+        let cell = layout.cell
+        let origin = layout.origin
+        return ZStack(alignment: .topLeading) {
+            ForEach(Array(colClues.enumerated()), id: \.offset) { col, clues in
+                let height = CGFloat(layout.maxColClues) * cell
+                node
+                    .accessibilityLabel(BoardSpeech.clue(isRow: false, index: col, clues: clues, paletteHex: paletteHex))
+                    .placed(CGRect(x: origin.x + CGFloat(col) * cell, y: origin.y - height, width: cell, height: height))
+            }
+            ForEach(Array(userGrid.enumerated()), id: \.offset) { row, values in
+                let width = CGFloat(layout.maxRowClues) * cell
+                node
+                    .accessibilityLabel(BoardSpeech.clue(isRow: true, index: row, clues: rowClues[safe: row] ?? [], paletteHex: paletteHex))
+                    .placed(CGRect(x: origin.x - width, y: origin.y + CGFloat(row) * cell, width: width, height: cell))
+                ForEach(Array(values.enumerated()), id: \.offset) { col, value in
+                    cellNode(row: row, col: col, value: value, layout: layout)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var node: some View {
+        Rectangle().fill(.clear).accessibilityElement()
+    }
+
+    private func cellNode(row: Int, col: Int, value: Int, layout: Layout) -> some View {
+        let isOpen = value <= 0
+        let colorCount = max(paletteHex.count, 1)
+        return node
+        .accessibilityLabel(BoardSpeech.cellPosition(row: row, col: col))
+        .accessibilityValue(BoardSpeech.cellState(value, paletteHex: paletteHex))
+        // Filled cells are final; empty and crossed ones take moves.
+        .accessibilityAddTraits(isOpen ? .isButton : [])
+        .accessibilityAction {
+            if isOpen { onCellTouched(row, col) }
+        }
+        // SwiftUI hands these to VoiceOver last-declared first, so they are declared in reverse to read
+        // "Doldur" (each colour in palette order), then "Çarpı koy" or "Temizle", as on Android.
+        .accessibilityActions {
+            if isOpen, let cellActions {
+                if value == 0 {
+                    Button("Çarpı koy") { cellActions.cross(row, col) }
+                } else {
+                    Button("Temizle") { cellActions.clear(row, col) }
+                }
+                ForEach(Array((1...colorCount).reversed()), id: \.self) { colorIndex in
+                    Button(colorCount > 1 ? "Doldur: \(BoardSpeech.colorLabel(colorIndex, paletteHex: paletteHex))" : "Doldur") {
+                        cellActions.fill(row, col, colorIndex)
+                    }
+                }
+            }
+        }
+        .placed(CGRect(
+            x: layout.origin.x + CGFloat(col) * layout.cell, y: layout.origin.y + CGFloat(row) * layout.cell,
+            width: layout.cell, height: layout.cell
+        ))
     }
 
     private func draw(in context: inout GraphicsContext, layout: Layout) {
@@ -151,5 +218,12 @@ struct GameGridArea: View {
             context.fill(Path(rect), with: .color(.neonCyan.opacity(0.2)))
             context.stroke(Path(rect), with: .color(.neonCyan), lineWidth: 3)
         }
+    }
+}
+
+private extension View {
+    /// Sizes and places an accessibility node at a rectangle of the board (layout, so VoiceOver frames follow).
+    func placed(_ rect: CGRect) -> some View {
+        frame(width: max(rect.width, 1), height: max(rect.height, 1)).position(x: rect.midX, y: rect.midY)
     }
 }
