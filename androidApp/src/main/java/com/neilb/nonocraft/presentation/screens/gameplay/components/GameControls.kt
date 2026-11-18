@@ -1,5 +1,16 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,8 +71,17 @@ import androidx.compose.material3.ripple
 fun AnalogStick(
     onMove: (dRow: Int, dCol: Int) -> Unit,
     onFocusChange: (Boolean) -> Unit,
+    cursorDescription: String,
     modifier: Modifier = Modifier
 ) {
+    // TalkBack: the stick is the board cursor; actions move it a cell at a time and the place button
+    // then fills, crosses or clears the cell under it.
+    fun step(dRow: Int, dCol: Int): Boolean {
+        onFocusChange(true)
+        onMove(dRow, dCol)
+        onFocusChange(false)
+        return true
+    }
     val stickSize = 100.dp
     val thumbSize = 44.dp
     val maxRadius = (stickSize / 2) - (thumbSize / 2)
@@ -93,6 +113,16 @@ fun AnalogStick(
             .clip(CircleShape)
             .background(SurfaceDark.copy(alpha = 0.5f))
             .border(2.dp, BorderDark, CircleShape)
+            .clearAndSetSemantics {
+                contentDescription = "İmleç"
+                stateDescription = cursorDescription
+                customActions = listOf(
+                    CustomAccessibilityAction("Yukarı") { step(-1, 0) },
+                    CustomAccessibilityAction("Aşağı") { step(1, 0) },
+                    CustomAccessibilityAction("Sola") { step(0, -1) },
+                    CustomAccessibilityAction("Sağa") { step(0, 1) },
+                )
+            }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
@@ -147,6 +177,7 @@ fun GameActionButtons(
     onHintAction: () -> Unit,
     hintsRemaining: Int,
     selectedColor: Color,
+    isCrossMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -160,7 +191,12 @@ fun GameActionButtons(
                 .clip(CircleShape)
                 .background(SurfaceDark)
                 .border(2.dp, NeonCyan.copy(alpha = 0.5f), CircleShape)
-                .rippleClickable { onHintAction() },
+                .rippleClickable { onHintAction() }
+                .clearAndSetSemantics {
+                    contentDescription = "İpucu, $hintsRemaining kaldı"
+                    role = Role.Button
+                    onClick { onHintAction(); true }
+                },
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -181,6 +217,12 @@ fun GameActionButtons(
                 .clip(CircleShape)
                 .background(selectedColor.copy(alpha = 0.15f))
                 .border(3.dp, selectedColor, CircleShape)
+                // Held, it keeps placing while the stick moves; for TalkBack a double tap places once.
+                .clearAndSetSemantics {
+                    contentDescription = if (isCrossMode) "İmleçteki kareye çarpı koy" else "İmleçteki kareyi doldur"
+                    role = Role.Button
+                    onClick { onPlacePressed(true); onPlacePressed(false); true }
+                }
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onPress = {
@@ -200,6 +242,7 @@ fun GameActionButtons(
 @Composable
 fun ToolPaletteBar(
     paletteColors: List<Color>,
+    colorLabels: List<String>,
     selectedColorIndex: Int,
     isCrossMode: Boolean,
     onColorSelected: (Int) -> Unit,
@@ -211,12 +254,14 @@ fun ToolPaletteBar(
     FlowRow(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ToolItem(
             color = Color.Transparent,
+            label = "Çarpı",
             isCross = true,
             isSelected = isCrossMode,
             onClick = onCrossSelected
@@ -225,6 +270,7 @@ fun ToolPaletteBar(
             val actualColorIndex = index + 1
             ToolItem(
                 color = color,
+                label = colorLabels.getOrElse(index) { "Renk $actualColorIndex" },
                 isCross = false,
                 isSelected = !isCrossMode && selectedColorIndex == actualColorIndex,
                 onClick = { onColorSelected(actualColorIndex) }
@@ -236,6 +282,7 @@ fun ToolPaletteBar(
 @Composable
 private fun ToolItem(
     color: Color,
+    label: String,
     isCross: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -246,7 +293,13 @@ private fun ToolItem(
             .clip(CircleShape)
             .background(if (isSelected) (if (isCross) DangerRed.copy(alpha = 0.2f) else color.copy(alpha = 0.2f)) else Color.Transparent)
             .border(2.dp, if (isSelected) (if (isCross) DangerRed else color) else BorderDark, CircleShape)
-            .rippleClickable { onClick() },
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = label
+                selected = isSelected
+                role = Role.RadioButton
+                onClick { onClick(); true }
+            },
         contentAlignment = Alignment.Center
     ) {
         if (isCross) {

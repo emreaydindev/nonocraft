@@ -67,7 +67,8 @@ fun GameGridArea(
     cursorCol: Int,
     onCellClick: (row: Int, col: Int) -> Unit,
     isCursorVisible: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cellActions: BoardCellActions? = null,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val isZoomEnabled = puzzle.size > 10
@@ -106,13 +107,18 @@ fun GameGridArea(
         // grow with the board, never with the system font size (which would overflow the cells).
         val clueDensity = remember(density.density) { Density(density.density, fontScale = 1f) }
 
-        Canvas(
+        // The zoom applies to the drawing and to the TalkBack nodes over it alike.
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer(
                     scaleX = scale, scaleY = scale,
                     translationX = offsetX, translationY = offsetY
                 )
+        ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
                 .pointerInput(puzzle.size, startX, startY, cellSize) {
                     // Like the iOS board: a touch or click registers on press, and a drag reports each
                     // cell once as the pointer enters it. Positions here are already in the layer's
@@ -180,6 +186,21 @@ fun GameGridArea(
             drawClues(rowClues, colClues, puzzle.paletteHex, maxRowClueCount, maxColClueCount, cellSize, startX, startY, textMeasurer, clueDensity)
 
             drawCursor(cursorRow, cursorCol, cellSize, startX, startY, isCursorVisible)
+        }
+
+        BoardSemantics(
+            puzzle = puzzle,
+            userGrid = userGrid,
+            rowClues = rowClues,
+            colClues = colClues,
+            maxRowClueCount = maxRowClueCount,
+            maxColClueCount = maxColClueCount,
+            cellSize = cellSize,
+            startX = startX,
+            startY = startY,
+            onCellClick = onCellClick,
+            cellActions = cellActions,
+        )
         }
 
         if (isZoomEnabled && (scale != defaultScale || offsetX != 0f || offsetY != 0f)) {

@@ -1,5 +1,19 @@
 package com.neilb.nonocraft.presentation.screens.gameplay
 
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import kotlinx.coroutines.delay
+import com.neilb.nonocraft.presentation.screens.gameplay.components.BoardCellActions
+import com.neilb.nonocraft.presentation.screens.gameplay.components.BoardSpeech
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -127,16 +141,50 @@ fun GameScreen(
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
+    // TalkBack hears a lost heart as it happens; the win and game-over dialogs announce themselves.
+    var announcement by remember { mutableStateOf("") }
+    var previousLives by remember { mutableIntStateOf(-1) }
+    LaunchedEffect(state.currentLives) {
+        if (previousLives > state.currentLives && state.currentLives > 0) {
+            announcement = "Yanlış hamle, ${state.currentLives} can kaldı"
+        }
+        previousLives = state.currentLives
+    }
+    // Cleared after it is spoken so it does not linger as a stop at the top of the screen.
+    LaunchedEffect(announcement) {
+        if (announcement.isNotEmpty()) {
+            delay(4000)
+            announcement = ""
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDark)
             .navigationBarsPadding()
-            .focusRequester(focusRequester)
             .onPreviewKeyEvent { handleGameKey(it, state, viewModel) }
-            .focusable()
     ) {
         GridBackground()
+
+        // Keyboard focus sits on this hidden node so the screen keeps getting key events; on the root it
+        // would make TalkBack read the clues, hearts and stick as one stop.
+        Box(
+            Modifier
+                .size(1.dp)
+                .clearAndSetSemantics { }
+                .focusRequester(focusRequester)
+                .focusable()
+        )
+
+        Box(
+            Modifier
+                .size(1.dp)
+                .semantics {
+                    liveRegion = LiveRegionMode.Assertive
+                    if (announcement.isNotEmpty()) contentDescription = announcement
+                }
+        )
 
         if (state.isLoading) {
             CircularProgressIndicator(
@@ -210,6 +258,7 @@ private fun GameContent(
     viewModel: GameViewModel,
     modifier: Modifier = Modifier
 ) {
+    val cellActions = remember(viewModel) { ViewModelCellActions(viewModel) }
     val board = remember(viewModel) {
         movableContentOf { boardState: GameUiState, boardModifier: Modifier ->
             Box(modifier = boardModifier, contentAlignment = Alignment.Center) {
@@ -223,7 +272,8 @@ private fun GameContent(
                         cursorRow = boardState.cursorRow,
                         cursorCol = boardState.cursorCol,
                         isCursorVisible = boardState.isCursorVisible,
-                        onCellClick = { row, col -> viewModel.onCellClicked(row, col) }
+                        onCellClick = { row, col -> viewModel.onCellClicked(row, col) },
+                        cellActions = cellActions
                     )
                 }
             }
@@ -257,21 +307,29 @@ private fun GameControlsPanel(
             horizontalArrangement = if (isSideBySide) Arrangement.SpaceEvenly else Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val palette = state.puzzle?.paletteHex.orEmpty()
             AnalogStick(
                 onMove = { dRow, dCol -> viewModel.moveCursor(dRow, dCol) },
-                onFocusChange = { isFocused -> viewModel.setAnalogFocus(isFocused) }
+                onFocusChange = { isFocused -> viewModel.setAnalogFocus(isFocused) },
+                cursorDescription = BoardSpeech.cellPosition(state.cursorRow, state.cursorCol) + ", " +
+                    BoardSpeech.cellState(state.userGrid.getOrNull(state.cursorRow)?.getOrNull(state.cursorCol) ?: 0, palette)
             )
 
             GameActionButtons(
                 onPlacePressed = { isPressed -> viewModel.setPlacePressed(isPressed) },
                 onHintAction = { viewModel.useHint() },
                 hintsRemaining = state.hintsRemaining,
-                selectedColor = activeColor
+                selectedColor = activeColor,
+                isCrossMode = state.isCrossMode
             )
         }
 
+        val palette = state.puzzle?.paletteHex.orEmpty()
         ToolPaletteBar(
-            paletteColors = state.puzzle?.paletteHex?.map { it.toColor() } ?: emptyList(),
+            paletteColors = palette.map { it.toColor() },
+            colorLabels = palette.indices.map { index ->
+                if (palette.size > 1) BoardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.uppercase() } else "Doldur"
+            },
             selectedColorIndex = state.selectedColorIndex,
             isCrossMode = state.isCrossMode,
             onColorSelected = { viewModel.selectColor(it) },
@@ -316,6 +374,10 @@ private fun handleGameKey(event: KeyEvent, state: GameUiState, viewModel: GameVi
             true
         }
         Key.X -> { if (isDown) viewModel.toggleCrossMode(true); true }
+        Key.Backspace, Key.Delete -> {
+            if (isDown) ViewModelCellActions(viewModel).clear(state.cursorRow, state.cursorCol)
+            true
+        }
         Key.H -> { if (isDown && event.nativeKeyEvent.repeatCount == 0) viewModel.useHint(); true }
         else -> {
             val digit = event.nativeKeyEvent.unicodeChar.toChar().digitToIntOrNull()
@@ -345,11 +407,10 @@ fun GameEndOverlay(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(color = Color(0xFF0D0D10)),
-                    onClick = { }
-                ),
+                // Swallows taps around the card without becoming an unlabeled TalkBack button.
+                .pointerInput(Unit) { detectTapGestures { } }
+                // TalkBack announces the dialog by its title ("Tebrikler!", "Oyun bitti") when it opens.
+                .semantics { paneTitle = "$title. $subtitle" },
             color = Color.Black.copy(alpha = 0.85f)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -359,6 +420,7 @@ fun GameEndOverlay(
                 ) {
                     Text(
                         text = title,
+                        modifier = Modifier.semantics { heading() },
                         color = if (isVictory) NeonCyan else DangerRed,
                         fontSize = 36.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -437,7 +499,9 @@ private fun GameTopBar(
             textAlign = TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() }
         )
 
         // Grows with the font scale so the timer is never clipped; 48 dp keeps the title centred.
@@ -449,6 +513,9 @@ private fun GameTopBar(
                 val remaining = max(0L, timeLimitSeconds - timeElapsed)
                 Text(
                     text = formatTime(remaining),
+                    modifier = Modifier.clearAndSetSemantics {
+                        contentDescription = "Kalan süre: ${remaining / 60} dakika ${remaining % 60} saniye"
+                    },
                     color = DangerRed,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -467,7 +534,8 @@ private fun LivesBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp),
+            .padding(bottom = 12.dp)
+            .clearAndSetSemantics { contentDescription = "$currentLives can kaldı" },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -482,5 +550,35 @@ private fun LivesBar(
                     .size(24.dp)
             )
         }
+    }
+}
+/**
+ * Single-cell moves for TalkBack and the keyboard, made from the view model's own moves (pick a tool, touch
+ * the cell); the player's tool is put back afterwards. Crossing a crossed cell clears it.
+ */
+private class ViewModelCellActions(private val viewModel: GameViewModel) : BoardCellActions {
+    override fun fill(row: Int, col: Int, colorIndex: Int) {
+        val before = viewModel.state.value
+        viewModel.selectColor(colorIndex)
+        viewModel.onCellClicked(row, col)
+        if (before.isCrossMode) viewModel.toggleCrossMode(true)
+        else if (before.selectedColorIndex != colorIndex) viewModel.selectColor(before.selectedColorIndex)
+    }
+
+    override fun cross(row: Int, col: Int) {
+        if (cellValue(row, col) == 0) withCrossTool { viewModel.onCellClicked(row, col) }
+    }
+
+    override fun clear(row: Int, col: Int) {
+        if (cellValue(row, col) == -1) withCrossTool { viewModel.onCellClicked(row, col) }
+    }
+
+    private fun cellValue(row: Int, col: Int): Int? = viewModel.state.value.userGrid.getOrNull(row)?.getOrNull(col)
+
+    private inline fun withCrossTool(move: () -> Unit) {
+        val wasCrossMode = viewModel.state.value.isCrossMode
+        viewModel.toggleCrossMode(true)
+        move()
+        if (!wasCrossMode) viewModel.toggleCrossMode(false)
     }
 }
