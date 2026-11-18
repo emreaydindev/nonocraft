@@ -1,5 +1,12 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -219,7 +226,9 @@ private fun SlideContent(
             color = textPrimary,
             textAlign = TextAlign.Center,
             lineHeight = 32.sp,
-            modifier = Modifier.padding(bottom = 12.dp),
+            modifier = Modifier
+                .padding(bottom = 12.dp)
+                .semantics { heading() },
         )
 
         Text(
@@ -283,7 +292,10 @@ private fun BottomSection(
                 text = "Atla",
                 fontSize = 13.sp,
                 color = textMuted,
-                modifier = Modifier.rippleClickable(onClick = onSkip),
+                modifier = Modifier
+                    .minimumInteractiveComponentSize()
+                    .rippleClickable(onClick = onSkip)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             )
         }
     }
@@ -299,7 +311,9 @@ private fun PageIndicator(
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
 
     Row(
-        modifier = modifier,
+        modifier = modifier.clearAndSetSemantics {
+            contentDescription = "Sayfa ${pagerState.currentPage + 1} / $count"
+        },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -472,6 +486,10 @@ private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColo
                 val isSelected = i == selectedColor
                 Box(
                     modifier = Modifier
+                        // 48 dp touch area around the small swatch; read as "Renk 2, selected".
+                        .minimumInteractiveComponentSize()
+                        .selectable(selected = isSelected, role = Role.RadioButton) { setSelectedColor(i) }
+                        .semantics { contentDescription = "Renk ${i + 1}" }
                         .size(if (isSelected) 28.dp else 22.dp)
                         .clip(CircleShape)
                         .background(color)
@@ -484,7 +502,6 @@ private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColo
                                 )
                             }
                         }
-                        .rippleClickable { setSelectedColor(i) }
                 )
             }
         }
@@ -517,7 +534,7 @@ private fun VisualPremium(accentColor: Color) {
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Text("★", fontSize = 22.sp, color = accentColor)
+            Text("★", fontSize = 22.sp, color = accentColor, modifier = Modifier.clearAndSetSemantics { })
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -540,7 +557,7 @@ private fun VisualPremium(accentColor: Color) {
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("✓ ", color = accentColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("✓ ", color = accentColor, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clearAndSetSemantics { })
                 Text(feature, color = accentColor, fontSize = 14.sp)
             }
         }
@@ -550,11 +567,12 @@ private fun VisualPremium(accentColor: Color) {
 }
 
 @Composable
-private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier =
+private fun Modifier.rippleClickable(role: Role? = Role.Button, onClick: () -> Unit): Modifier =
     this.then(
         Modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = ripple(color = Color(0xFF0D0D10)),
+            role = role,
             onClick = onClick,
         )
     )

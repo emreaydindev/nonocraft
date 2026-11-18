@@ -1,5 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.settings
 
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,7 +148,8 @@ fun SettingsScreen(
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() }
                 )
             }
 
@@ -273,7 +278,9 @@ private fun SettingsGroup(
     Column {
         SectionLabel(
             text = title,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            modifier = Modifier
+                .padding(start = 4.dp, bottom = 8.dp)
+                .semantics { heading() }
         )
         DashboardCard(
             modifier = Modifier.fillMaxWidth(),
@@ -363,7 +370,7 @@ private fun SettingsRow(
             } else if (!hideTrailingIcon) {
                 Icon(
                     imageVector = if (isExternalLink) Icons.AutoMirrored.Rounded.OpenInNew else Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                    contentDescription = null,
+                    contentDescription = if (isExternalLink) "Tarayıcıda açılır" else null,
                     tint = TextMuted.copy(alpha = 0.5f),
                     modifier = Modifier.size(if (isExternalLink) 18.dp else 14.dp)
                 )
@@ -380,9 +387,11 @@ private fun SettingsSwitchRow(
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    // The whole row is the switch, so TalkBack reads the label with the state in one stop.
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .toggleable(value = isChecked, role = Role.Switch, onValueChange = onCheckedChange)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -410,7 +419,7 @@ private fun SettingsSwitchRow(
 
         Switch(
             checked = isChecked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = null,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = BackgroundDark,
                 checkedTrackColor = NeonCyan,

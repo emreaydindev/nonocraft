@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library.detail
 
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,7 +95,8 @@ fun LibraryDetailScreen(
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() }
                 )
             }
 

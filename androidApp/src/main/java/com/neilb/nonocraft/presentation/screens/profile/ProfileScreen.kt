@@ -1,5 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.profile
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -85,7 +88,7 @@ fun ProfileScreen(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = null,
+                        contentDescription = "Geri",
                         tint = TextPrimary
                     )
                 }
@@ -94,7 +97,8 @@ fun ProfileScreen(
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() }
                 )
             }
 
@@ -124,7 +128,8 @@ fun ProfileScreen(
                                     .size(80.dp)
                                     .clip(CircleShape)
                                     .background(SurfaceVariantDark)
-                                    .border(2.dp, NeonCyan.copy(alpha = 0.5f), CircleShape),
+                                    .border(2.dp, NeonCyan.copy(alpha = 0.5f), CircleShape)
+                                    .clearAndSetSemantics { }, // the initial repeats the name below
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -250,7 +255,11 @@ fun ProfileScreen(
 
 @Composable
 private fun StatItem(value: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // "28 Bulmaca" as one stop instead of the number and the label apart.
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.semantics(mergeDescendants = true) { }
+    ) {
         Text(
             text = value,
             color = TextPrimary,

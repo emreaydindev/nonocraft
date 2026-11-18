@@ -1,5 +1,11 @@
 package com.neilb.nonocraft.presentation.components
 
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -90,7 +96,9 @@ fun CommentsSheetContent(comments: List<Comment>) {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = AppFont,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+            modifier = Modifier
+                .padding(horizontal = 18.dp, vertical = 8.dp)
+                .semantics { heading() }
         )
 
         LazyColumn(
@@ -110,12 +118,17 @@ fun CommentsSheetContent(comments: List<Comment>) {
                             detectTapGestures(
                                 onLongPress = { showMenu = true }
                             )
+                        }
+                        // One TalkBack stop per comment; the long-press menu is offered as an action.
+                        .semantics(mergeDescendants = true) {
+                            customActions = listOf(CustomAccessibilityAction("Şikayet Et") { showMenu = true; true })
                         },
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .clearAndSetSemantics { }
                             .clip(CircleShape)
                             .background(SurfaceVariantDark),
                         contentAlignment = Alignment.Center
@@ -188,7 +201,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                     }
                     Icon(
                         imageVector = if (comment.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = null,
+                        contentDescription = if (comment.isLiked) "Beğendin" else null,
                         tint = if (comment.isLiked) DangerRed else TextMuted,
                         modifier = Modifier
                             .size(20.dp)
@@ -250,7 +263,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.Send,
-                        contentDescription = null,
+                        contentDescription = "Gönder",
                         tint = if (textValue.isNotBlank()) BackgroundDark else TextMuted,
                         modifier = Modifier.size(20.dp)
                     )
@@ -325,15 +338,19 @@ fun PlaylistSelectionDialog(
                         color = TextPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = AppFont
+                        fontFamily = AppFont,
+                        modifier = Modifier.semantics { heading() }
                     )
                     Icon(
                         imageVector = Icons.Rounded.Close,
-                        contentDescription = null,
+                        contentDescription = "Kapat",
                         tint = TextMuted,
                         modifier = Modifier
-                            .size(24.dp)
+                            .minimumInteractiveComponentSize()
+                            .clip(CircleShape)
                             .rippleClickable(onDismiss)
+                            .padding(12.dp)
+                            .size(24.dp)
                     )
                 }
 

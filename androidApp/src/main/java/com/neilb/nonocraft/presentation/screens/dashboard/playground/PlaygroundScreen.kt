@@ -54,6 +54,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -246,7 +250,13 @@ private fun LevelProgressCard(
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
-                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                    modifier = Modifier.clearAndSetSemantics {
+                        contentDescription = "Mevcut seviye $currentLevel"
+                        heading()
+                    },
+                ) {
                     Text(
                         text = "MEVCUT SEVİYE",
                         color = TextMuted,
@@ -269,7 +279,9 @@ private fun LevelProgressCard(
                         .clip(RoundedCornerShape(14.dp))
                         .background(NeonCyan)
                         .rippleClickable(onContinue)
+                        .heightIn(min = 48.dp)
                         .padding(horizontal = 18.dp, vertical = 11.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = if (hasDraft) "Devam Et" else "Başla",
@@ -376,7 +388,7 @@ private fun WalletStrip(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(
-                modifier = Modifier.semantics(mergeDescendants = true) {
+                modifier = Modifier.clearAndSetSemantics {
                     contentDescription = "$stars yıldız"
                 },
                 verticalAlignment = Alignment.CenterVertically,
@@ -405,7 +417,7 @@ private fun WalletStrip(
             )
 
             Row(
-                modifier = Modifier.semantics(mergeDescendants = true) {
+                modifier = Modifier.clearAndSetSemantics {
                     contentDescription = "$crystals / $CRYSTAL_CAP kristal"
                 },
                 verticalAlignment = Alignment.CenterVertically,
@@ -442,7 +454,7 @@ private fun WalletStrip(
             if (crystals < CRYSTAL_CAP) {
                 val timerColor = if (crystals == 0) DangerRed else TextSecondary
                 Row(
-                    modifier = Modifier.semantics(mergeDescendants = true) {
+                    modifier = Modifier.clearAndSetSemantics {
                         contentDescription = "Yeni kristale $crystalRefillMinutes dakika"
                     },
                     verticalAlignment = Alignment.CenterVertically,
@@ -553,7 +565,10 @@ private fun DailyChallengeCard(
                             modifier = Modifier.size(22.dp),
                         )
                     }
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.semantics(mergeDescendants = true) { heading() },
+                    ) {
                         Text(
                             text = "GÜNÜN BULMACASI",
                             color = if (!isSolved) NeonCyan else TextMuted,
@@ -578,7 +593,9 @@ private fun DailyChallengeCard(
                             .clip(RoundedCornerShape(14.dp))
                             .background(NeonCyan)
                             .rippleClickable(onPlayToday)
+                            .heightIn(min = 48.dp)
                             .padding(horizontal = 18.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = "Oyna",
@@ -636,7 +653,7 @@ private fun DailyChallengeCard(
                             .clip(RoundedCornerShape(12.dp))
                             .rippleClickable { if (day.isToday) onPlayToday() else onPlayPast(day.key) }
                             .padding(vertical = 4.dp, horizontal = if (largeText) 4.dp else 0.dp)
-                            .semantics(mergeDescendants = true) {
+                            .clearAndSetSemantics {
                                 contentDescription =
                                     if (day.isToday) "Bugünün bulmacası" else "${day.number} ${day.weekday} bulmacası"
                             },
@@ -776,7 +793,10 @@ private fun SimulationToggles(
 @Composable
 private fun ToggleRow(label: String, value: Boolean, onToggle: (Boolean) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .toggleable(value = value, role = Role.Switch, onValueChange = onToggle),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -791,8 +811,7 @@ private fun ToggleRow(label: String, value: Boolean, onToggle: (Boolean) -> Unit
                     1.dp,
                     if (value) NeonCyan.copy(alpha = 0.6f) else BorderDark,
                     RoundedCornerShape(11.dp),
-                )
-                .rippleClickable { onToggle(!value) },
+                ),
             contentAlignment = if (value) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
             Box(

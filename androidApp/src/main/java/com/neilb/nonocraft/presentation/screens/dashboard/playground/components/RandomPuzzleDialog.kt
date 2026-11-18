@@ -1,5 +1,17 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.playground.components
 
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -80,14 +92,17 @@ fun RandomPuzzleDialog(
                         color = TextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = AppFont
+                        fontFamily = AppFont,
+                        modifier = Modifier.semantics { heading() }
                     )
                     Box(
                         modifier = Modifier
+                            .minimumInteractiveComponentSize()
                             .size(32.dp)
                             .clip(CircleShape)
                             .background(SurfaceVariantDark)
-                            .rippleClickable(onDismiss),
+                            .rippleClickable(onDismiss)
+                            .semantics { contentDescription = "Kapat" },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -102,7 +117,7 @@ fun RandomPuzzleDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     DialogSectionHeader(icon = Icons.Rounded.ColorLens, title = "Oyun Modu")
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().selectableGroup(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         SelectableOptionCard(
@@ -127,7 +142,7 @@ fun RandomPuzzleDialog(
                     DialogSectionHeader(icon = Icons.Rounded.GridOn, title = "Matris Boyutu")
                     // Four per row; two at the largest font scales so "20×20" stays on one line.
                     val perRow = if (isLargeFontScale()) 2 else 4
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.selectableGroup()) {
                         sizes.chunked(perRow).forEach { rowSizes ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -136,6 +151,7 @@ fun RandomPuzzleDialog(
                                 rowSizes.forEach { size ->
                                     SelectableChip(
                                         text = size,
+                                        label = size.replace("×", " x "),
                                         isSelected = selectedSize == size,
                                         onClick = { selectedSize = size },
                                         modifier = Modifier.weight(1f)
@@ -164,12 +180,13 @@ fun RandomPuzzleDialog(
                         }
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().selectableGroup(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         livesOptions.forEach { life ->
                             SelectableChip(
                                 text = life.toString(),
+                                label = if (life == 1) "1 can, Hardcore" else "$life can",
                                 isSelected = selectedLives == life,
                                 onClick = { selectedLives = life },
                                 activeColor = if (life == 1) DangerRed else PurpleAccent,
@@ -224,7 +241,8 @@ private fun DialogSectionHeader(
             color = TextSecondary,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            fontFamily = AppFont
+            fontFamily = AppFont,
+            modifier = Modifier.semantics { heading() }
         )
     }
 }
@@ -245,7 +263,7 @@ private fun SelectableOptionCard(
                 if (isSelected) PurpleAccent else Color.Transparent,
                 RoundedCornerShape(12.dp)
             )
-            .rippleClickable(onClick)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
             .padding(vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -262,6 +280,7 @@ private fun SelectableOptionCard(
 @Composable
 private fun SelectableChip(
     text: String,
+    label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -269,9 +288,16 @@ private fun SelectableChip(
 ) {
     Box(
         modifier = modifier
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(if (isSelected) activeColor else SurfaceVariantDark)
-            .rippleClickable(onClick)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = label
+                selected = isSelected
+                role = Role.RadioButton
+                onClick { onClick(); true }
+            }
             .padding(horizontal = 13.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {

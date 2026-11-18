@@ -1,5 +1,13 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +24,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -146,7 +155,8 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                         color = TextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = AppFont
+                        fontFamily = AppFont,
+                        modifier = Modifier.semantics { heading() }
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
@@ -256,9 +266,12 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
 @Composable
 private fun Step1Content(grid: List<CellState>, handOffset: Float, onFill: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("4", color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 16.dp))
+        Text("4", color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier
+            .padding(end = 16.dp)
+            .clearAndSetSemantics { contentDescription = "Satır ipucu: 4" })
         Box {
             Text("👆", fontSize = 30.sp, modifier = Modifier
+                .clearAndSetSemantics { }
                 .offset { IntOffset(handOffset.roundToInt(), 40) }
                 .zIndex(2f))
             Row(
@@ -271,8 +284,9 @@ private fun Step1Content(grid: List<CellState>, handOffset: Float, onFill: () ->
                     }
                 }
             ) {
-                grid.forEach { state ->
-                    CellView(state)
+                grid.forEachIndexed { i, state ->
+                    // Tapping the next empty cell fills it, like dragging onto it.
+                    CellView(state, i, onClick = { if (i == grid.count { it != CellState.EMPTY }) onFill() })
                 }
             }
         }
@@ -282,13 +296,15 @@ private fun Step1Content(grid: List<CellState>, handOffset: Float, onFill: () ->
 @Composable
 private fun Step2Content(grid: List<CellState>, onCross: (Int) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 16.dp)) {
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier
+            .padding(end = 16.dp)
+            .clearAndSetSemantics { contentDescription = "Satır ipucu: 1, 3" }) {
             Text("1", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text("3", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             grid.forEachIndexed { i, state ->
-                CellView(state, onClick = { onCross(i) })
+                CellView(state, i, onClick = { onCross(i) })
             }
         }
     }
@@ -297,12 +313,15 @@ private fun Step2Content(grid: List<CellState>, onCross: (Int) -> Unit) {
 @Composable
 private fun Step3Content(grid: List<CellState>, handOffset: Float, onFill: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 16.dp)) {
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier
+            .padding(end = 16.dp)
+            .clearAndSetSemantics { contentDescription = "Satır ipucu: 3 mor, 2 altın" }) {
             Text("3", color = PurpleAccent, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text("2", color = GameGold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         Box {
             Text("👆", fontSize = 30.sp, modifier = Modifier
+                .clearAndSetSemantics { }
                 .offset { IntOffset(handOffset.roundToInt(), 40) }
                 .zIndex(2f))
             Row(
@@ -315,8 +334,9 @@ private fun Step3Content(grid: List<CellState>, handOffset: Float, onFill: () ->
                     }
                 }
             ) {
-                grid.forEach { state ->
-                    CellView(state)
+                grid.forEachIndexed { i, state ->
+                    // Tapping the next empty cell fills it, like dragging onto it.
+                    CellView(state, i, onClick = { if (i == grid.count { it != CellState.EMPTY }) onFill() })
                 }
             }
         }
@@ -346,7 +366,10 @@ private fun Step4Content() {
     val rowClues = listOf("", "", "1", "3", "5", "1 5", "3 5", "5 5", "9", "7", "5", "3", "1", "")
     val colClues = listOf("1", "3", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "3", "1")
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clearAndSetSemantics { contentDescription = "Tamamlanmış bulmaca" }
+    ) {
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 4.dp)) {
             Box(Modifier.size(16.dp))
             rowClues.forEach { clue ->
@@ -381,8 +404,16 @@ private fun Step4Content() {
     }
 }
 
+/** A practice cell, read as "Kare 2, boş"; tappable when [onClick] is set (the drag steps also fill by tap). */
 @Composable
-private fun CellView(state: CellState, onClick: () -> Unit = {}) {
+private fun CellView(state: CellState, index: Int, onClick: (() -> Unit)? = null) {
+    val stateLabel = when (state) {
+        CellState.EMPTY -> "boş"
+        CellState.CYAN -> "dolu"
+        CellState.PURPLE -> "mor"
+        CellState.GOLD -> "altın"
+        CellState.CROSS -> "çarpı"
+    }
     Box(
         Modifier
             .size(50.dp)
@@ -397,7 +428,11 @@ private fun CellView(state: CellState, onClick: () -> Unit = {}) {
                 }
             )
             .border(0.5.dp, BorderDark, RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick),
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .clearAndSetSemantics {
+                contentDescription = "Kare ${index + 1}, $stateLabel"
+                if (onClick != null) this.onClick { onClick(); true }
+            },
         contentAlignment = Alignment.Center
     ) {
         if (state == CellState.CROSS) {
@@ -408,6 +443,12 @@ private fun CellView(state: CellState, onClick: () -> Unit = {}) {
 
 @Composable
 private fun ToolButton(tool: Tool, isSelected: Boolean, color: Color, onClick: () -> Unit) {
+    val label = when (tool) {
+        Tool.FILL -> "Doldur"
+        Tool.CROSS -> "Çarpı"
+        Tool.PURPLE -> "Mor"
+        Tool.GOLD -> "Altın"
+    }
     Box(
         modifier = Modifier
             .size(54.dp)
@@ -418,7 +459,13 @@ private fun ToolButton(tool: Tool, isSelected: Boolean, color: Color, onClick: (
                 if (isSelected) (if (color == Color.Transparent) TextPrimary else color) else BorderDark,
                 CircleShape
             )
-            .clickable { onClick() },
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = label
+                selected = isSelected
+                role = Role.RadioButton
+                this.onClick { onClick(); true }
+            },
         contentAlignment = Alignment.Center
     ) {
         when (tool) {
@@ -437,7 +484,8 @@ private fun ToolButton(tool: Tool, isSelected: Boolean, color: Color, onClick: (
 
 @Composable
 private fun StepDots(count: Int = 4, current: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    // The step is read from the "ADIM x / 4" label, so the dots are decoration.
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.clearAndSetSemantics { }) {
         repeat(count) { i ->
             Box(
                 Modifier
@@ -449,10 +497,13 @@ private fun StepDots(count: Int = 4, current: Int) {
     }
 }
 
-private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = composed {
+private fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = rippleClickable(Role.Button, onClick)
+
+private fun Modifier.rippleClickable(role: Role?, onClick: () -> Unit): Modifier = composed {
     this.clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = ripple(color = Color(0xFF0D0D10)),
+        role = role,
         onClick = onClick
     )
 }

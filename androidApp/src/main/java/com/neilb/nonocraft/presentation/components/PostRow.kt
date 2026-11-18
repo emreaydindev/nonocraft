@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.components
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -93,6 +95,7 @@ fun PostRow(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clearAndSetSemantics { contentDescription = "${post.likes} beğeni" },
             ) {
                 Icon(
                     imageVector = if (post.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,

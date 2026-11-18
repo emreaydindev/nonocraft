@@ -1,5 +1,14 @@
 package com.neilb.nonocraft.presentation.screens.premium
 
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -216,7 +225,8 @@ fun PremiumScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 16.dp)
+                    .clearAndSetSemantics { contentDescription = "Sayfa ${pagerState.currentPage + 1} / ${slides.size}" },
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -240,7 +250,8 @@ fun PremiumScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .selectableGroup(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 plans.forEach { plan ->
@@ -341,7 +352,8 @@ private fun FeatureSlideContent(
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = AppFont,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.semantics { heading() }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -400,9 +412,11 @@ private fun PlanSelectionCard(
             .clip(RoundedCornerShape(16.dp))
             .background(bgColor)
             .border(width = if (isSelected) 2.dp else 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
-            .clickable(
+            .selectable(
+                selected = isSelected,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = Color(0xFF0D0D10)),
+                role = Role.RadioButton,
                 onClick = onClick
             )
             .padding(16.dp)
@@ -482,6 +496,7 @@ private fun PurchaseButton(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(color = Color(0xFF0D0D10)),
                 enabled = !isProcessing,
+                role = Role.Button,
                 onClick = onClick
             ),
         contentAlignment = Alignment.Center
@@ -514,7 +529,11 @@ private fun ProcessingOverlay() {
             .background(BackgroundDark.copy(alpha = 0.85f)),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
+        ) {
             CircularProgressIndicator(color = GameGold)
             Text(
                 text = "İşleminiz tamamlanıyor...",
@@ -536,7 +555,8 @@ private fun SuccessOverlay() {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Assertive }
         ) {
             Box(
                 modifier = Modifier

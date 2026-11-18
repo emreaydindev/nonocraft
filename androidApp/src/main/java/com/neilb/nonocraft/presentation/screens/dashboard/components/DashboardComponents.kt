@@ -31,6 +31,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -82,7 +83,7 @@ fun DashboardBottomNavBar(
                 icon = {
                     Icon(
                         imageVector = if (isSelected) tabItem.filledIcon else tabItem.outlinedIcon,
-                        contentDescription = tabItem.label,
+                        contentDescription = null, // the label below names the tab
                         modifier = Modifier.size(24.dp)
                     )
                 },
@@ -127,7 +128,7 @@ fun DashboardNavRail(
                         icon = {
                             Icon(
                                 imageVector = if (isSelected) tabItem.filledIcon else tabItem.outlinedIcon,
-                                contentDescription = tabItem.label,
+                                contentDescription = null, // the label below names the tab
                                 modifier = Modifier.size(24.dp)
                             )
                         },
@@ -201,8 +202,13 @@ fun DashboardCard(
     }
 }
 
-fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = this.clickable(
+/** Clickable with the app ripple, read by TalkBack as a button. */
+fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = rippleClickable(Role.Button, onClick)
+
+/** Clickable with the app ripple, read by TalkBack as [role] (null for none). */
+fun Modifier.rippleClickable(role: Role?, onClick: () -> Unit): Modifier = this.clickable(
     interactionSource = MutableInteractionSource(),
     indication = ripple(color = Color(0xFF0D0D10)),
+    role = role,
     onClick = onClick,
 )

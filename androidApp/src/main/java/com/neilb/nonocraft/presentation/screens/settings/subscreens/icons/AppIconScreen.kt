@@ -1,5 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.icons
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -57,14 +63,15 @@ fun AppIconScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
                 }
                 Text(
                     text = "Uygulama İkonu",
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() }
                 )
             }
 
@@ -112,7 +119,14 @@ private fun AppIconCard(
                 color = if (isSelected) NeonCyan else BorderDark,
                 shape = RoundedCornerShape(20.dp)
             )
-            .rippleClickable(onClick)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .clearAndSetSemantics {
+                contentDescription = listOfNotNull(
+                    option.name,
+                    "Premium".takeIf { option.isPremium },
+                    "Kilitli".takeIf { isLocked },
+                ).joinToString(", ")
+            }
             .padding(16.dp)
     ) {
         Box(
@@ -128,7 +142,7 @@ private fun AppIconCard(
                     modifier = Modifier.fillMaxSize().background(BackgroundDark.copy(alpha = 0.6f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Rounded.Lock, contentDescription = null, tint = TextMuted, modifier = Modifier.size(28.dp))
+                    Icon(Icons.Rounded.Lock, contentDescription = "Kilitli", tint = TextMuted, modifier = Modifier.size(28.dp))
                 }
             }
         }

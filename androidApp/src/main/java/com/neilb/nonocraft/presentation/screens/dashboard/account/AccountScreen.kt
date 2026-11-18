@@ -1,5 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.account
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -81,7 +85,9 @@ fun AccountScreen(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = AppFont,
-                modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
+                modifier = Modifier
+                    .padding(bottom = 16.dp, top = 16.dp)
+                    .semantics { heading() }
             )
 
             DashboardCard(
@@ -129,7 +135,8 @@ private fun ProfileHeader(
                 .size(80.dp)
                 .clip(CircleShape)
                 .background(SurfaceVariantDark)
-                .rippleClickable(onNavigateToCrafting),
+                .rippleClickable(onNavigateToCrafting)
+                .clearAndSetSemantics { contentDescription = "Avatarı düzenle" },
             contentAlignment = Alignment.Center,
         ) {
             if (uiState.avatarUrl != null) {
@@ -205,7 +212,7 @@ private fun MenuRow(
                 )
                 Text(label, color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Medium, fontFamily = AppFont)
             }
-            Text("›", color = TextMuted, fontSize = 20.sp)
+            Text("›", color = TextMuted, fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
         }
     }
 }

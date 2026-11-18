@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -81,6 +83,7 @@ fun ResetPasswordScreen(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() },
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(

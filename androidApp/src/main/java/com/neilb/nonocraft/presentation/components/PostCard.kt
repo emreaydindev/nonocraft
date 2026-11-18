@@ -1,5 +1,11 @@
 package com.neilb.nonocraft.presentation.components
 
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,6 +70,7 @@ fun PostCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            .clearAndSetSemantics { } // the initial repeats the name read next
                             .clip(CircleShape)
                             .background(SurfaceVariantDark)
                             .border(1.dp, Color(post.accentColor).copy(alpha = 0.5f), CircleShape),
@@ -100,6 +107,7 @@ fun PostCard(
                     if (showFollowButton) {
                         Box(
                             modifier = Modifier
+                                .minimumInteractiveComponentSize()
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(if (post.isFollowed) SurfaceVariantDark else NeonCyan)
                                 .rippleClickable { onAction(PostAction.FollowClick(post.id)) }
@@ -119,8 +127,12 @@ fun PostCard(
                         contentDescription = null,
                         tint = TextMuted,
                         modifier = Modifier
-                            .size(24.dp)
+                            .minimumInteractiveComponentSize()
+                            .clip(CircleShape)
                             .rippleClickable { onAction(PostAction.MoreClick(post.id)) }
+                            .semantics { contentDescription = "Diğer seçenekler" }
+                            .padding(12.dp)
+                            .size(24.dp)
                     )
                 }
             }
@@ -165,7 +177,13 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.rippleClickable { onAction(PostAction.LikeClick(post.id)) }
+                    modifier = Modifier
+                        .heightIn(min = 48.dp)
+                        .rippleClickable { onAction(PostAction.LikeClick(post.id)) }
+                        .clearAndSetSemantics {
+                            contentDescription = "Beğen, ${post.likes} beğeni"
+                            stateDescription = if (post.isLiked) "Beğenildi" else "Beğenilmedi"
+                        }
                 ) {
                     Icon(
                         imageVector = if (post.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -184,7 +202,10 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.rippleClickable { onAction(PostAction.CommentClick(post.id)) }
+                    modifier = Modifier
+                        .heightIn(min = 48.dp)
+                        .rippleClickable { onAction(PostAction.CommentClick(post.id)) }
+                        .clearAndSetSemantics { contentDescription = "Yorumlar, ${post.comments} yorum" }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ChatBubbleOutline,
@@ -228,6 +249,7 @@ fun PostCard(
 
                 Box(
                     modifier = Modifier
+                        .minimumInteractiveComponentSize()
                         .clip(RoundedCornerShape(10.dp))
                         .background(NeonCyan)
                         .rippleClickable { onAction(PostAction.PlayClick(post.id)) }

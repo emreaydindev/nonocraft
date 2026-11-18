@@ -1,5 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.theme
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -45,14 +51,15 @@ fun ThemeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
                 }
                 Text(
                     text = "Uygulama Teması",
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() }
                 )
             }
 
@@ -108,7 +115,8 @@ private fun ThemeOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .rippleClickable(onClick)
+            .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
+            .clearAndSetSemantics { contentDescription = if (isPremium) "$title, Premium" else title }
             .background(if (isSelected) NeonCyan.copy(alpha = 0.05f) else Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -116,7 +124,7 @@ private fun ThemeOptionRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (isPremium) {
-                Icon(Icons.Rounded.WorkspacePremium, contentDescription = null, tint = GameGold, modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.WorkspacePremium, contentDescription = "Premium", tint = GameGold, modifier = Modifier.size(20.dp))
             }
             Text(
                 text = title,

@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.auth.login
 
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -120,6 +122,7 @@ fun LoginScreen(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() },
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(

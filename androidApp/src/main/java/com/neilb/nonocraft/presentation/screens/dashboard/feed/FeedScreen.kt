@@ -1,5 +1,14 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.feed
 
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -104,7 +113,9 @@ fun FeedScreen(
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = AppFont,
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 18.dp, vertical = 16.dp)
+                    .semantics { heading() }
             )
 
             val filterRow: @Composable () -> Unit = {
@@ -205,7 +216,7 @@ fun FeedScreen(
         ExtendedFloatingActionButton(
             onClick = onNavigateToCrafting,
             expanded = isFabExpanded,
-            icon = { Icon(Icons.Filled.Brush, contentDescription = "Oluştur") },
+            icon = { Icon(Icons.Filled.Brush, contentDescription = null) },
             text = {
                 Text(
                     text = "Oluştur",
@@ -218,6 +229,12 @@ fun FeedScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 20.dp)
+                // One label whether the text is shown or collapsed (it is hidden while animating).
+                .clearAndSetSemantics {
+                    contentDescription = "Oluştur"
+                    role = Role.Button
+                    onClick { onNavigateToCrafting(); true }
+                }
         )
 
         if (uiState.activeCommentPostId != null) {
@@ -338,6 +355,7 @@ private fun FeedFilterRow(
 
             Box(
                 modifier = Modifier
+                    .minimumInteractiveComponentSize()
                     .clip(RoundedCornerShape(20.dp))
                     .background(if (isSelected) NeonCyan else SurfaceDark)
                     .border(
@@ -345,7 +363,8 @@ private fun FeedFilterRow(
                         color = if (isSelected) NeonCyan else BorderDark,
                         shape = RoundedCornerShape(20.dp)
                     )
-                    .rippleClickable { onTabSelected(tab) }
+                    .rippleClickable(Role.Tab) { onTabSelected(tab) }
+                    .semantics { selected = isSelected }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -388,7 +407,9 @@ private fun FeedFilterRow(
                                     )
                                 },
                                 onClick = { onTimeRangeSelect(range) },
-                                modifier = Modifier.padding(horizontal = 8.dp)
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .semantics { selected = range == selectedTimeRange }
                             )
                         }
                     }

@@ -190,7 +190,7 @@ fun SplashScreen(
 
             Image(
                 painter = painterResource(id = R.drawable.ic_neon_cube_logo),
-                contentDescription = "Nonocraft logo",
+                contentDescription = null, // the name is read from the wordmark below
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(140.dp)

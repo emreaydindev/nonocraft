@@ -1,5 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -352,6 +356,7 @@ private fun LibraryRowList(
                 tint = section.tint,
                 isPremium = section.isPremium,
                 isSelected = section.id == selectedId,
+                isSelectable = selectedId != null,
                 onClick = section.onClick
             )
         }
@@ -363,6 +368,7 @@ private fun LibraryRowList(
                 icon = Icons.Rounded.Add,
                 tint = TextPrimary,
                 isSelected = false,
+                isSelectable = false,
                 onClick = onCreatePlaylist
             )
         }
@@ -373,6 +379,7 @@ private fun LibraryRowList(
                 icon = Icons.Rounded.QueueMusic,
                 tint = Color(playlist.coverColor),
                 isSelected = playlist.id == selectedId,
+                isSelectable = selectedId != null,
                 onClick = { onPlaylistClick(playlist.id) }
             )
         }
@@ -387,7 +394,9 @@ private fun LibraryTitle() {
         fontSize = 28.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = AppFont,
-        modifier = Modifier.padding(bottom = 8.dp)
+        modifier = Modifier
+            .padding(bottom = 8.dp)
+            .semantics { heading() }
     )
 }
 
@@ -399,7 +408,7 @@ private fun PlaylistsTitle(modifier: Modifier = Modifier) {
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
         fontFamily = AppFont,
-        modifier = modifier
+        modifier = modifier.semantics { heading() }
     )
 }
 
@@ -410,6 +419,7 @@ private fun LibraryRow(
     icon: ImageVector,
     tint: Color,
     isSelected: Boolean,
+    isSelectable: Boolean,
     onClick: () -> Unit,
     isPremium: Boolean = false
 ) {
@@ -420,7 +430,11 @@ private fun LibraryRow(
             .clip(shape)
             .background(if (isSelected) SurfaceVariantDark else SurfaceDark)
             .border(if (isSelected) 1.5.dp else 0.5.dp, if (isSelected) NeonCyan else BorderDark, shape)
-            .selectable(selected = isSelected, role = Role.Tab, onClick = onClick)
+            // A pane picker in the two-pane layout (read as a selected tab); a plain button otherwise.
+            .then(
+                if (isSelectable) Modifier.selectable(selected = isSelected, role = Role.Tab, onClick = onClick)
+                else Modifier.rippleClickable(onClick)
+            )
             .padding(horizontal = 14.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -488,7 +502,11 @@ private fun LibraryGridCard(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.1f)
-            .rippleClickable(onClick),
+            .rippleClickable(onClick)
+            // Title first, then the count and the Pro mark (the badge is drawn above the title).
+            .clearAndSetSemantics {
+                contentDescription = listOfNotNull(title, subtitle, "Pro".takeIf { isPremium }).joinToString(", ")
+            },
         cornerRadius = 24
     ) {
         Column(

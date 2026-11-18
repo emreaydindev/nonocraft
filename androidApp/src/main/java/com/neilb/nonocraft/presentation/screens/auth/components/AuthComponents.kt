@@ -1,5 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.auth.components
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -139,7 +146,13 @@ fun GoogleSignInButton(
             .clip(RoundedCornerShape(16.dp))
             .background(if (!isLoading) SurfaceDark else SurfaceDark.copy(alpha = 0.35f))
             .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
-            .clickable(enabled = !isLoading, onClick = onClick),
+            .clickable(enabled = !isLoading, role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                if (isLoading) {
+                    contentDescription = label
+                    stateDescription = "Yükleniyor"
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         if (isLoading) {
@@ -306,10 +319,7 @@ fun AuthPasswordField(
             PasswordVisualTransformation()
         },
         trailingIcon = {
-            IconButton(
-                onClick = { visible = !visible },
-                modifier = Modifier.size(24.dp)
-            ) {
+            IconButton(onClick = { visible = !visible }) {
                 Icon(
                     imageVector = if (visible)
                         Icons.Filled.VisibilityOff
@@ -385,7 +395,12 @@ fun PasswordRequirementRow(text: String, met: Boolean) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(vertical = 3.dp),
+        modifier = Modifier
+            .padding(vertical = 3.dp)
+            .clearAndSetSemantics {
+                contentDescription = text
+                stateDescription = if (met) "Karşılandı" else "Karşılanmadı"
+            },
     ) {
         Box(
             modifier = Modifier
@@ -431,10 +446,17 @@ fun PrimaryAuthButton(
             .background(if (enabled) NeonCyan else NeonCyan.copy(alpha = 0.35f))
             .clickable(
                 enabled = enabled && !isLoading,
+                role = Role.Button,
                 onClick = onClick,
                 interactionSource = interactionSource,
                 indication = ripple(color = Color(0xFF0D0D10))
-            ),
+            )
+            .semantics(mergeDescendants = true) {
+                if (isLoading) {
+                    contentDescription = text
+                    stateDescription = "Yükleniyor"
+                }
+            },
         contentAlignment = Alignment.Center,
     ) {
         if (isLoading) {
@@ -468,7 +490,7 @@ fun OutlineAuthButton(
             .heightIn(min = 50.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(1.5.dp, NeonCyan.copy(alpha = 0.50f), RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -494,7 +516,7 @@ fun GhostAuthButton(
             .heightIn(min = 50.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(0.5.dp, BorderDark, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
+            .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -524,11 +546,13 @@ fun InfoBanner(
             .clip(RoundedCornerShape(13.dp))
             .background(bgColor)
             .border(0.5.dp, brdColor, RoundedCornerShape(13.dp))
+            // Read out when it appears (errors and confirmations after submitting a form).
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
             .padding(horizontal = 14.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Text(if (isError) "⚠" else "✓", color = textColor, fontSize = 15.sp)
+        Text(if (isError) "⚠" else "✓", color = textColor, fontSize = 15.sp, modifier = Modifier.clearAndSetSemantics { })
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = message,
@@ -549,8 +573,13 @@ fun InfoBanner(
     }
 }
 
-fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = this.clickable(
+/** Clickable with the app ripple, read by TalkBack as a button. */
+fun Modifier.rippleClickable(onClick: () -> Unit): Modifier = rippleClickable(Role.Button, onClick)
+
+/** Clickable with the app ripple, read by TalkBack as [role] (null for none). */
+fun Modifier.rippleClickable(role: Role?, onClick: () -> Unit): Modifier = this.clickable(
     interactionSource = MutableInteractionSource(),
     indication = ripple(color = Color(0xFF0D0D10)),
+    role = role,
     onClick = onClick,
 )

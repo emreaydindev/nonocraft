@@ -1,5 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.auth.register
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -140,6 +144,7 @@ fun RegisterScreen(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = AppFont,
+                    modifier = Modifier.semantics { heading() },
                 )
                 Spacer(Modifier.height(32.dp))
 
@@ -181,7 +186,7 @@ fun RegisterScreen(
                         imeAction = ImeAction.Next,
                     ),
                     trailingIcon = if (username.isNotEmpty() && state.error == null) {
-                        { Text("✓", color = NeonCyan, fontSize = 15.sp) }
+                        { Text("✓", color = NeonCyan, fontSize = 15.sp, modifier = Modifier.clearAndSetSemantics { contentDescription = "Geçerli" }) }
                     } else null,
                 )
                 Spacer(Modifier.height(12.dp))
