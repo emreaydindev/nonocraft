@@ -129,6 +129,8 @@ struct OnboardingScreen: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 28)
+            // The Duo inner screen keeps its status bar at the side, so the top safe area is almost zero.
+            .padding(.top, 16)
             .frame(maxHeight: .infinity)
         }
     }

@@ -85,16 +85,33 @@ struct PremiumScreen: View {
                         .readableWidth()
                     }
                 } else {
-                    VStack(spacing: 0) {
-                        TabView(selection: $page) {
-                            ForEach(slides.indices, id: \.self) { index in
-                                FeatureSlideContent(slide: slides[index], isEmbedded: false).tag(index)
+                    // Wide, short windows (the Duo inner screen, iPad landscape) put the plans beside the
+                    // carousel, the same rule as the game screen; otherwise they sit below it.
+                    GeometryReader { proxy in
+                        let isSideBySide = proxy.size.width >= 700 && proxy.size.width > proxy.size.height * 1.15
+                        let layout = isSideBySide
+                            ? AnyLayout(HStackLayout(alignment: .center, spacing: 0))
+                            : AnyLayout(VStackLayout(spacing: 0))
+                        layout {
+                            VStack(spacing: 8) {
+                                TabView(selection: $page) {
+                                    ForEach(slides.indices, id: \.self) { index in
+                                        FeatureSlideContent(slide: slides[index], isEmbedded: false).tag(index)
+                                    }
+                                }
+                                .tabViewStyle(.page(indexDisplayMode: .never))
+                                // Drawn below the pages rather than over them, so a page that scrolls on a
+                                // short screen (the Duo outer screen) never runs under the dots.
+                                pageDots
+                            }
+
+                            if isSideBySide {
+                                CenteredScrollView { purchaseSection }
+                                    .frame(width: min(420, proxy.size.width * 0.42))
+                            } else {
+                                purchaseSection
                             }
                         }
-                        .tabViewStyle(.page(indexDisplayMode: .always))
-                        .indexViewStyle(.page(backgroundDisplayMode: .interactive))
-
-                        purchaseSection
                     }
                 }
             }
@@ -158,6 +175,20 @@ struct PremiumScreen: View {
         }
     }
 
+    private var pageDots: some View {
+        HStack(spacing: 8) {
+            ForEach(slides.indices, id: \.self) { index in
+                Circle()
+                    .fill(index == page ? slides[index].color : Color.surfaceVariantDark)
+                    .frame(width: 7, height: 7)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: page)
+        .padding(.bottom, 4)
+        .accessibilityElement()
+        .accessibilityLabel("Sayfa \(page + 1) / \(slides.count)")
+    }
+
     private var purchaseSection: some View {
         VStack(spacing: 12) {
             ForEach(plans) { plan in
@@ -187,6 +218,7 @@ struct PremiumScreen: View {
                 .font(.caption2)
                 .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 8)
         }
         .padding(.horizontal, 24)

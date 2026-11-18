@@ -154,6 +154,9 @@ struct FeedScreen: View {
             .padding(.vertical, 4)
         }
         .scrollClipDisabled()
+        // Clip sideways only, so chips don't scroll under a side status bar (the Duo outer screen keeps
+        // its clock at the trailing edge) while the glass shadows above and below stay visible.
+        .mask(Rectangle().padding(.vertical, -24))
     }
 
     private func chipLabel(_ title: String, showsMenuIndicator: Bool, isSelected: Bool) -> some View {

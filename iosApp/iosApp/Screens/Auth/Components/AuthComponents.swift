@@ -375,6 +375,8 @@ struct LegalText: View {
             .lineSpacing(3)
             .multilineTextAlignment(.center)
             .tint(.neonCyan)
+            // Wraps instead of truncating on narrow screens (the Duo outer screen) inside fixed pages.
+            .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity)
     }
 
