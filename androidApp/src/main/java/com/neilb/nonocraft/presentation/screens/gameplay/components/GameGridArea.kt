@@ -27,7 +27,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
-import androidx.compose.ui.input.pointer.isPrimaryPressed
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.isTertiaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.Density
@@ -128,8 +129,12 @@ fun GameGridArea(
                         }
 
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        // Only the primary mouse button paints; right and middle clicks are ignored.
-                        if (down.type == PointerType.Mouse && !currentEvent.buttons.isPrimaryPressed) return@awaitEachGesture
+                        // Right and middle mouse clicks don't paint (some input sources report no
+                        // button at all, so only those are rejected rather than requiring primary).
+                        val buttons = currentEvent.buttons
+                        if (down.type == PointerType.Mouse && (buttons.isSecondaryPressed || buttons.isTertiaryPressed)) {
+                            return@awaitEachGesture
+                        }
                         report(down.position)
                         while (true) {
                             val event = awaitPointerEvent()
