@@ -88,7 +88,14 @@ The Android screens are the feature reference. **iOS no longer copies the Androi
 - [ ] Tokens in Keychain / Keystore-backed storage; cleared on logout and deletion.
 - [ ] Network edge cases: offline banner, retries, 401 → refresh once → re-auth, 429, 5xx, maintenance.
 - [ ] Process death mid-game, mid-purchase, mid-AI-generation.
-- [ ] Accessibility: VoiceOver/TalkBack for cells and clues, non-drag input, colour-blind patterns, Reduce Motion disables neon.
+- [x] Accessibility: VoiceOver/TalkBack for cells and clues, non-drag input, colour-blind patterns, Reduce Motion disables neon. Done 2026-11-19:
+  - Every screen has labels, roles, headings and selected states. Checked on Android (Resizable_37) through uiautomator dumps and accessibility-action walkthroughs, and on iOS (iOS 27 iPhone) with `AccessibilityAuditTests` (prints each tree and runs Xcode's audit).
+  - Game board: one screen-reader node per clue line and per cell (`BoardSpeech`, `BoardSemantics.kt`, `GameGridArea.swift`), with fill (per colour) / cross / clear actions, a cursor stick with move actions (adjustable on iOS), and announcements for a lost heart, the win and game over. iPad hardware keyboards play like Android. Tested by `BoardSemanticsTest` (Android) and `NonocraftTests/BoardAccessibilityTests` (iOS, on iOS 27 and 18.2), and end to end on the Frame post.
+  - Colour-blind shapes per palette colour on cells, clues and swatches (`PaletteGlyph`). A Settings switch, saved on the device, defaults to the system colour correction / Differentiate Without Colour. Checked on both platforms.
+  - Reduce Motion / Remove animations stops the looping intro animations (tutorial hand, onboarding sample, splash dots). The game has no glow or win animation to turn off.
+  - Contrast: TextSecondary #A0A0A0 and TextMuted #8E8E8E pass 4.5:1 on every surface; brighter on iOS with Increase Contrast.
+  - Touch targets: nothing under 48 dp / 44 pt except board cells (sized by the puzzle; the stick and cell actions cover them) and the system iOS toolbar buttons.
+  - Not checked: real TalkBack gestures (adb taps go past touch exploration), the Accessibility Inspector (its target picker can't be driven), VoiceOver announcements by ear, and a physical iPad keyboard.
 - [ ] Remove `ExampleUnitTest`/`ExampleInstrumentedTest`; tests for ViewModels, mappers, economy rules.
 
 ## To-do: production (store release)
