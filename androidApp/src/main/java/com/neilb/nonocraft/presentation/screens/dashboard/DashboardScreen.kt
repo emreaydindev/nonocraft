@@ -2,6 +2,9 @@ package com.neilb.nonocraft.presentation.screens.dashboard
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -18,7 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.koin.androidx.compose.koinViewModel
 import com.neilb.nonocraft.presentation.screens.dashboard.account.AccountScreen
+import com.neilb.nonocraft.presentation.adaptive.isWideWindow
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardBottomNavBar
+import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardNavRail
 import com.neilb.nonocraft.presentation.screens.dashboard.components.DashboardTab
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.FeedScreen
 import com.neilb.nonocraft.presentation.screens.dashboard.library.LibraryScreen
@@ -70,46 +75,62 @@ fun DashboardScreen(
         }
     }
 
+    // Bottom bar on compact windows (phones, folded foldables); rail on medium/expanded windows.
+    val isWide = isWideWindow()
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            DashboardBottomNavBar(
-                currentTab = currentTab,
-                onTabSelected = { currentTab = it },
-            )
+            if (!isWide) {
+                DashboardBottomNavBar(
+                    currentTab = currentTab,
+                    onTabSelected = { currentTab = it },
+                )
+            }
         },
     ) { paddingValues ->
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues),
         ) {
-            when (currentTab) {
-                DashboardTab.PLAYGROUND -> PlaygroundScreen(
-                    onNavigateToGame = onNavigateToGame,
-                    onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToTutorial = onNavigateToTutorial
+            if (isWide) {
+                DashboardNavRail(
+                    currentTab = currentTab,
+                    onTabSelected = { currentTab = it },
                 )
+            }
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                when (currentTab) {
+                    DashboardTab.PLAYGROUND -> PlaygroundScreen(
+                        onNavigateToGame = onNavigateToGame,
+                        onNavigateToSettings = onNavigateToSettings,
+                        onNavigateToTutorial = onNavigateToTutorial
+                    )
 
-                DashboardTab.FEED -> FeedScreen(
-                    onNavigateToGame = onNavigateToGame,
-                    onNavigateToProfile = onNavigateToProfile,
-                    onNavigateToCrafting = onNavigateToCrafting
-                )
+                    DashboardTab.FEED -> FeedScreen(
+                        onNavigateToGame = onNavigateToGame,
+                        onNavigateToProfile = onNavigateToProfile,
+                        onNavigateToCrafting = onNavigateToCrafting
+                    )
 
-                DashboardTab.LIBRARY -> LibraryScreen(
-                    onNavigateToCrafting = onNavigateToCrafting,
-                    onNavigateToPremium = onNavigateToPremium,
-                    onNavigateToCategory = onNavigateToCategory,
-                    onNavigateToPlaylist = onNavigateToPlaylist
-                )
+                    DashboardTab.LIBRARY -> LibraryScreen(
+                        onNavigateToCrafting = onNavigateToCrafting,
+                        onNavigateToPremium = onNavigateToPremium,
+                        onNavigateToCategory = onNavigateToCategory,
+                        onNavigateToPlaylist = onNavigateToPlaylist,
+                        onNavigateToGame = onNavigateToGame,
+                        onNavigateToProfile = onNavigateToProfile
+                    )
 
-                DashboardTab.ACCOUNT -> AccountScreen(
-                    onNavigateToPremium = onNavigateToPremium,
-                    onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToCrafting = onNavigateToCrafting,
-                    onNavigateToAuthGateway = onNavigateToAuthGateway
-                )
+                    DashboardTab.ACCOUNT -> AccountScreen(
+                        onNavigateToPremium = onNavigateToPremium,
+                        onNavigateToSettings = onNavigateToSettings,
+                        onNavigateToCrafting = onNavigateToCrafting,
+                        onNavigateToAuthGateway = onNavigateToAuthGateway
+                    )
+                }
             }
         }
     }

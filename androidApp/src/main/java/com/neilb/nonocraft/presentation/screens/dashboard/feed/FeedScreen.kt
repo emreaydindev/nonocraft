@@ -46,6 +46,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.neilb.nonocraft.presentation.adaptive.ListPaneWidth
+import com.neilb.nonocraft.presentation.adaptive.ReadableWidth
+import com.neilb.nonocraft.presentation.adaptive.isWideWindow
+import com.neilb.nonocraft.presentation.components.PostRow
+import com.neilb.nonocraft.presentation.model.PostItem
 import com.neilb.nonocraft.presentation.components.CommentsSheetContent
 import com.neilb.nonocraft.presentation.components.PlaylistSelectionDialog
 import com.neilb.nonocraft.presentation.components.PostAction
@@ -74,6 +86,8 @@ fun FeedScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val listState = rememberLazyListState()
+    // Post shown in the preview pane of the two-pane layout; the first post until one is picked.
+    var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
     val isFabExpanded = listState.isScrollingUp()
 
     Box(
@@ -93,56 +107,95 @@ fun FeedScreen(
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)
             )
 
-            FeedFilterRow(
-                selectedTab = uiState.selectedTab,
-                selectedTimeRange = uiState.selectedTimeRange,
-                showTimeRangeDropdown = uiState.showTimeRangeDropdown,
-                onTabSelected = { viewModel.selectTab(it) },
-                onTimeRangeSelect = { viewModel.selectTimeRange(it) },
-                onDismissTimeRange = { viewModel.dismissTimeRangeDropdown() }
-            )
+            val filterRow: @Composable () -> Unit = {
+                FeedFilterRow(
+                    selectedTab = uiState.selectedTab,
+                    selectedTimeRange = uiState.selectedTimeRange,
+                    showTimeRangeDropdown = uiState.showTimeRangeDropdown,
+                    onTabSelected = { viewModel.selectTab(it) },
+                    onTimeRangeSelect = { viewModel.selectTimeRange(it) },
+                    onDismissTimeRange = { viewModel.dismissTimeRangeDropdown() }
+                )
+            }
+            val onPostAction: (PostAction) -> Unit = { action ->
+                when (action) {
+                    is PostAction.PlayClick -> onNavigateToGame(action.postId)
+                    is PostAction.ProfileClick -> onNavigateToProfile(action.author)
+                    else -> viewModel.handlePostAction(action)
+                }
+            }
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 18.dp,
-                    end = 18.dp,
-                    top = 16.dp,
-                    bottom = 88.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                if (uiState.isLoading) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = NeonCyan)
+            if (isWideWindow()) {
+                // Tablets, unfolded foldables and wide windows: post list on the left, the picked post's
+                // card on the right (same as the iOS two-pane Explore).
+                val selectedPost = uiState.posts.firstOrNull { it.id == selectedPostId } ?: uiState.posts.firstOrNull()
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.width(ListPaneWidth).fillMaxHeight()) {
+                        filterRow()
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 88.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            feedItems(uiState) { post ->
+                                PostRow(
+                                    post = post,
+                                    isSelected = post.id == selectedPost?.id,
+                                    onClick = { selectedPostId = post.id }
+                                )
+                            }
                         }
                     }
-                } else if (uiState.error != null) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text(text = uiState.error!!, color = DangerRed, fontFamily = AppFont)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(0.5.dp)
+                            .background(BorderDark)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        if (selectedPost != null) {
+                            key(selectedPost.id) {
+                                Box(
+                                    modifier = Modifier
+                                        .widthIn(max = ReadableWidth)
+                                        .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 88.dp)
+                                ) {
+                                    PostCard(
+                                        post = selectedPost,
+                                        showFollowButton = uiState.selectedTab != FeedTab.FOLLOWING,
+                                        onAction = onPostAction
+                                    )
+                                }
+                            }
                         }
                     }
-                } else if (uiState.posts.isEmpty()) {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text(text = "Henüz bir bulmaca bulunamadı.", color = TextMuted, fontFamily = AppFont)
-                        }
-                    }
-                } else {
-                    items(uiState.posts) { post ->
+                }
+            } else {
+                filterRow()
+
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 18.dp,
+                        end = 18.dp,
+                        top = 16.dp,
+                        bottom = 88.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    feedItems(uiState) { post ->
                         PostCard(
                             post = post,
                             showFollowButton = uiState.selectedTab != FeedTab.FOLLOWING,
-                            onAction = { action ->
-                                when (action) {
-                                    is PostAction.PlayClick -> onNavigateToGame(action.postId)
-                                    is PostAction.ProfileClick -> onNavigateToProfile(action.author)
-                                    else -> viewModel.handlePostAction(action)
-                                }
-                            }
+                            onAction = onPostAction
                         )
                     }
                 }
@@ -232,6 +285,34 @@ fun FeedScreen(
                 onCreatePlaylist = { viewModel.createAndAddToPlaylist(it) }
             )
         }
+    }
+}
+
+/** Loading, error and empty states; the posts otherwise. */
+private fun LazyListScope.feedItems(
+    uiState: FeedUiState,
+    post: @Composable (PostItem) -> Unit
+) {
+    if (uiState.isLoading) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = NeonCyan)
+            }
+        }
+    } else if (uiState.error != null) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text(text = uiState.error!!, color = DangerRed, fontFamily = AppFont)
+            }
+        }
+    } else if (uiState.posts.isEmpty()) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text(text = "Henüz bir bulmaca bulunamadı.", color = TextMuted, fontFamily = AppFont)
+            }
+        }
+    } else {
+        items(uiState.posts, key = { it.id }) { post(it) }
     }
 }
 

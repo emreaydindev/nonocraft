@@ -66,6 +66,26 @@ import com.neilb.nonocraft.presentation.theme.TextMuted
 import com.neilb.nonocraft.presentation.theme.TextPrimary
 import com.neilb.nonocraft.presentation.theme.TextSecondary
 import kotlin.math.max
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import com.neilb.nonocraft.presentation.adaptive.pxToDp
+import com.neilb.nonocraft.presentation.adaptive.rememberTableTopPosture
 
 @Composable
 fun GameScreen(
@@ -100,11 +120,17 @@ fun GameScreen(
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDark)
             .navigationBarsPadding()
+            .focusRequester(focusRequester)
+            .onPreviewKeyEvent { handleGameKey(it, state, viewModel) }
+            .focusable()
     ) {
         GridBackground()
 
@@ -138,58 +164,12 @@ fun GameScreen(
                     maxLives = state.puzzle?.maxLives ?: 3
                 )
 
-
-
-                Box(
+                GameContent(
+                    state = state,
+                    viewModel = viewModel,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (state.puzzle != null) {
-                        GameGridArea(
-                            puzzle = state.puzzle!!,
-                            userGrid = state.userGrid,
-                            rowClues = state.rowClues,
-                            colClues = state.colClues,
-                            cursorRow = state.cursorRow,
-                            cursorCol = state.cursorCol,
-                            isCursorVisible = state.isCursorVisible,
-                            onCellClick = { row, col -> viewModel.onCellClicked(row, col) }
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AnalogStick(
-                        onMove = { dRow, dCol -> viewModel.moveCursor(dRow, dCol) },
-                        onFocusChange = { isFocused -> viewModel.setAnalogFocus(isFocused) }
-                    )
-
-                    val activeColor = state.puzzle?.paletteHex?.getOrNull(state.selectedColorIndex - 1)?.toColor() ?: NeonCyan
-                    GameActionButtons(
-                        onPlacePressed = { isPressed -> viewModel.setPlacePressed(isPressed) }, // YENİ
-                        onHintAction = { viewModel.useHint() },
-                        hintsRemaining = state.hintsRemaining,
-                        selectedColor = activeColor
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ToolPaletteBar(
-                    paletteColors = state.puzzle?.paletteHex?.map { it.toColor() } ?: emptyList(),
-                    selectedColorIndex = state.selectedColorIndex,
-                    isCrossMode = state.isCrossMode,
-                    onColorSelected = { viewModel.selectColor(it) },
-                    onCrossSelected = { viewModel.toggleCrossMode(true) }
                 )
             }
         }
@@ -212,6 +192,185 @@ fun GameScreen(
                 isVictory = false,
                 onAction = onNavigateBack // Or implement retry
             )
+        }
+    }
+}
+
+/**
+ * Board and controls, arranged for the space the screen actually gets (not the device):
+ * - table-top posture (foldable half open, hinge horizontal): board on the top half, controls on the bottom half;
+ * - clearly wider than tall (tablet landscape, unfolded foldable, Chromebook, wide freeform window):
+ *   board and controls side by side;
+ * - otherwise (phones, portrait): board above the controls.
+ * The board is movable content, so switching arrangement on a resize, fold or unfold only rescales it.
+ */
+@Composable
+private fun GameContent(
+    state: GameUiState,
+    viewModel: GameViewModel,
+    modifier: Modifier = Modifier
+) {
+    val tableTop = rememberTableTopPosture()
+    var topInWindow by remember { mutableFloatStateOf(0f) }
+
+    val board = remember(viewModel) {
+        movableContentOf { boardState: GameUiState, boardModifier: Modifier ->
+            Box(modifier = boardModifier, contentAlignment = Alignment.Center) {
+                val puzzle = boardState.puzzle
+                if (puzzle != null) {
+                    GameGridArea(
+                        puzzle = puzzle,
+                        userGrid = boardState.userGrid,
+                        rowClues = boardState.rowClues,
+                        colClues = boardState.colClues,
+                        cursorRow = boardState.cursorRow,
+                        cursorCol = boardState.cursorCol,
+                        isCursorVisible = boardState.isCursorVisible,
+                        onCellClick = { row, col -> viewModel.onCellClicked(row, col) }
+                    )
+                }
+            }
+        }
+    }
+
+    BoxWithConstraints(
+        modifier = modifier.onGloballyPositioned { topInWindow = it.positionInWindow().y }
+    ) {
+        // Less margin on small screens (folded outer displays) so the clues get the room.
+        val boardPadding = if (minOf(maxWidth, maxHeight) < 420.dp) 8.dp else 16.dp
+        val heightPx = constraints.maxHeight.toFloat()
+        val controlsWidth = minOf(420.dp, maxWidth * 0.38f)
+        val hingeTop = tableTop?.let { it.hingeBounds.top - topInWindow }
+        val hingeBottom = tableTop?.let { it.hingeBounds.bottom - topInWindow }
+
+        when {
+            hingeTop != null && hingeBottom != null && hingeTop > 0f && hingeBottom < heightPx -> {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    board(state, Modifier.height(hingeTop.toInt().pxToDp()).fillMaxWidth().padding(boardPadding))
+                    Spacer(Modifier.height((hingeBottom - hingeTop).toInt().pxToDp()))
+                    Box(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = false)
+                    }
+                }
+            }
+
+            maxWidth >= 700.dp && maxWidth > maxHeight * 1.15f -> {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    board(state, Modifier.weight(1f).fillMaxHeight().padding(boardPadding))
+                    Box(
+                        modifier = Modifier
+                            .width(controlsWidth)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = true)
+                    }
+                }
+            }
+
+            else -> {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    board(state, Modifier.weight(1f).fillMaxWidth().padding(boardPadding))
+                    GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = false)
+                }
+            }
+        }
+    }
+}
+
+/** Stick, hint and place buttons, then the colour / cross palette. Stacked when beside the board. */
+@Composable
+private fun GameControlsPanel(
+    state: GameUiState,
+    viewModel: GameViewModel,
+    isSideBySide: Boolean
+) {
+    val activeColor = state.puzzle?.paletteHex?.getOrNull(state.selectedColorIndex - 1)?.toColor() ?: NeonCyan
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalArrangement = if (isSideBySide) Arrangement.SpaceEvenly else Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnalogStick(
+                onMove = { dRow, dCol -> viewModel.moveCursor(dRow, dCol) },
+                onFocusChange = { isFocused -> viewModel.setAnalogFocus(isFocused) }
+            )
+
+            GameActionButtons(
+                onPlacePressed = { isPressed -> viewModel.setPlacePressed(isPressed) },
+                onHintAction = { viewModel.useHint() },
+                hintsRemaining = state.hintsRemaining,
+                selectedColor = activeColor
+            )
+        }
+
+        ToolPaletteBar(
+            paletteColors = state.puzzle?.paletteHex?.map { it.toColor() } ?: emptyList(),
+            selectedColorIndex = state.selectedColorIndex,
+            isCrossMode = state.isCrossMode,
+            onColorSelected = { viewModel.selectColor(it) },
+            onCrossSelected = { viewModel.toggleCrossMode(true) }
+        )
+    }
+}
+
+/**
+ * Hardware keyboard (tablets, Chromebooks, keyboard covers): arrows or WASD move the cursor, Space or
+ * Enter places (held, it keeps placing while moving, like the place button), X picks the cross,
+ * 1–9 pick a palette colour and H uses a hint.
+ */
+private fun handleGameKey(event: KeyEvent, state: GameUiState, viewModel: GameViewModel): Boolean {
+    val isDown = event.type == KeyEventType.KeyDown
+    val isUp = event.type == KeyEventType.KeyUp
+    val move = when (event.key) {
+        Key.DirectionUp, Key.W -> -1 to 0
+        Key.DirectionDown, Key.S -> 1 to 0
+        Key.DirectionLeft, Key.A -> 0 to -1
+        Key.DirectionRight, Key.D -> 0 to 1
+        else -> null
+    }
+    if (move != null) {
+        if (isDown) {
+            viewModel.setAnalogFocus(true)
+            viewModel.moveCursor(move.first, move.second)
+        } else if (isUp) {
+            viewModel.setAnalogFocus(false)
+        }
+        return true
+    }
+    return when (event.key) {
+        Key.Spacebar, Key.Enter, Key.NumPadEnter -> {
+            if (isDown && event.nativeKeyEvent.repeatCount == 0) {
+                viewModel.setAnalogFocus(true)
+                viewModel.setPlacePressed(true)
+            } else if (isUp) {
+                viewModel.setPlacePressed(false)
+                viewModel.setAnalogFocus(false)
+            }
+            true
+        }
+        Key.X -> { if (isDown) viewModel.toggleCrossMode(true); true }
+        Key.H -> { if (isDown && event.nativeKeyEvent.repeatCount == 0) viewModel.useHint(); true }
+        else -> {
+            val digit = event.nativeKeyEvent.unicodeChar.toChar().digitToIntOrNull()
+            val paletteSize = state.puzzle?.paletteHex?.size ?: 0
+            if (digit != null && digit in 1..paletteSize) {
+                if (isDown) viewModel.selectColor(digit)
+                true
+            } else {
+                false
+            }
         }
     }
 }

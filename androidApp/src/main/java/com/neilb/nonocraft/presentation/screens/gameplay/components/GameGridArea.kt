@@ -2,7 +2,8 @@ package com.neilb.nonocraft.presentation.screens.gameplay.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,7 +25,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.input.pointer.isPrimaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.unit.Density
+import kotlin.math.floor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -43,6 +50,12 @@ import com.neilb.nonocraft.presentation.theme.SurfaceDark
 import com.neilb.nonocraft.presentation.theme.TextPrimary
 import kotlin.math.min
 
+/**
+ * The board with its clues, scaled to whatever space it gets: it rescales on a resize, fold/unfold or any
+ * configuration change, and its zoom survives those (state is saveable; the game itself lives in the
+ * shared view model). Touching, clicking or dragging over cells reports each cell once through
+ * [onCellClick]; boards above 10×10 zoom with a pinch, Ctrl + mouse wheel or the wheel alone.
+ */
 @Composable
 fun GameGridArea(
     puzzle: Puzzle,
@@ -56,15 +69,14 @@ fun GameGridArea(
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
-
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
     val isZoomEnabled = puzzle.size > 10
+    val defaultScale = if (isZoomEnabled) 1.5f else 1f
 
-    LaunchedEffect(puzzle.size) {
-        scale = if (isZoomEnabled) 1.5f else 1f
-        offset = Offset.Zero
-    }
+    // Keyed by the board size so a new puzzle starts at the default zoom, but a recreation keeps it.
+    var scale by rememberSaveable(puzzle.size) { mutableFloatStateOf(defaultScale) }
+    var offsetX by rememberSaveable(puzzle.size) { mutableFloatStateOf(0f) }
+    var offsetY by rememberSaveable(puzzle.size) { mutableFloatStateOf(0f) }
+    val currentOnCellClick by rememberUpdatedState(onCellClick)
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val density = LocalDensity.current
@@ -79,45 +91,78 @@ fun GameGridArea(
         val startX = (availableWidth - ((maxRowClueCount + puzzle.size) * cellSize)) / 2f + (maxRowClueCount * cellSize)
         val startY = (availableHeight - ((maxColClueCount + puzzle.size) * cellSize)) / 2f + (maxColClueCount * cellSize)
 
+        fun clampOffset() {
+            val maxX = (availableWidth * (scale - 1)) / 2
+            val maxY = (availableHeight * (scale - 1)) / 2
+            offsetX = offsetX.coerceIn(-maxX, maxX)
+            offsetY = offsetY.coerceIn(-maxY, maxY)
+        }
+
+        // A smaller window (fold, split screen) shrinks the pannable range; keep the board in view.
+        LaunchedEffect(availableWidth, availableHeight) { clampOffset() }
+
+        // Clue numbers are drawn with the font scale ignored: they stay a fixed share of the cell and
+        // grow with the board, never with the system font size (which would overflow the cells).
+        val clueDensity = remember(density.density) { Density(density.density, fontScale = 1f) }
+
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer(
                     scaleX = scale, scaleY = scale,
-                    translationX = offset.x, translationY = offset.y
+                    translationX = offsetX, translationY = offsetY
                 )
-                .pointerInput(scale, offset, startX, startY, cellSize) {
-                    detectDragGestures(
-                        onDragStart = { tapOffset ->
-                            val transformedX = (tapOffset.x - offset.x) / scale
-                            val transformedY = (tapOffset.y - offset.y) / scale
-                            val col = ((transformedX - startX) / cellSize).toInt()
-                            val row = ((transformedY - startY) / cellSize).toInt()
-                            if (row in 0 until puzzle.size && col in 0 until puzzle.size) {
-                                onCellClick(row, col)
-                            }
-                        },
-                        onDrag = { change, _ ->
-                            val transformedX = (change.position.x - offset.x) / scale
-                            val transformedY = (change.position.y - offset.y) / scale
-                            val col = ((transformedX - startX) / cellSize).toInt()
-                            val row = ((transformedY - startY) / cellSize).toInt()
-                            if (row in 0 until puzzle.size && col in 0 until puzzle.size) {
-                                onCellClick(row, col)
-                            }
+                .pointerInput(puzzle.size, startX, startY, cellSize) {
+                    // Like the iOS board: a touch or click registers on press, and a drag reports each
+                    // cell once as the pointer enters it. Positions here are already in the layer's
+                    // untransformed space.
+                    awaitEachGesture {
+                        var lastCell: Pair<Int, Int>? = null
+                        fun report(position: Offset) {
+                            val col = floor((position.x - startX) / cellSize).toInt()
+                            val row = floor((position.y - startY) / cellSize).toInt()
+                            if (row !in 0 until puzzle.size || col !in 0 until puzzle.size) return
+                            if (lastCell == row to col) return
+                            lastCell = row to col
+                            currentOnCellClick(row, col)
                         }
-                    )
+
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        // Only the primary mouse button paints; right and middle clicks are ignored.
+                        if (down.type == PointerType.Mouse && !currentEvent.buttons.isPrimaryPressed) return@awaitEachGesture
+                        report(down.position)
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            // A second finger means a pinch, not painting.
+                            if (event.changes.count { it.pressed } > 1) break
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) break
+                            report(change.position)
+                        }
+                    }
                 }
-                .pointerInput(Unit) {
+                .pointerInput(isZoomEnabled, availableWidth, availableHeight) {
                     if (isZoomEnabled) {
                         detectTransformGestures { _, pan, zoom, _ ->
                             scale = (scale * zoom).coerceIn(1f, 3f)
-                            val maxX = (availableWidth * (scale - 1)) / 2
-                            val maxY = (availableHeight * (scale - 1)) / 2
-                            offset = Offset(
-                                x = (offset.x + pan.x).coerceIn(-maxX, maxX),
-                                y = (offset.y + pan.y).coerceIn(-maxY, maxY)
-                            )
+                            offsetX += pan.x
+                            offsetY += pan.y
+                            clampOffset()
+                        }
+                    }
+                }
+                .pointerInput(isZoomEnabled, availableWidth, availableHeight) {
+                    // Mouse wheel / trackpad scroll zooms big boards (Chromebooks, tablets with a mouse).
+                    if (!isZoomEnabled) return@pointerInput
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.type != PointerEventType.Scroll) continue
+                            val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: continue
+                            if (delta == 0f) continue
+                            scale = (scale * if (delta < 0) 1.1f else 1f / 1.1f).coerceIn(1f, 3f)
+                            clampOffset()
+                            event.changes.forEach { it.consume() }
                         }
                     }
                 }
@@ -127,16 +172,16 @@ fun GameGridArea(
             drawUserCells(userGrid, puzzle.paletteHex, cellSize, startX, startY)
             drawGridLines(puzzle.size, subGridSize, cellSize, startX, startY)
 
-            drawClues(rowClues, colClues, puzzle.paletteHex, maxRowClueCount, maxColClueCount, cellSize, startX, startY, textMeasurer)
+            drawClues(rowClues, colClues, puzzle.paletteHex, maxRowClueCount, maxColClueCount, cellSize, startX, startY, textMeasurer, clueDensity)
 
             drawCursor(cursorRow, cursorCol, cellSize, startX, startY, isCursorVisible)
         }
 
-        if (isZoomEnabled && (scale > 1.0f || offset != Offset.Zero)) {
+        if (isZoomEnabled && (scale != defaultScale || offsetX != 0f || offsetY != 0f)) {
             IconButton(
-                onClick = { scale = 1.5f; offset = Offset.Zero },
+                onClick = { scale = defaultScale; offsetX = 0f; offsetY = 0f },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).size(48.dp).background(SurfaceDark.copy(0.8f), CircleShape)
-            ) { Icon(Icons.Rounded.ZoomOutMap, null, tint = NeonCyan) }
+            ) { Icon(Icons.Rounded.ZoomOutMap, contentDescription = "Yakınlaştırmayı sıfırla", tint = NeonCyan) }
         }
     }
 }
@@ -150,7 +195,8 @@ private fun DrawScope.drawClues(
     cellSize: Float,
     startX: Float,
     startY: Float,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    clueDensity: Density
 ) {
     val clueBgColor = SurfaceDark.copy(alpha = 0.5f)
 
@@ -178,7 +224,8 @@ private fun DrawScope.drawClues(
 
             val textLayoutResult = textMeasurer.measure(
                 text = clue.count.toString(),
-                style = TextStyle(color = color, fontSize = (cellSize * 0.45f).sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+                style = TextStyle(color = color, fontSize = with(clueDensity) { (cellSize * 0.45f).toSp() }, fontWeight = FontWeight.Bold, fontFamily = AppFont),
+                density = clueDensity
             )
             drawText(
                 textLayoutResult = textLayoutResult,
@@ -199,7 +246,8 @@ private fun DrawScope.drawClues(
 
             val textLayoutResult = textMeasurer.measure(
                 text = clue.count.toString(),
-                style = TextStyle(color = color, fontSize = (cellSize * 0.45f).sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+                style = TextStyle(color = color, fontSize = with(clueDensity) { (cellSize * 0.45f).toSp() }, fontWeight = FontWeight.Bold, fontFamily = AppFont),
+                density = clueDensity
             )
             drawText(
                 textLayoutResult = textLayoutResult,

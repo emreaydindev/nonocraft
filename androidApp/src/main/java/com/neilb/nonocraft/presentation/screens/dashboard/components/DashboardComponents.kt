@@ -4,7 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,10 +23,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -92,6 +101,66 @@ fun DashboardBottomNavBar(
                 )
             )
         }
+    }
+}
+
+/**
+ * Navigation rail for medium and expanded windows (tablets, unfolded foldables, Chromebooks): the same
+ * tabs and colours as [DashboardBottomNavBar], placed along the start edge so content gets the height.
+ */
+@Composable
+fun DashboardNavRail(
+    currentTab: DashboardTab,
+    onTabSelected: (DashboardTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier.fillMaxHeight()) {
+        NavigationRail(
+            containerColor = SurfaceDark,
+            contentColor = TextMuted,
+        ) {
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            ) {
+                DashboardTab.entries.forEach { tab ->
+                    val isSelected = tab == currentTab
+                    val tabItem = tab.tabItem
+                    NavigationRailItem(
+                        selected = isSelected,
+                        onClick = { onTabSelected(tab) },
+                        icon = {
+                            Icon(
+                                imageVector = if (isSelected) tabItem.filledIcon else tabItem.outlinedIcon,
+                                contentDescription = tabItem.label,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = tabItem.label,
+                                fontSize = 11.sp,
+                                fontFamily = AppFont,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationRailItemDefaults.colors(
+                            selectedIconColor = PurpleAccent,
+                            selectedTextColor = PurpleAccent,
+                            unselectedIconColor = TextMuted,
+                            unselectedTextColor = TextMuted,
+                            indicatorColor = PurpleAccent.copy(alpha = 0.15f)
+                        )
+                    )
+                }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(0.5.dp)
+                .background(BorderDark)
+        )
     }
 }
 

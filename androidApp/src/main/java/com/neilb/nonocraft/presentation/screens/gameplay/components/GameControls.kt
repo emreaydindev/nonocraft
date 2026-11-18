@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -205,12 +206,14 @@ fun ToolPaletteBar(
     onCrossSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // Wraps onto more lines when the palette is wider than the space (narrow outer screens, the
+    // control column beside the board).
+    FlowRow(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ToolItem(
             color = Color.Transparent,
@@ -218,7 +221,6 @@ fun ToolPaletteBar(
             isSelected = isCrossMode,
             onClick = onCrossSelected
         )
-        Spacer(modifier = Modifier.width(16.dp))
         paletteColors.forEachIndexed { index, color ->
             val actualColorIndex = index + 1
             ToolItem(
@@ -227,7 +229,6 @@ fun ToolPaletteBar(
                 isSelected = !isCrossMode && selectedColorIndex == actualColorIndex,
                 onClick = { onColorSelected(actualColorIndex) }
             )
-            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }
