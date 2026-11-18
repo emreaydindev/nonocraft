@@ -55,3 +55,17 @@ targets:
             done
           fi
           ./gradlew :shared:embedAndSignAppleFrameworkForXcode
+    scheme:
+      testTargets: [NonocraftUITests]
+  # Accessibility audit: walks the main screens, prints their accessibility trees and audit issues.
+  NonocraftUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: NonocraftUITests
+    dependencies:
+      - target: Nonocraft
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.emreaydin.nonocraft.uitests
+        GENERATE_INFOPLIST_FILE: "YES"

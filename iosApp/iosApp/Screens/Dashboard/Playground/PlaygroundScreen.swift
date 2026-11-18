@@ -228,6 +228,7 @@ private struct DailyCard: View {
                             .foregroundStyle(Color.textPrimary)
                     }
                     .accessibilityElement(children: .combine)
+                    .accessibilityAddTraits(.isHeader)
 
                     Spacer(minLength: 0)
 

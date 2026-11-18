@@ -80,10 +80,13 @@ struct TutorialScreen: View {
                     .background(Color.surfaceDark)
                     .clipShape(Capsule())
                     .overlay(Capsule().stroke(Color.borderDark, lineWidth: 0.5))
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .opacity(page == 3 ? 0 : 1)
             .disabled(page == 3)
+            .accessibilityHidden(page == 3)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
@@ -117,6 +120,7 @@ struct TutorialScreen: View {
         case 0:
             HStack(spacing: 16) {
                 Text("4").font(.app(24, .bold)).foregroundColor(.textPrimary)
+                    .accessibilityLabel("Satır ipucu: 4")
                 DragFillRow(cells: grid1, handStartCell: 0, showsHand: grid1.contains(.empty), onReachNextCell: fillStep1)
             }
         case 1:
@@ -127,11 +131,14 @@ struct TutorialScreen: View {
                 }
                 .font(.app(18, .bold))
                 .foregroundColor(.textPrimary)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Satır ipucu: 1, 3")
                 HStack(spacing: 4) {
                     ForEach(grid2.indices, id: \.self) { index in
                         Button { crossStep2(index) } label: { TutorialCell(state: grid2[index]) }
                             .buttonStyle(.plain)
                             .accessibilityLabel("Kare \(index + 1)")
+                            .accessibilityValue(grid2[index].spokenName)
                     }
                 }
             }
@@ -143,6 +150,8 @@ struct TutorialScreen: View {
                     Text("2").foregroundColor(.gameGold)
                 }
                 .font(.app(18, .bold))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Satır ipucu: 3 mor, 2 altın")
                 DragFillRow(cells: grid3, handStartCell: filled, showsHand: filled < 5, onReachNextCell: fillStep3)
             }
         default:
@@ -216,6 +225,18 @@ struct TutorialScreen: View {
     }
 }
 
+extension TutorialScreen.CellState {
+    var spokenName: String {
+        switch self {
+        case .empty: "boş"
+        case .cyan: "dolu"
+        case .purple: "mor"
+        case .gold: "altın"
+        case .cross: "çarpı"
+        }
+    }
+}
+
 private struct TutorialCell: View {
     let state: TutorialScreen.CellState
 
@@ -283,8 +304,13 @@ private struct DragFillRow: View {
                 try? await Task.sleep(for: .milliseconds(50))
             }
         }
+        // VoiceOver: one adjustable-free button; a double tap fills the next cell, like dragging onto it.
         .accessibilityElement()
         .accessibilityLabel("Doldurulacak satır")
+        .accessibilityValue(cells.map(\.spokenName).joined(separator: ", "))
+        .accessibilityHint("Sonraki kareyi doldurmak için iki kez dokun")
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { onReachNextCell() }
     }
 }
 

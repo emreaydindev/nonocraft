@@ -50,6 +50,7 @@ struct AppIconScreen: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                                .accessibilityLabel("Kilitli")
                         }
                     }
                     .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(.white.opacity(0.12)))

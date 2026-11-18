@@ -71,6 +71,7 @@ private struct CommentsSheetContent: View {
                             .foregroundStyle(Color.neonCyan)
                             .frame(width: 36, height: 36)
                             .background(Color.surfaceVariantDark, in: Circle())
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
                                 Text("@\(comment.author)")
@@ -85,7 +86,11 @@ private struct CommentsSheetContent: View {
                         Spacer(minLength: 8)
                         Image(systemName: comment.isLiked ? "heart.fill" : "heart")
                             .foregroundStyle(comment.isLiked ? Color.dangerRed : Color.textSecondary)
+                            .accessibilityLabel("Beğendin")
+                            .accessibilityHidden(!comment.isLiked)
                     }
+                    // One VoiceOver stop per comment; "Şikayet Et" comes from the swipe action.
+                    .accessibilityElement(children: .combine)
                     .listRowBackground(Color.clear)
                     .swipeActions {
                         Button("Şikayet Et", systemImage: "exclamationmark.bubble") {}

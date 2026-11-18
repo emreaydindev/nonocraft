@@ -77,11 +77,18 @@ struct OnboardingScreen: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button("Atla", action: onFinishOnboarding)
-                        .font(.app(13))
-                        .foregroundColor(.textMuted)
-                        .opacity(isLastPage ? 0 : 1)
-                        .disabled(isLastPage)
+                    Button(action: onFinishOnboarding) {
+                        Text("Atla")
+                            .font(.app(13))
+                            .foregroundColor(.textMuted)
+                            .padding(.horizontal, 16)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .opacity(isLastPage ? 0 : 1)
+                    .disabled(isLastPage)
+                    .accessibilityHidden(isLastPage)
                 }
                 .padding(.horizontal, 28)
                 .padding(.top, 24)
@@ -196,6 +203,7 @@ private struct VisualSolve: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
         }
         .task {
             let total = pattern.joined().filter { $0 == 1 }.count
@@ -209,7 +217,9 @@ private struct VisualSolve: View {
                 try? await Task.sleep(for: .milliseconds(400))
             }
         }
-        .accessibilityHidden(true)
+        // One description instead of the clue numbers one by one (hiding alone left them reachable).
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Kalp şeklinde dolan örnek bulmaca")
     }
 }
 
@@ -291,10 +301,11 @@ private struct VisualPremium: View {
                 .clipShape(Circle())
                 .overlay(Circle().stroke(accent.opacity(0.40), lineWidth: 1.5))
                 .padding(.bottom, 6)
+                .accessibilityHidden(true)
 
             ForEach(features, id: \.self) { feature in
                 HStack(spacing: 0) {
-                    Text("✓ ").font(.system(size: 14, weight: .bold))
+                    Text("✓ ").font(.system(size: 14, weight: .bold)).accessibilityHidden(true)
                     Text(feature).font(.app(14))
                     Spacer(minLength: 0)
                 }

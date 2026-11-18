@@ -255,6 +255,7 @@ struct PremiumScreen: View {
                     .frame(width: 72, height: 72)
                     .background(slide.color.opacity(0.15))
                     .clipShape(Circle())
+                    .accessibilityHidden(true)
 
                 Text(slide.title)
                     .font(.app(24, .bold))
@@ -276,6 +277,7 @@ struct PremiumScreen: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(slide.color)
                                 .frame(width: 20, height: 20)
+                                .accessibilityHidden(true) // the symbol reads as "Selected"
                             Text(point)
                                 .font(.subheadline)
                                 .foregroundColor(.textPrimary)

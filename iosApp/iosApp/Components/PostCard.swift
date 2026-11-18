@@ -37,6 +37,7 @@ struct PostCard: View {
                         .background(Color.surfaceVariantDark)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(accent.opacity(0.5), lineWidth: 1))
+                        .accessibilityHidden(true) // the initial repeats the name read next
                     VStack(alignment: .leading, spacing: 2) {
                         Text("@\(post.author)")
                             .font(.app(14, .bold))
@@ -65,7 +66,8 @@ struct PostCard: View {
                     Image(systemName: "ellipsis")
                         .font(.title3.weight(.semibold))
                         .foregroundColor(.textMuted)
-                        .frame(minWidth: 32, minHeight: 32)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Diğer seçenekler")
@@ -106,9 +108,12 @@ struct PostCard: View {
                         .font(.app(14, .medium))
                         .foregroundColor(.textPrimary)
                 }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Beğen, \(post.likes) beğeni")
+            .accessibilityValue(post.isLiked ? "Beğenildi" : "")
 
             Button { onAction(.comment) } label: {
                 HStack(spacing: 6) {
@@ -118,6 +123,8 @@ struct PostCard: View {
                         .font(.app(14, .medium))
                 }
                 .foregroundColor(.textPrimary)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Yorumlar, \(post.comments) yorum")

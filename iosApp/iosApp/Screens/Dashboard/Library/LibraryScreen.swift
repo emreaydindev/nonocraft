@@ -260,6 +260,7 @@ private struct LibraryGridCard: View {
                         .frame(width: 48, height: 48)
                         .background(tint.opacity(0.15))
                         .clipShape(Circle())
+                        .accessibilityHidden(true)
                     Spacer()
                     if isPremium {
                         ProBadge()
@@ -278,6 +279,8 @@ private struct LibraryGridCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
         }
+        // Title first, then the count and the Pro mark (the badge is drawn above the title).
+        .accessibilityLabel([title, subtitle, isPremium ? "Premium" : nil].compactMap { $0 }.joined(separator: ", "))
     }
 }
 
@@ -327,6 +330,8 @@ private struct LibrarySectionIcon<S: Shape>: View {
             .frame(width: side, height: side)
             .background(tint.opacity(0.15))
             .clipShape(shape)
+            // Decoration; some symbols carry their own label or trait (checkmark reads as "Selected").
+            .accessibilityHidden(true)
     }
 }
 

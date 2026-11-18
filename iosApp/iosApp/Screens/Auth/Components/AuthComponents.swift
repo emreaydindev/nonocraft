@@ -12,6 +12,7 @@ struct AuthLogoRow: View {
                 .background(Color.neonCyan.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 9))
                 .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color.neonCyan.opacity(0.25), lineWidth: 1))
+                .accessibilityHidden(true) // the name is read from the wordmark next to it
 
             BrandName(size: 18)
         }
