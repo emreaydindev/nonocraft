@@ -93,6 +93,29 @@ final class AccessibilityAuditTests: XCTestCase {
         sleep(UInt32(ProcessInfo.processInfo.environment["AX_HOLD"] ?? "") ?? 0)
     }
 
+    /// Colour-blind shapes on the board, clues and palette (setting forced on unless AX_SYSTEM_DEFAULT=1). AX_HOLD keeps it open for a
+    /// screenshot.
+    func testColorPatterns() throws {
+        app.terminate()
+        // AX_SYSTEM_DEFAULT=1 leaves the setting unset, to check it follows Differentiate Without Colour.
+        if ProcessInfo.processInfo.environment["AX_SYSTEM_DEFAULT"] != "1" {
+            app.launchArguments += ["-a11yColorPatterns", "YES"]
+        }
+        app.launch()
+        for skip in ["Atla", "Misafir olarak devam et", "Atla"] where app.buttons[skip].waitForExistence(timeout: 6) {
+            app.buttons[skip].tap()
+        }
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
+        app.tabBars.buttons["Keşfet"].tap()
+        let play = app.buttons["Oyna"].firstMatch
+        XCTAssertTrue(play.waitForExistence(timeout: 10))
+        play.tap()
+        XCTAssertTrue(app.buttons["Satır 1, sütun 1"].waitForExistence(timeout: 8))
+        for col in 1...5 { app.buttons["Satır 1, sütun \(col)"].tap() }
+        print("AX-PATTERNS ready")
+        sleep(UInt32(ProcessInfo.processInfo.environment["AX_HOLD"] ?? "") ?? 0)
+    }
+
     private func report(_ screen: String) {
         print("AX-TREE \(screen)\n\(app.debugDescription)\nAX-TREE-END \(screen)")
         do {

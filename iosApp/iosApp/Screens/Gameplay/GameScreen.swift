@@ -23,6 +23,7 @@ struct GameScreen: View {
     private var userGrid: [[Int]] { state.userGrid.map { $0.map(\.intValue) } }
 
     @FocusState private var isKeyboardFocused: Bool
+    private let colorPatterns = ColorPatternsReader()
 
     var body: some View {
         ScreenBackground {
@@ -118,7 +119,8 @@ struct GameScreen: View {
                     colClues: state.colClues.map { $0.map(GridClue.init) },
                     cursor: state.isCursorVisible ? (Int(state.cursorRow), Int(state.cursorCol)) : nil,
                     onCellTouched: { row, col in viewModel.onCellClicked(row: Int32(row), col: Int32(col)) },
-                    cellActions: cellActions
+                    cellActions: cellActions,
+                    showColorPatterns: colorPatterns.isEnabled
                 )
                 // Less margin on small screens (iPhone Duo outer screen) so the clues get the room.
                 .padding(min(proxy.size.width, proxy.size.height) < 420 ? 8 : 16)
@@ -257,6 +259,7 @@ struct GameScreen: View {
             colorLabels: paletteHex.indices.map { index in
                 paletteHex.count > 1 ? BoardSpeech.colorLabel(index + 1, paletteHex: paletteHex).capitalizedFirst : "Doldur"
             },
+            showColorPatterns: colorPatterns.isEnabled,
             selectedColorIndex: Int(state.selectedColorIndex),
             isCrossMode: state.isCrossMode,
             hintsRemaining: Int(state.hintsRemaining),

@@ -12,6 +12,7 @@ struct SettingsScreen: View {
     @State private var isVibrationEnabled = true
     @State private var isSoundEnabled = true
     @State private var isErrorWarningEnabled = false
+    private let colorPatterns = ColorPatternsReader()
 
     @State private var showDeleteDialog = false
     @State private var errorMessage: String?
@@ -49,6 +50,10 @@ struct SettingsScreen: View {
                 }
                 Toggle(isOn: $isErrorWarningEnabled) {
                     SettingsLabel(title: "Hatalı Hamle Uyarısı", systemImage: "exclamationmark.triangle.fill", tint: .dangerRed)
+                }
+                // Follows Differentiate Without Colour until the player picks; saved on the device.
+                Toggle(isOn: colorPatterns.binding) {
+                    SettingsLabel(title: "Renk Körü Desenleri", systemImage: "square.on.circle")
                 }
             }
             SettingsSection("Hesap & Güvenlik") {

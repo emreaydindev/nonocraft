@@ -17,6 +17,7 @@ struct GameGridArea: View {
     let cursor: (row: Int, col: Int)?
     let onCellTouched: (Int, Int) -> Void
     var cellActions: BoardCellActions? = nil
+    var showColorPatterns = false
 
     @State private var lastTouched: (Int, Int)?
 
@@ -146,13 +147,19 @@ struct GameGridArea: View {
         let board = CGFloat(size) * cell
 
         context.fill(Path(CGRect(x: origin.x, y: origin.y, width: board, height: board)), with: .color(.surfaceDark))
+        // Shapes only tell colours apart, so a one-colour puzzle needs none.
+        let patterns = showColorPatterns && palette.count > 1
 
         // Filled and crossed cells
         for (row, values) in userGrid.enumerated() {
             for (col, value) in values.enumerated() {
                 let rect = CGRect(x: origin.x + CGFloat(col) * cell, y: origin.y + CGFloat(row) * cell, width: cell, height: cell)
                 if value > 0 {
-                    context.fill(Path(rect), with: .color(palette[safe: value - 1] ?? .neonCyan))
+                    let fill = palette[safe: value - 1] ?? .neonCyan
+                    context.fill(Path(rect), with: .color(fill))
+                    if patterns {
+                        PaletteGlyph.draw(value, in: rect.insetBy(dx: cell * 0.3, dy: cell * 0.3), color: PaletteGlyph.contrast(on: fill), context: &context)
+                    }
                 } else if value == -1 {
                     let inset = rect.insetBy(dx: cell * 0.25, dy: cell * 0.25)
                     var cross = Path()
@@ -189,11 +196,23 @@ struct GameGridArea: View {
         context.fill(Path(CGRect(x: origin.x - rowStripWidth, y: origin.y, width: rowStripWidth, height: board)), with: .color(clueBackground))
         context.fill(Path(CGRect(x: origin.x, y: origin.y - colStripHeight, width: board, height: colStripHeight)), with: .color(clueBackground))
 
-        let clueFont = Font.appFixed(max(cell * 0.5, 8), .bold)
+        // With colour patterns on, each clue number moves up and its colour's shape sits under it.
+        let clueFont = Font.appFixed(max(cell * (patterns ? 0.42 : 0.5), 8), .bold)
         func drawClue(_ clue: GridClue, in rect: CGRect) {
             guard clue.count > 0 else { return }
-            let text = Text("\(clue.count)").font(clueFont).foregroundColor(palette[safe: clue.colorIndex - 1] ?? .neonCyan)
-            context.draw(text, at: CGPoint(x: rect.midX, y: rect.midY), anchor: .center)
+            let color = palette[safe: clue.colorIndex - 1] ?? .neonCyan
+            let text = Text("\(clue.count)").font(clueFont).foregroundColor(color)
+            if patterns {
+                context.draw(text, at: CGPoint(x: rect.midX, y: rect.minY + cell * 0.32), anchor: .center)
+                let glyph = cell * 0.24
+                PaletteGlyph.draw(
+                    clue.colorIndex,
+                    in: CGRect(x: rect.midX - glyph / 2, y: rect.minY + cell * 0.66, width: glyph, height: glyph),
+                    color: color, context: &context
+                )
+            } else {
+                context.draw(text, at: CGPoint(x: rect.midX, y: rect.midY), anchor: .center)
+            }
         }
         for (row, clues) in rowClues.enumerated() {
             for (index, clue) in clues.enumerated() {

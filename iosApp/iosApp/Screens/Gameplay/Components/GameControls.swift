@@ -101,6 +101,7 @@ struct AnalogStick: View {
 struct GameControlBar: View {
     let palette: [Color]
     let colorLabels: [String]
+    var showColorPatterns = false
     let selectedColorIndex: Int
     let isCrossMode: Bool
     let hintsRemaining: Int
@@ -120,6 +121,7 @@ struct GameControlBar: View {
                 ToolPaletteBar(
                     palette: palette,
                     colorLabels: colorLabels,
+                    showColorPatterns: showColorPatterns,
                     selectedColorIndex: selectedColorIndex,
                     isCrossMode: isCrossMode,
                     onColorSelected: onColorSelected,
@@ -213,6 +215,7 @@ struct GameActionButtons: View {
 struct ToolPaletteBar: View {
     let palette: [Color]
     let colorLabels: [String]
+    var showColorPatterns = false
     let selectedColorIndex: Int
     let isCrossMode: Bool
     let onColorSelected: (Int) -> Void
@@ -247,7 +250,18 @@ struct ToolPaletteBar: View {
                                 RoundedRectangle(cornerRadius: 4).stroke(Color.textPrimary.opacity(0.5), lineWidth: 1)
                             }
                         }
-                        .frame(width: 24, height: 24)
+                        .overlay {
+                            if showColorPatterns && palette.count > 1 {
+                                Canvas { context, size in
+                                    PaletteGlyph.draw(
+                                        colorIndex, in: CGRect(origin: .zero, size: size).insetBy(dx: 5, dy: 5),
+                                        color: PaletteGlyph.contrast(on: color), context: &context
+                                    )
+                                }
+                                .accessibilityHidden(true)
+                            }
+                        }
+                        .frame(width: 28, height: 28)
                 }
             }
         }
