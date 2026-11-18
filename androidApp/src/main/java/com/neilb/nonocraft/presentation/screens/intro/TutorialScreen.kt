@@ -117,12 +117,13 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp),
+                    .heightIn(min = 130.dp),
                 userScrollEnabled = false
             ) { p ->
+                // Wraps its text, so the pager grows with the font scale and the board keeps the rest.
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -214,7 +215,7 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                     modifier = Modifier
                         .padding(horizontal = 24.dp, vertical = 24.dp)
                         .fillMaxWidth()
-                        .height(52.dp)
+                        .heightIn(min = 52.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFF4CAF50))
                         .rippleClickable(onClick = {

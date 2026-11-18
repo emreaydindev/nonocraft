@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -380,8 +382,8 @@ fun GameEndOverlay(
                         ),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
-                            .width(200.dp)
-                            .height(56.dp)
+                            .widthIn(min = 200.dp)
+                            .heightIn(min = 56.dp)
                     ) {
                         Text(
                             text = buttonText,

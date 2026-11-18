@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -134,7 +135,7 @@ fun GoogleSignInButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .heightIn(min = 52.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (!isLoading) SurfaceDark else SurfaceDark.copy(alpha = 0.35f))
             .border(1.dp, BorderDark, RoundedCornerShape(16.dp))
@@ -151,7 +152,7 @@ fun GoogleSignInButton(
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(52.dp)
+                    .heightIn(min = 52.dp)
                     .clip(RoundedCornerShape(16.dp)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -425,7 +426,7 @@ fun PrimaryAuthButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .heightIn(min = 52.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (enabled) NeonCyan else NeonCyan.copy(alpha = 0.35f))
             .clickable(
@@ -464,7 +465,7 @@ fun OutlineAuthButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .heightIn(min = 50.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(1.5.dp, NeonCyan.copy(alpha = 0.50f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),
@@ -490,7 +491,7 @@ fun GhostAuthButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .heightIn(min = 50.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(0.5.dp, BorderDark, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),

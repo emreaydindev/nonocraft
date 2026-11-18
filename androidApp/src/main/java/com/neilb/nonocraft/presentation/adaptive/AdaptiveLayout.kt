@@ -4,7 +4,18 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Rect
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -75,4 +86,57 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+/**
+ * A column that is centred when its content fits and scrolls when it doesn't (large font scales, short
+ * windows, folded outer screens). The Android counterpart of the iOS `CenteredScrollView`.
+ */
+@Composable
+fun CenteredScrollColumn(
+    modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    BoxWithConstraints(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight),
+            horizontalAlignment = horizontalAlignment,
+            verticalArrangement = Arrangement.Center,
+            content = content
+        )
+    }
+}
+
+/** Whether the user picked one of the largest font scales (150 % and up), where rows turn into columns. */
+@Composable
+fun isLargeFontScale(): Boolean = LocalDensity.current.fontScale >= 1.5f
+
+/**
+ * A row that becomes a column at the largest font scales, where its pieces no longer fit side by side.
+ * The Android counterpart of the iOS `AdaptiveStack`.
+ */
+@Composable
+fun AdaptiveRow(
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceBetween,
+    columnSpacing: Dp = 12.dp,
+    content: @Composable () -> Unit
+) {
+    if (isLargeFontScale()) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(columnSpacing),
+            horizontalAlignment = Alignment.Start
+        ) { content() }
+    } else {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = horizontalArrangement,
+            verticalAlignment = Alignment.CenterVertically
+        ) { content() }
+    }
 }

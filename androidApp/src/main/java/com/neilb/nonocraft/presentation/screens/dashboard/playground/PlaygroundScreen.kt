@@ -41,6 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.horizontalScroll
+import com.neilb.nonocraft.presentation.adaptive.AdaptiveRow
+import com.neilb.nonocraft.presentation.adaptive.isLargeFontScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
@@ -116,82 +119,105 @@ fun PlaygroundContent(
     ) {
         GridBackground()
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            BoxWithConstraints(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
-                val density = LocalDensity.current
-                var topContentHeight by remember { mutableStateOf(0.dp) }
-                val gap = maxHeight - topContentHeight
-                // Same as iOS: the mascot sits centred between the daily card and the level card.
-                if (gap > 64.dp) {
-                    WatermarkLogo(
-                        modifier = Modifier
-                            .padding(top = topContentHeight)
-                            .height(gap),
-                        logoSize = minOf(180.dp, gap - 24.dp),
-                    )
+        val topCards: @Composable () -> Unit = {
+            PlaygroundHeader(
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToTutorial = onNavigateToTutorial
+            )
+
+            WalletStrip(
+                stars = state.stars,
+                crystals = state.crystals,
+                crystalRefillMinutes = state.crystalRefillMinutes,
+            )
+
+            DailyChallengeCard(
+                isSolved = state.isDailySolved,
+                onPlayToday = { onNavigateToGame("daily-today-20") },
+                onPlayPast = { date -> onNavigateToGame("daily-$date-20") },
+            )
+        }
+
+        var showRandomDialog by remember { mutableStateOf(false) }
+        if (showRandomDialog) {
+            RandomPuzzleDialog(
+                onDismiss = { showRandomDialog = false },
+                onGenerate = { isColored, size, lives ->
+                    onNavigateToGame("random-10")
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .onSizeChanged { topContentHeight = with(density) { it.height.toDp() } }
-                        .padding(horizontal = 18.dp)
-                        .padding(top = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    PlaygroundHeader(
-                        onNavigateToSettings = onNavigateToSettings,
-                        onNavigateToTutorial = onNavigateToTutorial
-                    )
+            )
+        }
 
-                    WalletStrip(
-                        stars = state.stars,
-                        crystals = state.crystals,
-                        crystalRefillMinutes = state.crystalRefillMinutes,
-                    )
+        val bottomCards: @Composable () -> Unit = {
+            LevelProgressCard(
+                currentLevel = state.currentLevelNumber,
+                hasDraft = state.hasDraft,
+                draftSize = state.draftSize,
+                draftProgress = state.draftProgress,
+                onContinue = { onNavigateToGame(state.currentLevelId) },
+            )
 
-                    DailyChallengeCard(
-                        isSolved = state.isDailySolved,
-                        onPlayToday = { onNavigateToGame("daily-today-20") },
-                        onPlayPast = { date -> onNavigateToGame("daily-$date-20") },
-                    )
-                }
-            }
+            RandomPuzzleButton(
+                onClick = { showRandomDialog = true }
+            )
+        }
 
+        if (isLargeFontScale()) {
+            // Largest font scales: everything in one scrolling column, no mascot, so no card is squeezed
+            // into a sliver above the pinned bottom cards.
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 18.dp)
                     .padding(top = 20.dp, bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                LevelProgressCard(
-                    currentLevel = state.currentLevelNumber,
-                    hasDraft = state.hasDraft,
-                    draftSize = state.draftSize,
-                    draftProgress = state.draftProgress,
-                    onContinue = { onNavigateToGame(state.currentLevelId) },
-                )
-
-                var showRandomDialog by remember { mutableStateOf(false) }
-
-                if (showRandomDialog) {
-                    RandomPuzzleDialog(
-                        onDismiss = { showRandomDialog = false },
-                        onGenerate = { isColored, size, lives ->
-                            onNavigateToGame("random-10")
-                        }
-                    )
+                topCards()
+                bottomCards()
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                ) {
+                    val density = LocalDensity.current
+                    var topContentHeight by remember { mutableStateOf(0.dp) }
+                    val gap = maxHeight - topContentHeight
+                    // Same as iOS: the mascot sits centred between the daily card and the level card.
+                    if (gap > 64.dp) {
+                        WatermarkLogo(
+                            modifier = Modifier
+                                .padding(top = topContentHeight)
+                                .height(gap),
+                            logoSize = minOf(180.dp, gap - 24.dp),
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .onSizeChanged { topContentHeight = with(density) { it.height.toDp() } }
+                            .padding(horizontal = 18.dp)
+                            .padding(top = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        topCards()
+                    }
                 }
 
-                RandomPuzzleButton(
-                    onClick = { showRandomDialog = true }
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 18.dp)
+                        .padding(top = 20.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    bottomCards()
+                }
             }
         }
     }
@@ -219,11 +245,7 @@ private fun LevelProgressCard(
         borderColor = NeonCyan.copy(alpha = 0.22f),
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
                 Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(
                         text = "MEVCUT SEVİYE",
@@ -509,11 +531,7 @@ private fun DailyChallengeCard(
         borderColor = if (!isSolved) NeonCyan.copy(alpha = 0.35f) else BorderDark,
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -602,14 +620,22 @@ private fun DailyChallengeCard(
 
             Spacer(Modifier.height(16.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
+            // Seven equal columns normally; at the largest font scales the days keep their natural width
+            // and the strip scrolls sideways instead of squeezing the text.
+            val largeText = isLargeFontScale()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (largeText) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
+                horizontalArrangement = if (largeText) Arrangement.spacedBy(8.dp) else Arrangement.Start,
+            ) {
                 week.forEach { day ->
                     Column(
                         modifier = Modifier
-                            .weight(1f)
+                            .then(if (largeText) Modifier else Modifier.weight(1f))
                             .clip(RoundedCornerShape(12.dp))
                             .rippleClickable { if (day.isToday) onPlayToday() else onPlayPast(day.key) }
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp, horizontal = if (largeText) 4.dp else 0.dp)
                             .semantics(mergeDescendants = true) {
                                 contentDescription =
                                     if (day.isToday) "Bugünün bulmacası" else "${day.number} ${day.weekday} bulmacası"
@@ -627,7 +653,7 @@ private fun DailyChallengeCard(
                         )
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(if (largeText) 56.dp else 36.dp)
                                 .clip(CircleShape)
                                 .background(if (day.isToday) NeonCyan else SurfaceVariantDark),
                             contentAlignment = Alignment.Center,

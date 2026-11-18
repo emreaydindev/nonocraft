@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neilb.nonocraft.presentation.theme.AppFont
@@ -84,14 +86,7 @@ fun DashboardBottomNavBar(
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                label = {
-                    Text(
-                        text = tabItem.label,
-                        fontSize = 11.sp,
-                        fontFamily = AppFont,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-                    )
-                },
+                label = { NavLabel(tabItem.label, isSelected) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = PurpleAccent,
                     selectedTextColor = PurpleAccent,
@@ -136,14 +131,7 @@ fun DashboardNavRail(
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        label = {
-                            Text(
-                                text = tabItem.label,
-                                fontSize = 11.sp,
-                                fontFamily = AppFont,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-                            )
-                        },
+                        label = { NavLabel(tabItem.label, isSelected) },
                         colors = NavigationRailItemDefaults.colors(
                             selectedIconColor = PurpleAccent,
                             selectedTextColor = PurpleAccent,
@@ -162,6 +150,24 @@ fun DashboardNavRail(
                 .background(BorderDark)
         )
     }
+}
+
+/**
+ * Tab label on one line. Its growth with the font scale is capped at 130 % so four labels still fit
+ * side by side at the largest settings (the icons carry the meaning; TalkBack reads the full label).
+ */
+@Composable
+private fun NavLabel(text: String, isSelected: Boolean) {
+    val fontScale = LocalDensity.current.fontScale
+    Text(
+        text = text,
+        fontSize = 11.sp * (minOf(fontScale, 1.3f) / fontScale),
+        fontFamily = AppFont,
+        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 @Composable

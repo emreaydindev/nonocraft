@@ -13,6 +13,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import com.neilb.nonocraft.presentation.adaptive.CenteredScrollColumn
+import com.neilb.nonocraft.presentation.adaptive.isLargeFontScale
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -96,6 +101,7 @@ fun OnboardingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(backgroundColor)
+            .statusBarsPadding()
             .navigationBarsPadding()
     ) {
         GridBackground()
@@ -155,12 +161,11 @@ private fun SlideContent(
         .absoluteValue.coerceIn(0f, 1f)
     val contentAlpha = 1f - pageOffset * 0.6f
 
-    Column(
+    // Scrolls at the largest font scales instead of pushing the text off screen.
+    CenteredScrollColumn(
         modifier = modifier
             .padding(horizontal = 28.dp)
             .alpha(contentAlpha),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
     ) {
 
         Text(
@@ -169,13 +174,16 @@ private fun SlideContent(
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 2.sp,
             color = slide.accentColor.copy(alpha = 0.7f),
-            modifier = Modifier.padding(bottom = 24.dp),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
         )
 
         Box(
             modifier = Modifier
+                .widthIn(max = 420.dp)
                 .fillMaxWidth()
-                .aspectRatio(1.1f)
+                // Taller at the largest font scales so the premium perks fit.
+                .aspectRatio(if (isLargeFontScale()) 0.8f else 1.1f)
                 .clip(RoundedCornerShape(24.dp))
                 .background(surfaceColor)
                 .drawBehind {
@@ -220,6 +228,7 @@ private fun SlideContent(
             color = textSecondary,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
+            modifier = Modifier.padding(bottom = 16.dp),
         )
     }
 }
@@ -254,10 +263,11 @@ private fun BottomSection(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .heightIn(min = 52.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(accentColor)
-                .rippleClickable(onClick = onNext),
+                .rippleClickable(onClick = onNext)
+                .padding(vertical = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
             Text(

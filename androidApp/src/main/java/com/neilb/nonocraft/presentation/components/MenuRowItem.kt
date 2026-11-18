@@ -33,6 +33,7 @@ fun MenuRowItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
+            modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -47,7 +48,8 @@ fun MenuRowItem(
                 color = tint,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = AppFont
+                fontFamily = AppFont,
+                modifier = Modifier.weight(1f)
             )
         }
 

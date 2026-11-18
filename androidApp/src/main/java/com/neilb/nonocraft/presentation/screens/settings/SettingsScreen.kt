@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.neilb.nonocraft.presentation.adaptive.isLargeFontScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -306,7 +307,10 @@ private fun SettingsRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // The label takes the free width and wraps; at the largest font scales the value moves under it.
+        val valueBelow = value != null && isLargeFontScale()
         Row(
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -316,20 +320,31 @@ private fun SettingsRow(
                 tint = if (contentColor == DangerRed) DangerRed else TextMuted,
                 modifier = Modifier.size(22.dp)
             )
-            Text(
-                text = label,
-                color = contentColor,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                fontFamily = AppFont
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    color = contentColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = AppFont
+                )
+                if (valueBelow) {
+                    Text(
+                        text = value.orEmpty(),
+                        color = TextMuted,
+                        fontSize = 13.sp,
+                        fontFamily = AppFont
+                    )
+                }
+            }
         }
 
         Row(
+            modifier = Modifier.padding(start = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (value != null) {
+            if (value != null && !valueBelow) {
                 Text(
                     text = value,
                     color = TextMuted,
@@ -373,6 +388,7 @@ private fun SettingsSwitchRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
+            modifier = Modifier.weight(1f).padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -387,7 +403,8 @@ private fun SettingsSwitchRow(
                 color = TextPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
-                fontFamily = AppFont
+                fontFamily = AppFont,
+                modifier = Modifier.weight(1f)
             )
         }
 

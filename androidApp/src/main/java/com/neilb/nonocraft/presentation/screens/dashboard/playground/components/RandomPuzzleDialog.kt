@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.neilb.nonocraft.presentation.adaptive.isLargeFontScale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -124,31 +125,22 @@ fun RandomPuzzleDialog(
 
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     DialogSectionHeader(icon = Icons.Rounded.GridOn, title = "Matris Boyutu")
+                    // Four per row; two at the largest font scales so "20×20" stays on one line.
+                    val perRow = if (isLargeFontScale()) 2 else 4
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            sizes.take(4).forEach { size ->
-                                SelectableChip(
-                                    text = size,
-                                    isSelected = selectedSize == size,
-                                    onClick = { selectedSize = size },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            sizes.drop(4).forEach { size ->
-                                SelectableChip(
-                                    text = size,
-                                    isSelected = selectedSize == size,
-                                    onClick = { selectedSize = size },
-                                    modifier = Modifier.weight(1f)
-                                )
+                        sizes.chunked(perRow).forEach { rowSizes ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowSizes.forEach { size ->
+                                    SelectableChip(
+                                        text = size,
+                                        isSelected = selectedSize == size,
+                                        onClick = { selectedSize = size },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
                         }
                     }
