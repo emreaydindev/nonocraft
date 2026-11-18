@@ -69,7 +69,15 @@ private fun NotificationSwitchRow(label: String, isChecked: Boolean, onCheckedCh
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium, fontFamily = AppFont)
+        // Takes the free width and wraps, so the switch never gets pushed off the card.
+        Text(
+            label,
+            color = TextPrimary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = AppFont,
+            modifier = Modifier.weight(1f).padding(end = 12.dp)
+        )
         Switch(
             checked = isChecked,
             onCheckedChange = onCheckedChange,

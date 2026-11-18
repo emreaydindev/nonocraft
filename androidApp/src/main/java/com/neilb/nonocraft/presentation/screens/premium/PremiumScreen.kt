@@ -46,6 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.neilb.nonocraft.presentation.adaptive.AdaptiveRow
+import com.neilb.nonocraft.presentation.adaptive.isLargeFontScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -180,10 +182,14 @@ fun PremiumScreen(
             .background(BackgroundDark)
             .navigationBarsPadding()
     ) {
+        // At the largest font scales the whole paywall scrolls as one page and the slideshow gets a fixed
+        // height, so the plans and the purchase button are never pushed off screen.
+        val largeText = isLargeFontScale()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .safeContentPadding()
+                .then(if (largeText) Modifier.verticalScroll(rememberScrollState()) else Modifier)
         ) {
             // Top Bar
             AuthBackRow { onNavigateBack() }
@@ -192,7 +198,7 @@ fun PremiumScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .then(if (largeText) Modifier.height(440.dp) else Modifier.weight(1f))
             ) {
                 HorizontalPager(
                     state = pagerState,
@@ -401,11 +407,7 @@ private fun PlanSelectionCard(
             )
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        AdaptiveRow(modifier = Modifier.fillMaxWidth(), columnSpacing = 8.dp) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
@@ -442,13 +444,14 @@ private fun PlanSelectionCard(
                 }
             }
 
-            Column(horizontalAlignment = Alignment.End) {
+            Column(horizontalAlignment = if (isLargeFontScale()) Alignment.Start else Alignment.End) {
                 Text(
                     text = plan.price,
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = AppFont
+                    fontFamily = AppFont,
+                    softWrap = false
                 )
                 Text(
                     text = plan.period,
