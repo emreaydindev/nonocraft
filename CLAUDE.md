@@ -73,8 +73,8 @@ The Android screens are the feature reference. **iOS no longer copies the Androi
 - [x] Respect Reduce Transparency / Increase Contrast (glass falls back to solid).
 
 ### Adaptive layout: iPhone Duo, foldables, iPad, tablets (D§15)
-- [ ] iPhone Duo (small outer screen + large inner screen, the lit screen follows the hinge): no fixed sizes; check every screen closed, half-open and open in the simulator.
-- [ ] Game board rescales on a screen switch mid-game without losing state; clues readable on the outer screen.
+- [x] iPhone Duo (small outer screen + large inner screen, the lit screen follows the hinge): no fixed sizes; check every screen closed, half-open and open in the simulator. (Checked on the iPhone Duo simulator, iOS 27.2: outer 466×678 pt with the status bar at the trailing edge, inner 951×669 pt landscape, also lit when half-open.)
+- [x] Game board rescales on a screen switch mid-game without losing state; clues readable on the outer screen. (Checked with the 5×5 feed puzzle. Clues are half a cell with an 8 pt floor, so boards of 15×15 and up get small clues on the outer screen until big-board zoom lands.)
 - [x] iOS inner screen / iPad: landscape + two-pane layouts (Explore list + preview, Library sections + content, board + controls side by side), sidebar-adaptable tab bar. Phones stay portrait. (Checked on iPad; the Duo inner screen only through an iPad window of similar size, since the installed simulator runtime can't run the iPhone Duo.)
 - [x] Android tablets / foldables: landscape + two-pane layouts (navigation rail, Explore list + preview, Library sections + content, board + controls side by side). Checked on the Resizable emulator in tablet and foldable modes.
 - [x] iPad: support multitasking resizing (no `UIRequiresFullScreen`).
