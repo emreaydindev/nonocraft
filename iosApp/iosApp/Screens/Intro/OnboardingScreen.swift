@@ -166,6 +166,7 @@ private struct VisualSolve: View {
     ]
     private let columnClues = ["2", "4", "4", "4", "4", "4", "2"]
     @State private var filledCount = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Order in which each filled cell lights up (row by row).
     private func fillOrder(row: Int, col: Int) -> Int {
@@ -207,6 +208,11 @@ private struct VisualSolve: View {
         }
         .task {
             let total = pattern.joined().filter { $0 == 1 }.count
+            // Reduce Motion: the finished heart, without the fill looping.
+            if reduceMotion {
+                filledCount = total
+                return
+            }
             while !Task.isCancelled {
                 for count in 0...total {
                     filledCount = count

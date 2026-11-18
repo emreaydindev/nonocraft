@@ -2,6 +2,7 @@ import Shared
 import SwiftUI
 
 struct SplashScreen: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onFinished: (SplashDestination) -> Void
 
     @StateObject private var store = ViewModelStore()
@@ -27,7 +28,8 @@ struct SplashScreen: View {
                     Image("Logo")
                         .resizable()
                         .frame(width: 140, height: 140)
-                        .scaleEffect(logoVisible ? 1 : 0.6)
+                        // Reduce Motion: fades in without the zoom.
+                        .scaleEffect(logoVisible || reduceMotion ? 1 : 0.6)
                         .opacity(logoVisible ? 1 : 0)
                 }
                 .frame(height: 140)
@@ -36,7 +38,7 @@ struct SplashScreen: View {
                     .kerning(1)
                     .padding(.top, 28)
                     .opacity(nameVisible ? 1 : 0)
-                    .offset(y: nameVisible ? 0 : 12)
+                    .offset(y: nameVisible || reduceMotion ? 0 : 12)
 
                 Text("Çöz ve Tasarla")
                     .font(.app(14))
@@ -83,13 +85,16 @@ struct SplashScreen: View {
 private struct PulsingDot: View {
     let delay: Double
     @State private var dimmed = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         RoundedRectangle(cornerRadius: 1.5)
             .fill(Color.neonCyan)
             .frame(width: 6, height: 6)
-            .opacity(dimmed ? 0.25 : 1)
+            // Reduce Motion: steady dots instead of a pulse.
+            .opacity(reduceMotion ? 0.6 : dimmed ? 0.25 : 1)
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true).delay(delay)) {
                     dimmed = false
                 }

@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
+import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -243,6 +244,10 @@ fun SplashScreen(
 
 @Composable
 private fun PulsingDot(delayMs: Int, color: Color) {
+    if (rememberReduceMotion()) {
+        Canvas(Modifier.size(6.dp)) { drawCircle(color = color.copy(alpha = 0.6f)) }
+        return
+    }
     val infiniteTransition = rememberInfiniteTransition(label = "dot")
     val alpha by infiniteTransition.animateFloat(
         initialValue   = 0.25f,

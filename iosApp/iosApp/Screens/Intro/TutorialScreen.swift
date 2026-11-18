@@ -271,6 +271,7 @@ private struct DragFillRow: View {
 
     private let cellPitch: CGFloat = 54
     @State private var handTravel: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 4) {
@@ -297,6 +298,8 @@ private struct DragFillRow: View {
         }
         .task(id: handStartCell) {
             handTravel = 0
+            // Reduce Motion: the hand rests at the start of the stroke instead of sweeping over and over.
+            guard !reduceMotion else { return }
             while !Task.isCancelled {
                 withAnimation(.easeOut(duration: 0.9)) { handTravel = cellPitch }
                 try? await Task.sleep(for: .milliseconds(1300))

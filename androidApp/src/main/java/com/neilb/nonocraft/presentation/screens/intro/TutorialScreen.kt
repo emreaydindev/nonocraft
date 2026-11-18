@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
+import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
@@ -62,8 +63,14 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
     // Animation for hand
     val handX = remember { Animatable(0f) }
     val page = pagerState.currentPage
+    val reduceMotion = rememberReduceMotion()
 
     LaunchedEffect(page, grid3.count { it != CellState.EMPTY }) {
+        // Reduce Motion: the hand rests at the start of the stroke instead of sweeping over and over.
+        if (reduceMotion) {
+            handX.snapTo(if (page == 2) (grid3.count { it != CellState.EMPTY } * 150).toFloat() else 0f)
+            return@LaunchedEffect
+        }
         if (page == 0) {
             while (true) {
                 handX.animateTo(150f, tween(1200, easing = LinearOutSlowInEasing))

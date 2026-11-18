@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
+import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.contentDescription
@@ -357,7 +358,13 @@ private fun VisualSolve(accentColor: Color) {
     var filledCount by remember { mutableIntStateOf(0) }
     val totalCells = pattern.sumOf { it.count { c -> c == 1 } }
 
-    LaunchedEffect(Unit) {
+    val reduceMotion = rememberReduceMotion()
+    LaunchedEffect(reduceMotion) {
+        // Reduce Motion: the finished heart, without the fill looping.
+        if (reduceMotion) {
+            filledCount = totalCells
+            return@LaunchedEffect
+        }
         while (true) {
             for (i in 0..totalCells) {
                 filledCount = i
