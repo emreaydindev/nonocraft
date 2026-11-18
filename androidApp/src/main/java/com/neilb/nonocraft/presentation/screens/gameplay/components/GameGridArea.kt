@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -69,6 +70,7 @@ fun GameGridArea(
     isCursorVisible: Boolean,
     modifier: Modifier = Modifier,
     cellActions: BoardCellActions? = null,
+    showColorPatterns: Boolean = false,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val isZoomEnabled = puzzle.size > 10
@@ -180,10 +182,12 @@ fun GameGridArea(
         ) {
             drawRect(SurfaceDark, Offset(startX, startY), Size(puzzle.size * cellSize, puzzle.size * cellSize))
 
-            drawUserCells(userGrid, puzzle.paletteHex, cellSize, startX, startY)
+            // Shapes only tell colours apart, so a one-colour puzzle needs none.
+            val patterns = showColorPatterns && puzzle.paletteHex.size > 1
+            drawUserCells(userGrid, puzzle.paletteHex, cellSize, startX, startY, patterns, textMeasurer, clueDensity)
             drawGridLines(puzzle.size, subGridSize, cellSize, startX, startY)
 
-            drawClues(rowClues, colClues, puzzle.paletteHex, maxRowClueCount, maxColClueCount, cellSize, startX, startY, textMeasurer, clueDensity)
+            drawClues(rowClues, colClues, puzzle.paletteHex, maxRowClueCount, maxColClueCount, cellSize, startX, startY, textMeasurer, clueDensity, patterns)
 
             drawCursor(cursorRow, cursorCol, cellSize, startX, startY, isCursorVisible)
         }
@@ -222,8 +226,37 @@ private fun DrawScope.drawClues(
     startX: Float,
     startY: Float,
     textMeasurer: TextMeasurer,
-    clueDensity: Density
+    clueDensity: Density,
+    showPatterns: Boolean,
 ) {
+    // With colour patterns on, each clue number moves up and its colour's shape sits under it.
+    fun drawClue(clue: Clue, x: Float, y: Float) {
+        val color = paletteHex.getOrNull(clue.colorIndex - 1)?.toColor() ?: NeonCyan
+        val textLayoutResult = textMeasurer.measure(
+            text = clue.count.toString(),
+            style = TextStyle(
+                color = color,
+                fontSize = with(clueDensity) { (cellSize * if (showPatterns) 0.38f else 0.45f).toSp() },
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFont
+            ),
+            density = clueDensity
+        )
+        val textTop = if (showPatterns) y + cellSize * 0.04f else y + (cellSize - textLayoutResult.size.height) / 2f
+        drawText(
+            textLayoutResult = textLayoutResult,
+            topLeft = Offset(x + (cellSize - textLayoutResult.size.width) / 2f, textTop)
+        )
+        if (showPatterns) {
+            val glyph = cellSize * 0.24f
+            drawPaletteGlyph(
+                clue.colorIndex,
+                Rect(Offset(x + (cellSize - glyph) / 2f, y + cellSize * 0.68f), Size(glyph, glyph)),
+                color, textMeasurer, clueDensity
+            )
+        }
+    }
+
     val clueBgColor = SurfaceDark.copy(alpha = 0.5f)
 
     drawRect(
@@ -246,17 +279,7 @@ private fun DrawScope.drawClues(
             if (clue.count == 0) return@forEachIndexed
 
             val x = startX - ((maxRowClueCount - (missingClues + clueIndex)) * cellSize)
-            val color = paletteHex.getOrNull(clue.colorIndex - 1)?.toColor() ?: NeonCyan
-
-            val textLayoutResult = textMeasurer.measure(
-                text = clue.count.toString(),
-                style = TextStyle(color = color, fontSize = with(clueDensity) { (cellSize * 0.45f).toSp() }, fontWeight = FontWeight.Bold, fontFamily = AppFont),
-                density = clueDensity
-            )
-            drawText(
-                textLayoutResult = textLayoutResult,
-                topLeft = Offset(x + (cellSize - textLayoutResult.size.width) / 2f, y + (cellSize - textLayoutResult.size.height) / 2f)
-            )
+            drawClue(clue, x, y)
         }
     }
 
@@ -268,22 +291,21 @@ private fun DrawScope.drawClues(
             if (clue.count == 0) return@forEachIndexed
 
             val y = startY - ((maxColClueCount - (missingClues + clueIndex)) * cellSize)
-            val color = paletteHex.getOrNull(clue.colorIndex - 1)?.toColor() ?: NeonCyan
-
-            val textLayoutResult = textMeasurer.measure(
-                text = clue.count.toString(),
-                style = TextStyle(color = color, fontSize = with(clueDensity) { (cellSize * 0.45f).toSp() }, fontWeight = FontWeight.Bold, fontFamily = AppFont),
-                density = clueDensity
-            )
-            drawText(
-                textLayoutResult = textLayoutResult,
-                topLeft = Offset(x + (cellSize - textLayoutResult.size.width) / 2f, y + (cellSize - textLayoutResult.size.height) / 2f)
-            )
+            drawClue(clue, x, y)
         }
     }
 }
 
-private fun DrawScope.drawUserCells(userGrid: List<List<Int>>, paletteHex: List<String>, cellSize: Float, startX: Float, startY: Float) {
+private fun DrawScope.drawUserCells(
+    userGrid: List<List<Int>>,
+    paletteHex: List<String>,
+    cellSize: Float,
+    startX: Float,
+    startY: Float,
+    showPatterns: Boolean,
+    textMeasurer: TextMeasurer,
+    textDensity: Density,
+) {
     for (row in userGrid.indices) {
         for (col in userGrid[row].indices) {
             val cellValue = userGrid[row][col]
@@ -293,6 +315,14 @@ private fun DrawScope.drawUserCells(userGrid: List<List<Int>>, paletteHex: List<
             if (cellValue > 0) {
                 val color = paletteHex.getOrNull(cellValue - 1)?.toColor() ?: NeonCyan
                 drawRect(color = color, topLeft = Offset(x, y), size = Size(cellSize, cellSize))
+                if (showPatterns) {
+                    val inset = cellSize * 0.3f
+                    drawPaletteGlyph(
+                        cellValue,
+                        Rect(Offset(x + inset, y + inset), Size(cellSize - 2 * inset, cellSize - 2 * inset)),
+                        PaletteGlyph.contrastOn(color), textMeasurer, textDensity
+                    )
+                }
             } else if (cellValue == -1) {
                 val padding = cellSize * 0.25f
                 val path = Path().apply {

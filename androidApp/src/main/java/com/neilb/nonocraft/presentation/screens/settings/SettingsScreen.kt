@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.settings
 
+import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
+import androidx.compose.material.icons.rounded.Category
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -162,6 +164,7 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
 
+                val colorPatterns = rememberColorPatternSetting()
                 SettingsGroup(title = "Görünüm & Özelleştirme") {
                     SettingsRow(
                         icon = Icons.Rounded.Palette,
@@ -202,6 +205,13 @@ fun SettingsScreen(
                         label = "Hatalı Hamle Uyarısı",
                         isChecked = isErrorWarningEnabled,
                         onCheckedChange = { isErrorWarningEnabled = it }
+                    )
+                    // Off by default unless the system colour correction is on; saved on the device.
+                    SettingsSwitchRow(
+                        icon = Icons.Rounded.Category,
+                        label = "Renk Körü Desenleri",
+                        isChecked = colorPatterns.isEnabled,
+                        onCheckedChange = { colorPatterns.isEnabled = it }
                     )
                 }
 

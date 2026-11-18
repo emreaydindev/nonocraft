@@ -1,5 +1,12 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.selected
@@ -247,7 +254,8 @@ fun ToolPaletteBar(
     isCrossMode: Boolean,
     onColorSelected: (Int) -> Unit,
     onCrossSelected: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showColorPatterns: Boolean = false,
 ) {
     // Wraps onto more lines when the palette is wider than the space (narrow outer screens, the
     // control column beside the board).
@@ -273,7 +281,8 @@ fun ToolPaletteBar(
                 label = colorLabels.getOrElse(index) { "Renk $actualColorIndex" },
                 isCross = false,
                 isSelected = !isCrossMode && selectedColorIndex == actualColorIndex,
-                onClick = { onColorSelected(actualColorIndex) }
+                onClick = { onColorSelected(actualColorIndex) },
+                glyphIndex = actualColorIndex.takeIf { showColorPatterns && paletteColors.size > 1 }
             )
         }
     }
@@ -285,7 +294,8 @@ private fun ToolItem(
     label: String,
     isCross: Boolean,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    glyphIndex: Int? = null,
 ) {
     Box(
         modifier = Modifier
@@ -303,9 +313,27 @@ private fun ToolItem(
         contentAlignment = Alignment.Center
     ) {
         if (isCross) {
-            Icon(Icons.Rounded.Close, contentDescription = "Cross", tint = DangerRed, modifier = Modifier.size(28.dp))
+            Icon(Icons.Rounded.Close, contentDescription = null, tint = DangerRed, modifier = Modifier.size(28.dp))
         } else {
-            Box(Modifier.size(24.dp).clip(RoundedCornerShape(4.dp)).background(color))
+            val textMeasurer = rememberTextMeasurer()
+            val density = LocalDensity.current
+            Canvas(
+                Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(color)
+                    // Dark swatches (e.g. black) vanish on the dark bar without an outline, as on iOS.
+                    .then(if (color.luminance() < 0.2f) Modifier.border(1.dp, TextPrimary.copy(alpha = 0.5f), RoundedCornerShape(4.dp)) else Modifier)
+            ) {
+                if (glyphIndex != null) {
+                    val inset = size.minDimension * 0.22f
+                    drawPaletteGlyph(
+                        glyphIndex,
+                        Rect(Offset(inset, inset), Size(size.width - 2 * inset, size.height - 2 * inset)),
+                        PaletteGlyph.contrastOn(color), textMeasurer, Density(density.density, 1f)
+                    )
+                }
+            }
         }
     }
 }

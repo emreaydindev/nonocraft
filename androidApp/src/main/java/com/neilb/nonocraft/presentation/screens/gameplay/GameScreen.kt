@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.gameplay
 
+import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import kotlinx.coroutines.delay
@@ -259,6 +260,7 @@ private fun GameContent(
     modifier: Modifier = Modifier
 ) {
     val cellActions = remember(viewModel) { ViewModelCellActions(viewModel) }
+    val colorPatterns = rememberColorPatternSetting()
     val board = remember(viewModel) {
         movableContentOf { boardState: GameUiState, boardModifier: Modifier ->
             Box(modifier = boardModifier, contentAlignment = Alignment.Center) {
@@ -273,7 +275,8 @@ private fun GameContent(
                         cursorCol = boardState.cursorCol,
                         isCursorVisible = boardState.isCursorVisible,
                         onCellClick = { row, col -> viewModel.onCellClicked(row, col) },
-                        cellActions = cellActions
+                        cellActions = cellActions,
+                        showColorPatterns = colorPatterns.isEnabled
                     )
                 }
             }
@@ -283,7 +286,7 @@ private fun GameContent(
     GameBoardLayout(
         modifier = modifier,
         board = { boardModifier -> board(state, boardModifier) },
-        controls = { isSideBySide -> GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = isSideBySide) }
+        controls = { isSideBySide -> GameControlsPanel(state = state, viewModel = viewModel, isSideBySide = isSideBySide, showColorPatterns = colorPatterns.isEnabled) }
     )
 }
 
@@ -292,7 +295,8 @@ private fun GameContent(
 private fun GameControlsPanel(
     state: GameUiState,
     viewModel: GameViewModel,
-    isSideBySide: Boolean
+    isSideBySide: Boolean,
+    showColorPatterns: Boolean
 ) {
     val activeColor = state.puzzle?.paletteHex?.getOrNull(state.selectedColorIndex - 1)?.toColor() ?: NeonCyan
     Column(
@@ -327,6 +331,7 @@ private fun GameControlsPanel(
         val palette = state.puzzle?.paletteHex.orEmpty()
         ToolPaletteBar(
             paletteColors = palette.map { it.toColor() },
+            showColorPatterns = showColorPatterns,
             colorLabels = palette.indices.map { index ->
                 if (palette.size > 1) BoardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.uppercase() } else "Doldur"
             },
