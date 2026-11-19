@@ -37,33 +37,33 @@ struct LibraryScreen: View {
     private var sections: [Section] {
         [
             Section(
-                id: "liked", title: "Beğenilenler", subtitle: "\(uiState.likedArtsCount) Pixelart",
+                id: "liked", title: L10n.string("library_liked"), subtitle: L10n.format("library_pixelart_count", uiState.likedArtsCount),
                 icon: "heart.fill", tint: .dangerRed
             ) { send(LibraryActionOnCategoryClick(categoryId: "liked")) },
             Section(
-                id: "downloaded", title: "İndirilenler", subtitle: "\(uiState.downloadedLevelsCount) Bölüm",
+                id: "downloaded", title: L10n.string("library_downloaded"), subtitle: L10n.format("library_level_count", uiState.downloadedLevelsCount),
                 icon: "arrow.down.to.line", tint: .gameGold, isPremium: true
             ) {
                 send(LibraryActionOnCategoryClick(categoryId: "downloaded"))
                 onNavigateToPremium()
             },
             Section(
-                id: "shared", title: "Paylaşılanlar", subtitle: "\(uiState.sharedArtsCount) Tasarım",
+                id: "shared", title: L10n.string("library_shared"), subtitle: L10n.format("library_design_count", uiState.sharedArtsCount),
                 icon: "paintpalette.fill", tint: .neonCyan
             ) { send(LibraryActionOnCategoryClick(categoryId: "shared")) },
             Section(
-                id: "drafts", title: "Taslaklar", subtitle: "\(uiState.draftArtsCount) Kayıt",
+                id: "drafts", title: L10n.string("library_drafts"), subtitle: L10n.format("library_saved_count", uiState.draftArtsCount),
                 icon: "pencil", tint: .textMuted
             ) {
                 send(LibraryActionOnCategoryClick(categoryId: "drafts"))
                 onNavigateToCrafting()
             },
             Section(
-                id: "completed", title: "Çözülenler", subtitle: "\(uiState.completedLevelsCount) Bölüm",
+                id: "completed", title: L10n.string("library_completed"), subtitle: L10n.format("library_level_count", uiState.completedLevelsCount),
                 icon: "checkmark.circle.fill", tint: Color(hex: 0x4CAF50)
             ) { send(LibraryActionOnCategoryClick(categoryId: "completed")) },
             Section(
-                id: "dailies", title: "Günlük Serüven", subtitle: "\(uiState.completedDailiesCount) Çözüm",
+                id: "dailies", title: L10n.string("library_dailies"), subtitle: L10n.format("library_solution_count", uiState.completedDailiesCount),
                 icon: "calendar", tint: Color(hex: 0xB388FF)
             ) { send(LibraryActionOnCategoryClick(categoryId: "dailies")) },
         ]
@@ -78,12 +78,12 @@ struct LibraryScreen: View {
             }
         }
         .background { ScreenBackground { EmptyView() } }
-        .navigationTitle("Kütüphanem")
+        .navigationTitle(L10n.string("library_title"))
         // Large title on the same row as the toolbar button instead of a row below it.
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Tasarım Stüdyosu", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
+                Button(L10n.string("crafting_title"), systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
             }
         }
         .onChange(of: horizontalSizeClass, initial: true) { _, sizeClass in
@@ -102,10 +102,10 @@ struct LibraryScreen: View {
                 }
             }
         }
-        .alert("Yeni Liste", isPresented: $showCreatePlaylist) {
-            TextField("Liste adı", text: $newPlaylistName)
-            Button("İptal", role: .cancel) {}
-            Button("Oluştur") {
+        .alert(L10n.string("playlist_new"), isPresented: $showCreatePlaylist) {
+            TextField(L10n.string("playlist_name"), text: $newPlaylistName)
+            Button(L10n.string("common_cancel"), role: .cancel) {}
+            Button(L10n.string("common_create")) {
                 let name = newPlaylistName.trimmingCharacters(in: .whitespaces)
                 if !name.isEmpty { send(LibraryActionOnCreatePlaylistSubmit(name: name)) }
             }
@@ -193,7 +193,7 @@ struct LibraryScreen: View {
             ForEach(uiState.playlists, id: \.id) { playlist in
                 let tint = Color(argb: playlist.coverColor)
                 LibrarySectionRow(
-                    title: playlist.name, subtitle: "\(playlist.postCount) Bulmaca",
+                    title: playlist.name, subtitle: L10n.format("playlist_puzzle_count", playlist.postCount),
                     isSelected: isTwoPane && selectedId == playlist.id
                 ) {
                     send(LibraryActionOnPlaylistClick(playlistId: playlist.id))
@@ -209,12 +209,12 @@ struct LibraryScreen: View {
 
     private var playlistsHeader: some View {
         HStack {
-            Text("Oynatma Listeleri")
+            Text(L10n.string("library_playlists"))
                 .font(.app(22, .bold))
                 .foregroundStyle(Color.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
-            Button("Yeni Liste", systemImage: "plus") { send(LibraryActionOnCreatePlaylist.shared) }
+            Button(L10n.string("playlist_new"), systemImage: "plus") { send(LibraryActionOnCreatePlaylist.shared) }
                 .labelStyle(.iconOnly)
                 .font(.title3.weight(.semibold))
                 .buttonStyle(.appGlass)
@@ -280,7 +280,7 @@ private struct LibraryGridCard: View {
             .padding(20)
         }
         // Title first, then the count and the Pro mark (the badge is drawn above the title).
-        .accessibilityLabel([title, subtitle, isPremium ? "Premium" : nil].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityLabel([title, subtitle, isPremium ? L10n.string("common_premium") : nil].compactMap { $0 }.joined(separator: ", "))
     }
 }
 
@@ -303,7 +303,7 @@ private struct PlaylistGridCard: View {
                     .font(.app(15, .bold))
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
-                Text("\(playlist.postCount) Bulmaca")
+                Text(L10n.format("playlist_puzzle_count", playlist.postCount))
                     .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)

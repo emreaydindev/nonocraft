@@ -18,70 +18,82 @@ struct SettingsScreen: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        SettingsForm(title: "Ayarlar", titleDisplayMode: .large) {
-            SettingsSection("Görünüm & Özelleştirme") {
+        SettingsForm(title: L10n.string("common_settings"), titleDisplayMode: .large) {
+            SettingsSection(L10n.string("settings_group_appearance")) {
                 NavigationLink(value: AppRoute.settingsSub(.theme)) {
                     LabeledContent {
-                        Text("Karanlık")
+                        Text(L10n.string("settings_theme_dark"))
                     } label: {
-                        SettingsLabel(title: "Uygulama Teması", systemImage: "paintpalette.fill", tint: .purpleAccent)
+                        SettingsLabel(title: L10n.string("settings_theme"), systemImage: "paintpalette.fill", tint: .purpleAccent)
                     }
                 }
                 NavigationLink(value: AppRoute.settingsSub(.appIcon)) {
                     LabeledContent {
                         HStack(spacing: 8) {
-                            Text("Klasik")
+                            Text(L10n.string("settings_icon_classic"))
                             ProBadge()
                         }
                     } label: {
-                        SettingsLabel(title: "Uygulama İkonu", systemImage: "app.badge.fill", tint: .gameGold)
+                        SettingsLabel(title: L10n.string("settings_icon"), systemImage: "app.badge.fill", tint: .gameGold)
                     }
                 }
                 Toggle(isOn: $isNeonEffectsEnabled) {
-                    SettingsLabel(title: "Neon Efektleri", systemImage: "sparkles")
+                    SettingsLabel(title: L10n.string("settings_neon"), systemImage: "sparkles")
                 }
+                // iOS keeps the per-app language in the app's page in Settings; it relaunches the app on change.
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                } label: {
+                    LabeledContent {
+                        Text(L10n.string(Bundle.main.preferredLocalizations.first == "tr" ? "settings_language_tr" : "settings_language_en"))
+                    } label: {
+                        SettingsLabel(title: L10n.string("settings_language"), systemImage: "globe")
+                    }
+                }
+                .foregroundStyle(.primary)
+                .accessibilityHint(L10n.string("settings_language_opens_settings"))
             }
-            SettingsSection("Oyun Deneyimi") {
+            SettingsSection(L10n.string("settings_group_game")) {
                 Toggle(isOn: $isVibrationEnabled) {
-                    SettingsLabel(title: "Titreşim", systemImage: "iphone.radiowaves.left.and.right")
+                    SettingsLabel(title: L10n.string("settings_vibration"), systemImage: "iphone.radiowaves.left.and.right")
                 }
                 Toggle(isOn: $isSoundEnabled) {
-                    SettingsLabel(title: "Ses Efektleri", systemImage: "speaker.wave.2.fill")
+                    SettingsLabel(title: L10n.string("settings_sound"), systemImage: "speaker.wave.2.fill")
                 }
                 Toggle(isOn: $isErrorWarningEnabled) {
-                    SettingsLabel(title: "Hatalı Hamle Uyarısı", systemImage: "exclamationmark.triangle.fill", tint: .dangerRed)
+                    SettingsLabel(title: L10n.string("settings_wrong_move_alert"), systemImage: "exclamationmark.triangle.fill", tint: .dangerRed)
                 }
                 // Follows Differentiate Without Colour until the player picks; saved on the device.
                 Toggle(isOn: colorPatterns.binding) {
-                    SettingsLabel(title: "Renk Körü Desenleri", systemImage: "square.on.circle")
+                    SettingsLabel(title: L10n.string("settings_colorblind"), systemImage: "square.on.circle")
                 }
             }
-            SettingsSection("Hesap & Güvenlik") {
+            SettingsSection(L10n.string("settings_group_account")) {
                 NavigationLink(value: AppRoute.settingsSub(.editProfile)) {
-                    SettingsLabel(title: "Hesap Bilgilerini Düzenle", systemImage: "person.crop.circle.fill")
+                    SettingsLabel(title: L10n.string("settings_edit_account"), systemImage: "person.crop.circle.fill")
                 }
                 NavigationLink(value: AppRoute.settingsSub(.changePassword)) {
-                    SettingsLabel(title: "Şifre Değiştir", systemImage: "lock.fill")
+                    SettingsLabel(title: L10n.string("settings_change_password"), systemImage: "lock.fill")
                 }
                 NavigationLink(value: AppRoute.settingsSub(.notifications)) {
-                    SettingsLabel(title: "Bildirim Tercihleri", systemImage: "bell.badge.fill", tint: .dangerRed)
+                    SettingsLabel(title: L10n.string("settings_notifications"), systemImage: "bell.badge.fill", tint: .dangerRed)
                 }
             }
-            SettingsSection("Destek & Yasal") {
-                externalLink("Bize Ulaşın", systemImage: "envelope.fill", url: "mailto:\(Constants.shared.SUPPORT_EMAIL)")
-                externalLink("Gizlilik Politikası", systemImage: "checkmark.shield.fill", url: Constants.shared.PRIVACY_POLICY_URL)
-                externalLink("Kullanım Koşulları", systemImage: "doc.text.fill", url: Constants.shared.TERMS_OF_SERVICE_URL)
+            SettingsSection(L10n.string("settings_group_support")) {
+                externalLink(L10n.string("settings_contact"), systemImage: "envelope.fill", url: "mailto:\(Constants.shared.SUPPORT_EMAIL)")
+                externalLink(L10n.string("common_privacy_policy"), systemImage: "checkmark.shield.fill", url: Constants.shared.PRIVACY_POLICY_URL)
+                externalLink(L10n.string("common_terms"), systemImage: "doc.text.fill", url: Constants.shared.TERMS_OF_SERVICE_URL)
             }
             SettingsSection {
                 Button(role: .destructive) {
                     model.viewModel.logout()
                 } label: {
-                    Label("Çıkış Yap", systemImage: "rectangle.portrait.and.arrow.right")
+                    Label(L10n.string("settings_log_out"), systemImage: "rectangle.portrait.and.arrow.right")
                 }
                 Button(role: .destructive) {
                     showDeleteDialog = true
                 } label: {
-                    Label("Hesabı Kalıcı Olarak Sil", systemImage: "trash")
+                    Label(L10n.string("settings_delete_account"), systemImage: "trash")
                 }
             }
             .foregroundStyle(Color.dangerRed)
@@ -94,14 +106,14 @@ struct SettingsScreen: View {
                 }
             }
         }
-        .alert("Hesabı Sil", isPresented: $showDeleteDialog) {
-            Button("İptal", role: .cancel) {}
-            Button("Evet, Sil", role: .destructive) { model.viewModel.deleteAccount() }
+        .alert(L10n.string("delete_title"), isPresented: $showDeleteDialog) {
+            Button(L10n.string("common_cancel"), role: .cancel) {}
+            Button(L10n.string("delete_confirm"), role: .destructive) { model.viewModel.deleteAccount() }
         } message: {
-            Text("Bu işlem geri alınamaz. Tüm verilerin, bulmacaların ve ilerlemen kalıcı olarak silinecek. Emin misin?")
+            Text(L10n.string("delete_body"))
         }
-        .alert("Hata", isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("Tamam", role: .cancel) {}
+        .alert(L10n.string("common_error"), isPresented: .init(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button(L10n.string("common_ok"), role: .cancel) {}
         } message: {
             Text(errorMessage ?? "")
         }

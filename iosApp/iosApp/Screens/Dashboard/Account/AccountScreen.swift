@@ -28,12 +28,12 @@ struct AccountScreen: View {
             .frame(maxWidth: .infinity)
         }
         .background { ScreenBackground { EmptyView() } }
-        .navigationTitle("Profilim")
+        .navigationTitle(L10n.string("account_title"))
         // Large title on the same row as the toolbar button instead of a row below it.
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Ayarlar", systemImage: "gearshape", action: onNavigateToSettings)
+                Button(L10n.string("common_settings"), systemImage: "gearshape", action: onNavigateToSettings)
             }
         }
     }
@@ -52,10 +52,10 @@ private struct PremiumBanner: View {
                     .frame(width: 44, height: 44)
                     .background(Color.gameGold.opacity(0.18), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Premium'a Geç")
+                    Text(L10n.string("account_go_premium"))
                         .font(.app(17, .bold))
                         .foregroundStyle(Color.gameGold)
-                    Text("Sınırsız kristal, ipucu ve özel temalar")
+                    Text(L10n.string("account_pro_subtitle"))
                         .font(.subheadline)
                         .foregroundStyle(Color.textPrimary.opacity(0.75))
                 }
@@ -94,25 +94,25 @@ private struct ProfileHeader: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Avatarı düzenle")
+            .accessibilityLabel(L10n.string("account_edit_avatar"))
 
             if uiState.isGuest {
-                Text("Misafir Kullanıcı")
+                Text(L10n.string("account_guest_user"))
                     .font(.app(20, .bold))
                     .foregroundColor(.textPrimary)
                     .padding(.top, 12)
-                Text("İlerlemeni kaybetmemek için giriş yap")
+                Text(L10n.string("account_guest_hint"))
                     .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)
-                PrimaryAuthButton(text: "Giriş Yap / Kayıt Ol", action: onNavigateToAuthGateway)
+                PrimaryAuthButton(text: L10n.string("account_sign_in_or_up"), action: onNavigateToAuthGateway)
                     .padding(.top, 16)
             } else {
                 Text(uiState.username)
                     .font(.app(20, .bold))
                     .foregroundColor(.textPrimary)
                     .padding(.top, 12)
-                Text(uiState.bio ?? "Nonocraft Bulmaca Meraklısı")
+                Text(uiState.bio ?? L10n.string("common_bio_placeholder"))
                     .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .multilineTextAlignment(.center)

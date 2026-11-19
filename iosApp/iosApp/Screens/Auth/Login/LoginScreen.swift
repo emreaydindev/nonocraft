@@ -24,27 +24,27 @@ struct LoginScreen: View {
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Tekrar Hoş Geldin")
+                        Text(L10n.string("auth_login_title"))
                             .font(.app(32, .bold))
                             .foregroundColor(.textPrimary)
-                        Text("Devam etmek için giriş yap.")
+                        Text(L10n.string("auth_login_subtitle"))
                             .font(.app(15))
                             .foregroundColor(.textSecondary)
                             .padding(.top, 8)
 
-                        GoogleSignInButton(label: "Google ile giriş yap", action: onGoogleSignIn)
+                        GoogleSignInButton(label: L10n.string("auth_sign_in_with_google"), action: onGoogleSignIn)
                             .padding(.top, 32)
-                        AuthDivider(label: "veya e-posta ile")
+                        AuthDivider(label: L10n.string("auth_or_with_email"))
 
                         if let error = uiState.error {
-                            InfoBanner(message: "Giriş başarısız", subMessage: error.message(.login), isError: true)
+                            InfoBanner(message: L10n.string("auth_login_failed"), subMessage: error.message(.login), isError: true)
                                 .padding(.bottom, 14)
                         }
 
                         AuthTextField(
                             text: $identifier,
-                            label: "E-posta veya kullanıcı adı",
-                            placeholder: "ornek@gmail.com veya @kullanici",
+                            label: L10n.string("auth_email_or_username"),
+                            placeholder: L10n.string("auth_email_or_username_placeholder"),
                             isError: uiState.error != nil,
                             keyboardType: .emailAddress,
                             contentType: .username
@@ -55,12 +55,12 @@ struct LoginScreen: View {
                             identifier = value.trimmingCharacters(in: .whitespaces)
                         }
 
-                        AuthPasswordField(text: $password, label: "Şifre", isError: uiState.error != nil)
+                        AuthPasswordField(text: $password, label: L10n.string("auth_password"), isError: uiState.error != nil)
                             .focused($focus, equals: .password)
                             .onSubmit(submit)
                             .padding(.top, 12)
 
-                        Button("Şifremi unuttum", action: onNavigateToForgotPassword)
+                        Button(L10n.string("auth_forgot_password_link"), action: onNavigateToForgotPassword)
                             .font(.app(13))
                             .foregroundColor(.neonCyan)
                             .frame(maxWidth: .infinity, alignment: .trailing)
@@ -71,10 +71,10 @@ struct LoginScreen: View {
                 }
 
                 VStack(spacing: 24) {
-                    PrimaryAuthButton(text: "Giriş Yap", enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
+                    PrimaryAuthButton(text: L10n.string("auth_sign_in"), enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
                     Button(action: onNavigateToRegister) {
-                        (Text("Hesabın yok mu? ").foregroundColor(.textSecondary)
-                            + Text("Kayıt Ol").font(.app(13, .semibold)).foregroundColor(.neonCyan))
+                        (Text(L10n.string("auth_no_account_prefix")).foregroundColor(.textSecondary)
+                            + Text(L10n.string("auth_sign_up")).font(.app(13, .semibold)).foregroundColor(.neonCyan))
                             .font(.app(13))
                     }
                     .buttonStyle(.plain)

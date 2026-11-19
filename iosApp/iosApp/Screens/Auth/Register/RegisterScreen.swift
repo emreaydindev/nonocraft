@@ -28,25 +28,26 @@ struct RegisterScreen: View {
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Hesap Oluştur")
+                        Text(L10n.string("auth_register_title"))
                             .font(.app(32, .bold))
                             .foregroundColor(.textPrimary)
 
-                        GoogleSignInButton(label: "Google ile kayıt ol", action: onGoogleSignIn)
+                        GoogleSignInButton(label: L10n.string("auth_sign_up_with_google"), action: onGoogleSignIn)
                             .padding(.top, 32)
-                        AuthDivider(label: "veya e-posta ile")
+                        AuthDivider(label: L10n.string("auth_or_with_email"))
 
                         if let error = uiState.error {
-                            InfoBanner(message: "Kayıt başarısız", subMessage: error.message(.register), isError: true)
+                            InfoBanner(message: L10n.string("auth_register_failed"), subMessage: error.message(.register), isError: true)
                                 .padding(.bottom, 14)
                         }
 
                         AuthTextField(
-                            text: $username, label: "Kullanıcı adı", placeholder: "@kullaniciadi",
+                            text: $username, label: L10n.string("auth_username"), placeholder: L10n.string("auth_username_placeholder"),
                             isError: uiState.error != nil, keyboardType: .asciiCapable, contentType: .username
                         ) {
                             if !username.isEmpty && uiState.error == nil {
                                 Text("✓").font(.system(size: 15)).foregroundColor(.neonCyan)
+                                    .accessibilityLabel(L10n.string("auth_valid"))
                             }
                         }
                         .focused($focus, equals: .username)
@@ -56,8 +57,8 @@ struct RegisterScreen: View {
                         }
 
                         AuthTextField(
-                            text: $email, label: "E-posta", placeholder: "ornek@gmail.com",
-                            isError: !isEmailValid, errorMessage: "Geçerli bir e-posta adresi girin",
+                            text: $email, label: L10n.string("auth_email"), placeholder: L10n.string("auth_email_placeholder"),
+                            isError: !isEmailValid, errorMessage: L10n.string("auth_email_invalid"),
                             keyboardType: .emailAddress, contentType: .emailAddress
                         )
                         .focused($focus, equals: .email)
@@ -67,7 +68,7 @@ struct RegisterScreen: View {
                         }
                         .padding(.top, 12)
 
-                        AuthPasswordField(text: $password, label: "Şifre", contentType: .newPassword)
+                        AuthPasswordField(text: $password, label: L10n.string("auth_password"), contentType: .newPassword)
                             .focused($focus, equals: .password)
                             .onSubmit(submit)
                             .padding(.top, 12)
@@ -77,14 +78,14 @@ struct RegisterScreen: View {
                                 .padding(.top, 8)
 
                             VStack(alignment: .leading, spacing: 0) {
-                                Text("GEREKSİNİMLER")
+                                Text(L10n.string("auth_requirements"))
                                     .font(.app(11))
                                     .kerning(0.8)
                                     .foregroundColor(.textMuted)
                                     .padding(.bottom, 8)
-                                PasswordRequirementRow(text: "En az 8 karakter", met: isPasswordLongEnough)
-                                PasswordRequirementRow(text: "Büyük harf içeriyor", met: password.contains(where: \.isUppercase))
-                                PasswordRequirementRow(text: "Rakam içeriyor", met: password.contains(where: \.isNumber))
+                                PasswordRequirementRow(text: L10n.string("auth_req_min_length"), met: isPasswordLongEnough)
+                                PasswordRequirementRow(text: L10n.string("auth_req_uppercase"), met: password.contains(where: \.isUppercase))
+                                PasswordRequirementRow(text: L10n.string("auth_req_digit"), met: password.contains(where: \.isNumber))
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 14)
@@ -99,10 +100,10 @@ struct RegisterScreen: View {
                 }
 
                 VStack(spacing: 0) {
-                    PrimaryAuthButton(text: "Kayıt Ol", enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
+                    PrimaryAuthButton(text: L10n.string("auth_sign_up"), enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
                     Button(action: onNavigateToLogin) {
-                        (Text("Hesabın var mı? ").foregroundColor(.textSecondary)
-                            + Text("Giriş Yap").font(.app(13, .semibold)).foregroundColor(.neonCyan))
+                        (Text(L10n.string("auth_have_account_prefix")).foregroundColor(.textSecondary)
+                            + Text(L10n.string("auth_sign_in")).font(.app(13, .semibold)).foregroundColor(.neonCyan))
                             .font(.app(13))
                     }
                     .buttonStyle(.plain)

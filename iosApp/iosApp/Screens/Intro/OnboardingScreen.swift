@@ -18,18 +18,18 @@ struct OnboardingScreen: View {
     private var slides: [Slide] {
         [
             Slide(
-                tag: "BULMACA · MANTIK · SINIRSIZ", title: "Çöz!", titleAccent: "Çöz",
-                description: "Her gün yenilenen, binlerce benzersiz nonogram bulmacasını keşfet. Mantığını konuştur.",
+                tag: L10n.string("onboarding_1_tag"), title: L10n.string("onboarding_1_title"), titleAccent: L10n.string("onboarding_1_accent"),
+                description: L10n.string("onboarding_1_body"),
                 accentColor: .neonCyan
             ),
             Slide(
-                tag: "TASARIM · PAYLAŞIM · TOPLULUK", title: "Tasarla ve Paylaş!", titleAccent: "Paylaş",
-                description: "Kendi pixel artını oluştur, toplulukla paylaş. Beğenileri topla, efsane ol.",
+                tag: L10n.string("onboarding_2_tag"), title: L10n.string("onboarding_2_title"), titleAccent: L10n.string("onboarding_2_accent"),
+                description: L10n.string("onboarding_2_body"),
                 accentColor: craftColors[selectedCraftColor]
             ),
             Slide(
-                tag: "PREMIUM · AVANTAJLAR", title: "Sınırlarını Aş!", titleAccent: "Sınırlarını",
-                description: "Premium ile reklamsız bir deneyim yaşa; sınırsız kristal, fazladan kalpler ve özel öne çıkarmalar kazan.",
+                tag: L10n.string("onboarding_3_tag"), title: L10n.string("onboarding_3_title"), titleAccent: L10n.string("onboarding_3_accent"),
+                description: L10n.string("onboarding_3_body"),
                 accentColor: .gameGold
             ),
         ]
@@ -67,7 +67,7 @@ struct OnboardingScreen: View {
                             withAnimation { page += 1 }
                         }
                     } label: {
-                        Text(isLastPage ? "Başla" : "Devam Et")
+                        Text(L10n.string(isLastPage ? "common_start" : "common_continue"))
                             .font(.app(15, .semibold))
                             .foregroundColor(.backgroundDark)
                             .frame(maxWidth: .infinity)
@@ -78,7 +78,7 @@ struct OnboardingScreen: View {
                     .buttonStyle(.plain)
 
                     Button(action: onFinishOnboarding) {
-                        Text("Atla")
+                        Text(L10n.string("common_skip"))
                             .font(.app(13))
                             .foregroundColor(.textMuted)
                             .padding(.horizontal, 16)
@@ -225,7 +225,7 @@ private struct VisualSolve: View {
         }
         // One description instead of the clue numbers one by one (hiding alone left them reachable).
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Kalp şeklinde dolan örnek bulmaca")
+        .accessibilityLabel(L10n.string("onboarding_heart_sample"))
     }
 }
 
@@ -277,7 +277,7 @@ private struct VisualCraft: View {
                                 .frame(width: 36, height: 36)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Renk \(index + 1)")
+                        .accessibilityLabel(L10n.format("onboarding_color_n", index + 1))
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
                     }
                 }
@@ -290,11 +290,11 @@ private struct VisualCraft: View {
 private struct VisualPremium: View {
     let accent: Color
 
-    private let features = [
-        "Reklamsız deneyim",
-        "Sınırsız kristal paketleri",
-        "Ekstra yaşam kalpleri",
-        "Gönderilerini öne çıkar",
+    private let features: [LocalizedStringResource] = [
+        L10n.resource("onboarding_feature_no_ads"),
+        L10n.resource("onboarding_feature_crystals"),
+        L10n.resource("onboarding_feature_hearts"),
+        L10n.resource("onboarding_feature_boost"),
     ]
 
     var body: some View {
@@ -309,7 +309,8 @@ private struct VisualPremium: View {
                 .padding(.bottom, 6)
                 .accessibilityHidden(true)
 
-            ForEach(features, id: \.self) { feature in
+            ForEach(features.indices, id: \.self) { index in
+                let feature = features[index]
                 HStack(spacing: 0) {
                     Text("✓ ").font(.system(size: 14, weight: .bold)).accessibilityHidden(true)
                     Text(feature).font(.app(14))

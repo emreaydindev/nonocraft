@@ -2,58 +2,72 @@ import XCTest
 
 /// Walks the main screens with a fresh install, prints each screen's accessibility tree and runs Xcode's
 /// accessibility audit. Issues are printed, not failed on, so one run lists everything; grep the log for
-/// "AX-TREE" and "AX-ISSUE".
+/// "AX-TREE" and "AX-ISSUE". AX_LANG=tr (TEST_RUNNER_AX_LANG from xcodebuild) runs the app in Turkish; English otherwise.
 final class AccessibilityAuditTests: XCTestCase {
     private let app = XCUIApplication()
+    private let isTurkish = ProcessInfo.processInfo.environment["AX_LANG"] == "tr"
 
     override func setUp() {
         continueAfterFailure = true
+        app.launchArguments += ["-AppleLanguages", isTurkish ? "(tr)" : "(en)", "-AppleLocale", isTurkish ? "tr_TR" : "en_US"]
         app.launch()
+    }
+
+    /// The label in the language the app runs in.
+    private func t(_ en: String, _ tr: String) -> String { isTurkish ? tr : en }
+    private var skip: String { t("Skip", "Atla") }
+    private var guest: String { t("Continue as guest", "Misafir olarak devam et") }
+    private var exploreTab: String { t("Explore", "Keşfet") }
+    private var postPlay: XCUIElement { app.buttons["post_play"].firstMatch }
+
+    /// Opens Explore and waits for the feed (the staging feed may need a second try).
+    private func openFeedPost() -> XCUIElement {
+        app.tabBars.buttons[exploreTab].tap()
+        if !postPlay.waitForExistence(timeout: 8) {
+            app.buttons[t("Newest", "En Yeniler")].tap(); sleep(2)
+            app.buttons[t("Featured", "Öne Çıkanlar")].tap()
+        }
+        return postPlay
     }
 
     func testMainScreens() throws {
         // Splash, then onboarding, auth and tutorial on a fresh install.
-        if app.buttons["Atla"].waitForExistence(timeout: 15) {
+        if app.buttons[skip].waitForExistence(timeout: 15) {
             report("Onboarding")
-            app.buttons["Atla"].tap()
+            app.buttons[skip].tap()
         }
-        if app.buttons["Misafir olarak devam et"].waitForExistence(timeout: 5) {
+        if app.buttons[guest].waitForExistence(timeout: 5) {
             report("AuthGateway")
-            app.buttons["Misafir olarak devam et"].tap()
+            app.buttons[guest].tap()
         }
-        if app.buttons["Atla"].waitForExistence(timeout: 5) {
+        if app.buttons[skip].waitForExistence(timeout: 5) {
             report("Tutorial")
-            app.buttons["Atla"].tap()
+            app.buttons[skip].tap()
         }
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
-        for tab in ["Oyun Alanı", "Keşfet", "Koleksiyon", "Profil"] {
+        for (screen, tab) in [("Playground", t("Play", "Oyun Alanı")), ("Explore", exploreTab),
+                              ("Library", t("Collection", "Koleksiyon")), ("Profile", t("Profile", "Profil"))] {
             app.tabBars.buttons[tab].tap()
             sleep(3)
-            report(tab)
+            report(screen)
         }
-        app.tabBars.buttons["Profil"].tap()
-        let premium = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Premium'a Geç")).firstMatch
+        app.tabBars.buttons[t("Profile", "Profil")].tap()
+        let premium = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", t("Go Premium", "Premium'a Geç"))).firstMatch
         if premium.waitForExistence(timeout: 3) {
             premium.tap()
             sleep(2)
             report("Paywall")
-            app.buttons["Kapat"].firstMatch.tap()
+            app.buttons[t("Close", "Kapat")].firstMatch.tap()
             sleep(1)
         }
-        if app.buttons["Ayarlar"].waitForExistence(timeout: 3) {
-            app.buttons["Ayarlar"].tap()
+        if app.buttons[t("Settings", "Ayarlar")].waitForExistence(timeout: 3) {
+            app.buttons[t("Settings", "Ayarlar")].tap()
             sleep(2)
             report("Settings")
             app.navigationBars.buttons.firstMatch.tap()
         }
-        // The 5×5 feed post opens a game (the staging feed may need a second try).
-        app.tabBars.buttons["Keşfet"].tap()
-        var play = app.buttons["Oyna"].firstMatch
-        if !play.waitForExistence(timeout: 8) {
-            app.buttons["En Yeniler"].tap(); sleep(2)
-            app.buttons["Öne Çıkanlar"].tap()
-            play = app.buttons["Oyna"].firstMatch
-        }
+        // The 5×5 feed post opens a game.
+        let play = openFeedPost()
         if play.waitForExistence(timeout: 8) {
             play.tap()
             sleep(4)
@@ -64,17 +78,11 @@ final class AccessibilityAuditTests: XCTestCase {
     /// The board's VoiceOver elements: clues, cells with state, the cursor stick (adjustable) and the place
     /// button. Custom actions are checked in the Accessibility Inspector; XCUITest cannot run them.
     func testGameBoard() throws {
-        for skip in ["Atla", "Misafir olarak devam et", "Atla"] where app.buttons[skip].waitForExistence(timeout: 6) {
-            app.buttons[skip].tap()
+        for label in [skip, guest, skip] where app.buttons[label].waitForExistence(timeout: 6) {
+            app.buttons[label].tap()
         }
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
-        app.tabBars.buttons["Keşfet"].tap()
-        var play = app.buttons["Oyna"].firstMatch
-        if !play.waitForExistence(timeout: 8) {
-            app.buttons["En Yeniler"].tap(); sleep(2)
-            app.buttons["Öne Çıkanlar"].tap()
-            play = app.buttons["Oyna"].firstMatch
-        }
+        let play = openFeedPost()
         XCTAssertTrue(play.waitForExistence(timeout: 8))
         play.tap()
         let cell = app.buttons["Satır 1, sütun 2"]
@@ -102,12 +110,11 @@ final class AccessibilityAuditTests: XCTestCase {
             app.launchArguments += ["-a11yColorPatterns", "YES"]
         }
         app.launch()
-        for skip in ["Atla", "Misafir olarak devam et", "Atla"] where app.buttons[skip].waitForExistence(timeout: 6) {
-            app.buttons[skip].tap()
+        for label in [skip, guest, skip] where app.buttons[label].waitForExistence(timeout: 6) {
+            app.buttons[label].tap()
         }
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 10))
-        app.tabBars.buttons["Keşfet"].tap()
-        let play = app.buttons["Oyna"].firstMatch
+        let play = openFeedPost()
         XCTAssertTrue(play.waitForExistence(timeout: 10))
         play.tap()
         XCTAssertTrue(app.buttons["Satır 1, sütun 1"].waitForExistence(timeout: 8))

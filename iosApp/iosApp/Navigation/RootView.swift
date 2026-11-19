@@ -37,13 +37,13 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: phase)
-        .alert("Şifren başarıyla güncellendi.", isPresented: $showPasswordUpdated) {
-            Button("Tamam", role: .cancel) {}
+        .alert(L10n.string("auth_password_updated"), isPresented: $showPasswordUpdated) {
+            Button(L10n.string("common_ok"), role: .cancel) {}
         }
-        .alert("Google ile giriş", isPresented: $showGoogleUnavailable) {
-            Button("Tamam", role: .cancel) {}
+        .alert(L10n.string("auth_google_title"), isPresented: $showGoogleUnavailable) {
+            Button(L10n.string("common_ok"), role: .cancel) {}
         } message: {
-            Text("Google ile giriş iOS sürümünde henüz etkin değil. E-posta ile devam edebilirsin.")
+            Text(L10n.string("auth_google_unavailable"))
         }
     }
 

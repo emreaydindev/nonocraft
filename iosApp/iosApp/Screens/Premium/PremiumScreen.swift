@@ -14,7 +14,7 @@ struct PremiumScreen: View {
 
     private struct Plan: Identifiable {
         let id: String
-        let title: String
+        let title: LocalizedStringResource
         let price: String
         let period: String
         var monthlyEquivalent: String?
@@ -22,48 +22,48 @@ struct PremiumScreen: View {
     }
 
     private struct FeatureSlide {
-        let title: String
-        let description: String
+        let title: LocalizedStringResource
+        let description: LocalizedStringResource
         let icon: String
         let color: Color
-        let bulletPoints: [String]
+        let bulletPoints: [LocalizedStringResource]
     }
 
     private let plans = [
-        Plan(id: "monthly", title: "Aylık Plan", price: "₺89", period: "/ay", accent: .neonCyan),
-        Plan(id: "yearly", title: "Yıllık Plan", price: "₺599", period: "/yıl", monthlyEquivalent: "Aylık ₺49.90'a gelir", accent: .gameGold),
+        Plan(id: "monthly", title: L10n.resource("premium_monthly"), price: "₺89", period: L10n.string("premium_per_month"), accent: .neonCyan),
+        Plan(id: "yearly", title: L10n.resource("premium_yearly"), price: "₺599", period: L10n.string("premium_per_year"), monthlyEquivalent: L10n.format("premium_yearly_equiv", "₺49.90"), accent: .gameGold),
     ]
 
     private let slides = [
         FeatureSlide(
-            title: "Sınırsız Oyun Deneyimi",
-            description: "Reklamları kaldırın ve bekleme sürelerine veda edin.",
+            title: L10n.resource("premium_s1_title"),
+            description: L10n.resource("premium_s1_body"),
             icon: "bolt.circle.fill", color: .neonCyan,
             bulletPoints: [
-                "Hiçbir reklam gösterilmez.",
-                "Sınırsız kristal ile can doldurma beklemesi yok.",
-                "Hata payı 3 yerine 5 kalbe çıkarılır.",
-                "Çevrimdışı oynamak için 50'ye kadar bölüm otomatik indirilir.",
+                L10n.resource("premium_s1_b1"),
+                L10n.resource("premium_s1_b2"),
+                L10n.resource("premium_s1_b3"),
+                L10n.resource("premium_s1_b4"),
             ]
         ),
         FeatureSlide(
-            title: "Yaratıcılığınızı Özgür Bırakın",
-            description: "Yapay zeka ile yeni bulmacalar ve tasarımlar üretin.",
+            title: L10n.resource("premium_s2_title"),
+            description: L10n.resource("premium_s2_body"),
             icon: "sparkles", color: .purpleAccent,
             bulletPoints: [
-                "AI ile piksel sanat tasarımları oluşturun.",
-                "Tek renkli çizimlerinizi AI ile saniyeler içinde renklendirin.",
-                "Çizimleriniz çözülebilirlik algoritmasına takılınca AI'dan ipucu alın.",
+                L10n.resource("premium_s2_b1"),
+                L10n.resource("premium_s2_b2"),
+                L10n.resource("premium_s2_b3"),
             ]
         ),
         FeatureSlide(
-            title: "Öne Çıkın ve Kişiselleştirin",
-            description: "Toplulukta fark yaratın ve uygulamayı kendinize göre özelleştirin.",
+            title: L10n.resource("premium_s3_title"),
+            description: L10n.resource("premium_s3_body"),
             icon: "rosette", color: .gameGold,
             bulletPoints: [
-                "Paylaşımlarınız Keşfet bölümünde algoritma tarafından daha çok öne çıkarılır.",
-                "Profilinizde prestijli altın renkli highlight sergilenir.",
-                "Uygulama ikonu ve teması için özel premium seçeneklere erişim.",
+                L10n.resource("premium_s3_b1"),
+                L10n.resource("premium_s3_b2"),
+                L10n.resource("premium_s3_b3"),
             ]
         ),
     ]
@@ -118,7 +118,7 @@ struct PremiumScreen: View {
             .background { ScreenBackground { EmptyView() } }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Kapat", systemImage: "xmark") { dismiss() }
+                    Button(L10n.string("common_close"), systemImage: "xmark") { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
                     Label("Nonocraft Pro", systemImage: "crown.fill")
@@ -132,7 +132,7 @@ struct PremiumScreen: View {
                 if isProcessing {
                     overlay(opacity: 0.85) {
                         ProgressView().tint(.gameGold).controlSize(.large)
-                        Text("İşleminiz tamamlanıyor...")
+                        Text(L10n.string("premium_processing"))
                             .font(.headline)
                             .foregroundStyle(Color.textPrimary)
                     }
@@ -145,10 +145,10 @@ struct PremiumScreen: View {
                             .frame(width: 80, height: 80)
                             .background(Color.gameGold.opacity(0.2), in: Circle())
                             .symbolEffect(.bounce, value: showSuccess)
-                        Text("Aramıza Hoş Geldin!")
+                        Text(L10n.string("premium_welcome"))
                             .font(.app(24, .bold))
                             .foregroundStyle(Color.gameGold)
-                        Text("Tüm premium özellikler aktif edildi.")
+                        Text(L10n.string("premium_welcome_body"))
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary)
                     }
@@ -186,7 +186,7 @@ struct PremiumScreen: View {
         .animation(.easeInOut(duration: 0.2), value: page)
         .padding(.bottom, 4)
         .accessibilityElement()
-        .accessibilityLabel("Sayfa \(page + 1) / \(slides.count)")
+        .accessibilityLabel(L10n.format("common_page_of", page + 1, slides.count))
     }
 
     private var purchaseSection: some View {
@@ -200,7 +200,7 @@ struct PremiumScreen: View {
             Button {
                 model.viewModel.purchasePremium(planId: selectedPlan.id)
             } label: {
-                Text("Devam Et (\(selectedPlan.price)\(selectedPlan.period))")
+                Text(L10n.format("premium_continue_with_price", selectedPlan.price, selectedPlan.period))
                     .font(.app(17, .bold))
                     .foregroundStyle(Color.onNeon)
                     .multilineTextAlignment(.center)
@@ -214,7 +214,7 @@ struct PremiumScreen: View {
             .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
             .padding(.top, 8)
 
-            Text("Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.")
+            Text(L10n.string("premium_renewal_note"))
                 .font(.caption2)
                 .foregroundStyle(Color.textSecondary)
                 .multilineTextAlignment(.center)
@@ -271,7 +271,8 @@ struct PremiumScreen: View {
                     .padding(.top, 12)
 
                 VStack(alignment: .leading, spacing: 16) {
-                    ForEach(slide.bulletPoints, id: \.self) { point in
+                    ForEach(slide.bulletPoints.indices, id: \.self) { index in
+                        let point = slide.bulletPoints[index]
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 14, weight: .bold))

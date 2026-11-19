@@ -13,13 +13,8 @@ struct TutorialScreen: View {
     @State private var grid2: [CellState] = [.cyan, .empty, .cyan, .cyan, .empty]
     @State private var grid3: [CellState] = Array(repeating: .empty, count: 5)
 
-    private let titles = ["Satırları Doldur", "Boş Kareler", "Renkli Gruplar", "Tebrikler"]
-    private let descriptions = [
-        "Soldaki sayı o satırda kaç kareyi doldurman gerektiğini belirtir. İlk satırı doldurmak için sürükle.",
-        "Kesin boş olduğunu bildiğin kareleri çarpı ile işaretle. Boşluğu işaretlemek için çarpı aracını seç.",
-        "Renkli bulmacalarda farklı renkler yan yana gelebilir. İstenen renkleri kullanarak hücreleri doldur.",
-        "Tüm temel kuralları öğrendin. Artık Nonocraft dünyasına girmeye hazırsın.",
-    ]
+    private let titles: [LocalizedStringResource] = (1...4).map { L10n.resource("tutorial_\($0)_title") }
+    private let descriptions: [LocalizedStringResource] = (1...4).map { L10n.resource("tutorial_\($0)_body") }
     private let successGreen = Color(hex: 0x4CAF50)
     private let wrongToolHaptic = UINotificationFeedbackGenerator()
 
@@ -39,7 +34,7 @@ struct TutorialScreen: View {
 
                     if page == 3 {
                         Button(action: onNavigateToDashboard) {
-                            Text("Başla")
+                            Text(L10n.string("common_start"))
                                 .font(.app(15, .semibold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -72,7 +67,7 @@ struct TutorialScreen: View {
             .accessibilityHidden(true)
             Spacer()
             Button(action: onNavigateToDashboard) {
-                Text("Atla")
+                Text(L10n.string("common_skip"))
                     .font(.app(12))
                     .foregroundColor(.textSecondary)
                     .padding(.horizontal, 14)
@@ -94,7 +89,7 @@ struct TutorialScreen: View {
 
     private var stepText: some View {
         VStack(spacing: 0) {
-            Text("ADIM \(page + 1) / 4")
+            Text(L10n.format("tutorial_step", page + 1, 4))
                 .font(.app(11))
                 .kerning(1.5)
                 .foregroundColor(.neonCyan.opacity(0.7))

@@ -13,20 +13,20 @@ struct AppIconScreen: View {
     @State private var selectedIcon = "classic"
 
     private let options = [
-        Option(id: "classic", name: "Klasik", isPremium: false),
-        Option(id: "dark", name: "Gece Modu", isPremium: false),
-        Option(id: "neon", name: "Neon Küp", isPremium: true),
-        Option(id: "gold", name: "Altın Taç", isPremium: true),
-        Option(id: "pixel", name: "8-Bit Nostalji", isPremium: true),
-        Option(id: "synth", name: "Synthwave", isPremium: true),
+        Option(id: "classic", name: L10n.string("icon_classic"), isPremium: false),
+        Option(id: "dark", name: L10n.string("icon_dark"), isPremium: false),
+        Option(id: "neon", name: L10n.string("icon_neon"), isPremium: true),
+        Option(id: "gold", name: L10n.string("icon_gold"), isPremium: true),
+        Option(id: "pixel", name: L10n.string("icon_pixel"), isPremium: true),
+        Option(id: "synth", name: L10n.string("icon_synth"), isPremium: true),
     ]
 
     var body: some View {
-        SettingsForm(title: "Uygulama İkonu") {
+        SettingsForm(title: L10n.string("settings_icon")) {
             SettingsSection {
                 ForEach(options.filter { !$0.isPremium }) { row($0) }
             }
-            SettingsSection("Premium") {
+            SettingsSection(L10n.string("common_premium")) {
                 ForEach(options.filter(\.isPremium)) { row($0) }
             }
         }
@@ -50,7 +50,7 @@ struct AppIconScreen: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                                .accessibilityLabel("Kilitli")
+                                .accessibilityLabel(L10n.string("common_locked"))
                         }
                     }
                     .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).stroke(.white.opacity(0.12)))

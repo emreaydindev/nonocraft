@@ -40,7 +40,7 @@ struct SplashScreen: View {
                     .opacity(nameVisible ? 1 : 0)
                     .offset(y: nameVisible || reduceMotion ? 0 : 12)
 
-                Text("Çöz ve Tasarla")
+                Text(L10n.string("splash_tagline"))
                     .font(.app(14))
                     .kerning(1)
                     .foregroundColor(.neonCyan.opacity(0.55))

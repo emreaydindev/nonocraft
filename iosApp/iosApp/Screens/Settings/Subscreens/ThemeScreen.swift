@@ -5,22 +5,22 @@ struct ThemeScreen: View {
     @State private var selectedTheme = "dark"
 
     private let freeThemes = [
-        ThemeOption(id: "system", name: "Sistem Teması", systemImage: "circle.lefthalf.filled"),
-        ThemeOption(id: "dark", name: "Karanlık Mod", systemImage: "moon.fill"),
-        ThemeOption(id: "light", name: "Aydınlık Mod", systemImage: "sun.max.fill"),
+        ThemeOption(id: "system", name: L10n.string("theme_system"), systemImage: "circle.lefthalf.filled"),
+        ThemeOption(id: "dark", name: L10n.string("theme_dark"), systemImage: "moon.fill"),
+        ThemeOption(id: "light", name: L10n.string("theme_light"), systemImage: "sun.max.fill"),
     ]
     private let premiumThemes = [
-        ThemeOption(id: "amoled", name: "AMOLED Siyah", systemImage: "circle.fill"),
-        ThemeOption(id: "retro", name: "Retro Wave", systemImage: "sun.horizon.fill"),
-        ThemeOption(id: "cyberpunk", name: "Cyberpunk", systemImage: "bolt.fill"),
+        ThemeOption(id: "amoled", name: L10n.string("theme_amoled"), systemImage: "circle.fill"),
+        ThemeOption(id: "retro", name: L10n.string("theme_retro"), systemImage: "sun.horizon.fill"),
+        ThemeOption(id: "cyberpunk", name: L10n.string("theme_cyberpunk"), systemImage: "bolt.fill"),
     ]
 
     var body: some View {
-        SettingsForm(title: "Uygulama Teması") {
-            SettingsSection("Standart (Ücretsiz)") {
+        SettingsForm(title: L10n.string("settings_theme")) {
+            SettingsSection(L10n.string("theme_standard")) {
                 ForEach(freeThemes) { row($0, isPremium: false) }
             }
-            SettingsSection("Özel Koleksiyon (Premium)") {
+            SettingsSection(L10n.string("theme_exclusive")) {
                 ForEach(premiumThemes) { row($0, isPremium: true) }
             }
         }

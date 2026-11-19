@@ -24,17 +24,17 @@ struct ResetPasswordScreen: View {
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Yeni Şifre Belirle")
+                        Text(L10n.string("auth_reset_title"))
                             .font(.app(32, .bold))
                             .foregroundColor(.textPrimary)
-                        Text("E-postana gönderdiğimiz 6 haneli kodu gir ve yeni şifreni belirle.")
+                        Text(L10n.string("auth_reset_subtitle"))
                             .font(.app(15))
                             .lineSpacing(4)
                             .foregroundColor(.textSecondary)
                             .padding(.top, 8)
 
                         AuthTextField(
-                            text: $code, label: "Doğrulama kodu", placeholder: "000000",
+                            text: $code, label: L10n.string("auth_verification_code"), placeholder: "000000",
                             isError: uiState.error != nil, errorMessage: uiState.error?.message(.resetPassword),
                             keyboardType: .numberPad, contentType: .oneTimeCode
                         )
@@ -43,7 +43,7 @@ struct ResetPasswordScreen: View {
                         }
                         .padding(.top, 32)
 
-                        AuthPasswordField(text: $password, label: "Yeni şifre", contentType: .newPassword, submitLabel: .next)
+                        AuthPasswordField(text: $password, label: L10n.string("auth_new_password"), contentType: .newPassword, submitLabel: .next)
                             .padding(.top, 20)
                         if !password.isEmpty {
                             PasswordStrengthBar(password: password)
@@ -51,15 +51,15 @@ struct ResetPasswordScreen: View {
                         }
 
                         AuthPasswordField(
-                            text: $confirm, label: "Şifreyi onayla",
-                            isError: !confirm.isEmpty && !passwordsMatch, errorMessage: "Şifreler eşleşmiyor",
+                            text: $confirm, label: L10n.string("auth_confirm_password"),
+                            isError: !confirm.isEmpty && !passwordsMatch, errorMessage: L10n.string("auth_passwords_dont_match"),
                             contentType: .newPassword
                         )
                         .onSubmit(submit)
                         .padding(.top, 12)
 
                         if passwordsMatch {
-                            Text("✓ Şifreler eşleşiyor")
+                            Text(L10n.string("auth_passwords_match"))
                                 .font(.app(11))
                                 .foregroundColor(.neonCyan.opacity(0.80))
                                 .padding(.leading, 4)
@@ -67,14 +67,14 @@ struct ResetPasswordScreen: View {
                         }
 
                         VStack(alignment: .leading, spacing: 0) {
-                            Text("GEREKSİNİMLER")
+                            Text(L10n.string("auth_requirements"))
                                 .font(.app(10))
                                 .kerning(0.8)
                                 .foregroundColor(.textMuted)
                                 .padding(.bottom, 8)
-                            PasswordRequirementRow(text: "En az 8 karakter", met: hasMinLength)
-                            PasswordRequirementRow(text: "Büyük harf içeriyor", met: hasUpper)
-                            PasswordRequirementRow(text: "Rakam içeriyor", met: hasDigit)
+                            PasswordRequirementRow(text: L10n.string("auth_req_min_length"), met: hasMinLength)
+                            PasswordRequirementRow(text: L10n.string("auth_req_uppercase"), met: hasUpper)
+                            PasswordRequirementRow(text: L10n.string("auth_req_digit"), met: hasDigit)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 14)
@@ -87,7 +87,7 @@ struct ResetPasswordScreen: View {
                     .padding(.horizontal, 28)
                 }
 
-                PrimaryAuthButton(text: "Şifremi Güncelle", enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
+                PrimaryAuthButton(text: L10n.string("auth_update_password"), enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
                     .padding(.horizontal, 28)
                     .padding(.bottom, 24)
             }

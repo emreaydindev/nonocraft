@@ -128,14 +128,14 @@ struct CraftingScreen: View {
                     .font(.system(size: 32))
                     .foregroundColor(.purpleAccent)
                     .padding(.bottom, 8)
-                Text("Bulmaca tasarlama ekranı yakında burada olacak.")
+                Text(L10n.string("crafting_coming_soon"))
                     .font(.app(13))
                     .foregroundColor(.textSecondary)
                     .multilineTextAlignment(.center)
             }
             .padding(32)
         }
-        .navigationTitle("Tasarım Stüdyosu")
+        .navigationTitle(L10n.string("crafting_title"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

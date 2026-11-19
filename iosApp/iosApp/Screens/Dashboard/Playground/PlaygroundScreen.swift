@@ -68,7 +68,7 @@ private struct PlaygroundContent: View {
         }
         .background { ScreenBackground { EmptyView() } }
         // The title still names the page for VoiceOver and the back-button menu; the wordmark replaces it on screen.
-        .navigationTitle("Oyun Alanı")
+        .navigationTitle(L10n.string("tab_playground"))
         .toolbarTitleDisplayMode(.inline)
         .toolbar(removing: .title)
         .toolbar {
@@ -81,8 +81,8 @@ private struct PlaygroundContent: View {
             }
             .appGlassBackgroundHidden()
             ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("Nasıl oynanır", systemImage: "questionmark.circle", action: onNavigateToTutorial)
-                Button("Ayarlar", systemImage: "gearshape", action: onNavigateToSettings)
+                Button(L10n.string("playground_how_to_play"), systemImage: "questionmark.circle", action: onNavigateToTutorial)
+                Button(L10n.string("common_settings"), systemImage: "gearshape", action: onNavigateToSettings)
             }
         }
     }
@@ -113,7 +113,7 @@ private struct WalletStrip: View {
                         .contentTransition(.numericText())
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(stars) yıldız")
+                .accessibilityLabel(L10n.format("playground_stars_a11y", stars))
 
                 if !dynamicTypeSize.isAccessibilitySize {
                     Rectangle()
@@ -133,17 +133,17 @@ private struct WalletStrip: View {
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(crystals) / \(crystalCap) kristal")
+                .accessibilityLabel(L10n.format("playground_crystals_a11y", crystals, crystalCap))
 
                 Spacer(minLength: 0)
 
                 if crystals < crystalCap {
-                    Label("\(crystalRefillMinutes) dk", systemImage: "timer")
+                    Label(L10n.format("playground_refill_short", crystalRefillMinutes), systemImage: "timer")
                         .labelStyle(.titleAndIcon)
                         .font(.footnote.weight(.semibold).monospacedDigit())
                         .foregroundStyle(crystals == 0 ? Color.dangerRed : Color.textSecondary)
                         .fixedSize()
-                        .accessibilityLabel("Yeni kristale \(crystalRefillMinutes) dakika")
+                        .accessibilityLabel(L10n.format("playground_refill_a11y", crystalRefillMinutes))
                 }
             }
             .font(.subheadline.weight(.bold))
@@ -171,8 +171,6 @@ private struct DailyCard: View {
     let onPlayToday: () -> Void
     let onPlayPast: (String) -> Void
 
-    private static let locale = Locale(identifier: "tr_TR")
-
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .subheadline) private var dayCircle: CGFloat = 36
 
@@ -180,6 +178,8 @@ private struct DailyCard: View {
         let id: String  // yyyy-MM-dd, the daily puzzle key
         let weekday: String
         let number: String
+        /// "Monday, 17 November" in the app language, for VoiceOver.
+        let fullDate: String
         let isToday: Bool
     }
 
@@ -188,21 +188,23 @@ private struct DailyCard: View {
         (0...6).reversed().compactMap { daysAgo in
             Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date()).map {
                 Day(
-                    id: Self.format($0, "yyyy-MM-dd"),
-                    weekday: daysAgo == 0 ? "Bugün" : Self.format($0, "EEE"),
-                    number: Self.format($0, "d"),
+                    id: Self.keyFormatter.string(from: $0),
+                    weekday: daysAgo == 0 ? L10n.string("playground_today") : $0.formatted(.dateTime.weekday(.abbreviated)),
+                    number: $0.formatted(.dateTime.day()),
+                    fullDate: $0.formatted(.dateTime.weekday(.wide).day().month(.wide)),
                     isToday: daysAgo == 0
                 )
             }
         }
     }
 
-    private static func format(_ date: Date, _ pattern: String) -> String {
+    /// The daily puzzle key; fixed format, independent of the app language.
+    private static let keyFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = locale
-        formatter.dateFormat = pattern
-        return formatter.string(from: date)
-    }
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     var body: some View {
         DashboardCard(borderColor: isSolved ? .borderDark : .neonCyan.opacity(0.35), cornerRadius: 22) {
@@ -219,11 +221,11 @@ private struct DailyCard: View {
                         .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("GÜNÜN BULMACASI")
+                        Text(L10n.string("playground_daily_title"))
                             .font(.app(11, .medium))
                             .kerning(1)
                             .foregroundStyle(isSolved ? Color.textMuted : Color.neonCyan)
-                        Text(Self.format(Date(), "d MMMM"))
+                        Text(Date().formatted(.dateTime.day().month(.wide)))
                             .font(.app(22, .bold))
                             .foregroundStyle(Color.textPrimary)
                     }
@@ -233,11 +235,11 @@ private struct DailyCard: View {
                     Spacer(minLength: 0)
 
                     if isSolved {
-                        Label("Çözüldü", systemImage: "checkmark.seal.fill")
+                        Label(L10n.string("playground_solved"), systemImage: "checkmark.seal.fill")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Color.neonCyan)
                     } else {
-                        CompactPlayButton(title: "Oyna", action: onPlayToday)
+                        CompactPlayButton(title: L10n.string("common_play"), action: onPlayToday)
                     }
                 }
 
@@ -282,7 +284,7 @@ private struct DailyCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(day.isToday ? "Bugünün bulmacası" : "\(day.number) \(day.weekday) bulmacası")
+            .accessibilityLabel(day.isToday ? L10n.string("playground_today_puzzle_a11y") : L10n.format("playground_day_puzzle_a11y", day.fullDate))
         }
     }
 }
@@ -314,7 +316,7 @@ private struct LevelProgressCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 AdaptiveStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("MEVCUT SEVİYE")
+                        Text(L10n.string("playground_current_level"))
                             .font(.app(11))
                             .kerning(1)
                             .foregroundStyle(Color.textMuted)
@@ -323,16 +325,16 @@ private struct LevelProgressCard: View {
                             .foregroundStyle(Color.neonCyan)
                     }
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Mevcut seviye \(currentLevel)")
+                    .accessibilityLabel(L10n.format("playground_current_level_a11y", currentLevel))
                     Spacer(minLength: 0)
-                    CompactPlayButton(title: hasDraft ? "Devam Et" : "Başla", action: onContinue)
+                    CompactPlayButton(title: L10n.string(hasDraft ? "common_continue" : "common_start"), action: onContinue)
                 }
 
                 if hasDraft {
                     Rectangle().fill(Color.borderDark).frame(height: 0.5)
                         .padding(.vertical, 14)
                     Label {
-                        Text("Yarım kalan bölüm: \(draftSize) · %\(draftProgress)")
+                        Text(L10n.format("playground_draft", draftSize, draftProgress))
                             .font(.subheadline)
                             .foregroundStyle(Color.textSecondary)
                     } icon: {
@@ -362,10 +364,10 @@ private struct RandomPuzzleRow: View {
                     .background(Color.purpleAccent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Rastgele Bölüm Oluştur")
+                    Text(L10n.string("playground_random_title"))
                         .font(.app(15, .semibold))
                         .foregroundStyle(Color.textPrimary)
-                    Text("İnternetsiz de çalışır")
+                    Text(L10n.string("playground_random_subtitle"))
                         .font(.footnote)
                         .foregroundStyle(Color.textMuted)
                 }

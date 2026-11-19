@@ -5,10 +5,10 @@ enum DashboardTab: CaseIterable, Hashable {
 
     var label: String {
         switch self {
-        case .playground: "Oyun Alanı"
-        case .feed: "Keşfet"
-        case .library: "Koleksiyon"
-        case .account: "Profil"
+        case .playground: L10n.string("tab_playground")
+        case .feed: L10n.string("tab_explore")
+        case .library: L10n.string("tab_library")
+        case .account: L10n.string("tab_profile")
         }
     }
 

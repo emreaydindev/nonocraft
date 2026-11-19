@@ -78,7 +78,7 @@ struct LibraryDetailContent: View {
             if uiState.isLoading {
                 ProgressView().tint(.neonCyan)
             } else if uiState.posts.isEmpty {
-                ContentUnavailableView("Burada henüz bir şey yok.", systemImage: "tray")
+                ContentUnavailableView(L10n.string("library_empty"), systemImage: "tray")
             }
         }
         .modifier(InlineNavigationTitle(title: uiState.category.title(playlistName: uiState.playlistName), isEnabled: !showsTitleHeader))

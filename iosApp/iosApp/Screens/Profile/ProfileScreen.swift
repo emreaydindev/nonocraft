@@ -53,15 +53,15 @@ struct ProfileScreen: View {
                     .font(.app(20, .bold))
                     .foregroundColor(.textPrimary)
                     .padding(.top, 12)
-                Text("Nonocraft Bulmaca Meraklısı")
+                Text(L10n.string("common_bio_placeholder"))
                     .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .padding(.top, 4)
                 // Demo numbers, same as Android, until user stats come from the API.
                 HStack {
-                    stat("28", "Bulmaca")
-                    stat("156", "Beğeni")
-                    stat("12", "Liste")
+                    stat("28", L10n.string("profile_stat_puzzles"))
+                    stat("156", L10n.string("profile_stat_likes"))
+                    stat("12", L10n.string("profile_stat_lists"))
                 }
                 .padding(.top, 20)
             }

@@ -54,7 +54,7 @@ struct PostCard: View {
 
             HStack(spacing: 8) {
                 if showFollowButton {
-                    Button(post.isFollowed ? "Takipte" : "Takip Et") { onAction(.follow) }
+                    Button(L10n.string(post.isFollowed ? "post_following" : "post_follow")) { onAction(.follow) }
                         .font(.footnote.weight(.bold))
                         .foregroundStyle(post.isFollowed ? Color.textPrimary : Color.onNeon)
                         .buttonStyle(post.isFollowed ? AppGlassButtonStyle.appGlass : .appGlassProminent)
@@ -70,7 +70,7 @@ struct PostCard: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Diğer seçenekler")
+                .accessibilityLabel(L10n.string("post_more_options"))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -112,8 +112,8 @@ struct PostCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Beğen, \(post.likes) beğeni")
-            .accessibilityValue(post.isLiked ? "Beğenildi" : "")
+            .accessibilityLabel(L10n.format("post_like_a11y", post.likes))
+            .accessibilityValue(post.isLiked ? L10n.string("post_liked") : "")
 
             Button { onAction(.comment) } label: {
                 HStack(spacing: 6) {
@@ -127,7 +127,7 @@ struct PostCard: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Yorumlar, \(post.comments) yorum")
+            .accessibilityLabel(L10n.format("post_comments_a11y", post.comments))
 
             Spacer()
         }
@@ -146,12 +146,13 @@ struct PostCard: View {
             }
             Spacer(minLength: 0)
             Button { onAction(.play) } label: {
-                Label("Oyna", systemImage: "play.fill")
+                Label(L10n.string("common_play"), systemImage: "play.fill")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color.onNeon)
             }
             .buttonStyle(.appGlassProminent)
             .tint(.neonCyan)
+            .accessibilityIdentifier("post_play")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)

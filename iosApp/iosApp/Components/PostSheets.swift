@@ -86,18 +86,18 @@ private struct CommentsSheetContent: View {
                         Spacer(minLength: 8)
                         Image(systemName: comment.isLiked ? "heart.fill" : "heart")
                             .foregroundStyle(comment.isLiked ? Color.dangerRed : Color.textSecondary)
-                            .accessibilityLabel("Beğendin")
+                            .accessibilityLabel(L10n.string("post_you_liked"))
                             .accessibilityHidden(!comment.isLiked)
                     }
                     // One VoiceOver stop per comment; "Şikayet Et" comes from the swipe action.
                     .accessibilityElement(children: .combine)
                     .listRowBackground(Color.clear)
                     .swipeActions {
-                        Button("Şikayet Et", systemImage: "exclamationmark.bubble") {}
+                        Button(L10n.string("common_report"), systemImage: "exclamationmark.bubble") {}
                             .tint(.dangerRed)
                     }
                     .contextMenu {
-                        Button(role: .destructive) {} label: { Label("Şikayet Et", systemImage: "exclamationmark.bubble") }
+                        Button(role: .destructive) {} label: { Label(L10n.string("common_report"), systemImage: "exclamationmark.bubble") }
                     }
                 }
             }
@@ -105,15 +105,15 @@ private struct CommentsSheetContent: View {
             .scrollContentBackground(.hidden)
             .overlay {
                 if comments.isEmpty {
-                    ContentUnavailableView("Henüz yorum yok", systemImage: "bubble.left.and.bubble.right")
+                    ContentUnavailableView(L10n.string("post_no_comments"), systemImage: "bubble.left.and.bubble.right")
                 }
             }
             .safeAreaInset(edge: .bottom) { composer }
-            .navigationTitle("Yorumlar")
+            .navigationTitle(L10n.string("post_comments_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Kapat", systemImage: "xmark", action: onClose)
+                    Button(L10n.string("common_close"), systemImage: "xmark", action: onClose)
                 }
             }
         }
@@ -121,7 +121,7 @@ private struct CommentsSheetContent: View {
 
     private var composer: some View {
         HStack(spacing: 10) {
-            TextField("Yorum ekle...", text: $draft, axis: .vertical)
+            TextField(L10n.string("post_add_comment"), text: $draft, axis: .vertical)
                 .lineLimit(1...4)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -136,7 +136,7 @@ private struct CommentsSheetContent: View {
             .buttonStyle(.appGlassProminent)
             .tint(.neonCyan)
             .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty)
-            .accessibilityLabel("Gönder")
+            .accessibilityLabel(L10n.string("common_send"))
         }
         .tint(.neonCyan)
         .padding(.horizontal, 16)
@@ -151,21 +151,21 @@ private struct PostMenuSheetContent: View {
     var body: some View {
         List {
             Section {
-                row("Şimdi Oyna", systemImage: "play.fill", action: model.onPlay)
-                row("Kaydet", systemImage: "bookmark", action: model.closeMenu)
-                row("Oynatma Listesine Ekle", systemImage: "text.badge.plus", action: model.onAddToPlaylist)
+                row(L10n.string("post_menu_play_now"), systemImage: "play.fill", action: model.onPlay)
+                row(L10n.string("post_menu_save"), systemImage: "bookmark", action: model.closeMenu)
+                row(L10n.string("post_menu_add_to_playlist"), systemImage: "text.badge.plus", action: model.onAddToPlaylist)
                 Button(action: model.onDownload) {
                     HStack {
-                        Label("İndir", systemImage: "arrow.down.to.line")
+                        Label(L10n.string("post_menu_download"), systemImage: "arrow.down.to.line")
                         Spacer()
                         ProBadge()
                     }
                 }
-                row("@\(author) Profiline Git", systemImage: "person.fill", action: model.onGoToProfile)
+                row(L10n.format("post_menu_go_to_profile", author), systemImage: "person.fill", action: model.onGoToProfile)
             }
             Section {
                 Button(role: .destructive, action: model.closeMenu) {
-                    Label("Şikayet Et", systemImage: "exclamationmark.bubble.fill")
+                    Label(L10n.string("common_report"), systemImage: "exclamationmark.bubble.fill")
                 }
                 .foregroundStyle(Color.dangerRed)
             }
@@ -194,7 +194,7 @@ private struct PlaylistSelectionSheet: View {
                     ForEach(model.playlists) { playlist in
                         Button { model.onSelectPlaylist(playlist.id) } label: {
                             LabeledContent {
-                                Text("\(playlist.postCount) bulmaca")
+                                Text(L10n.format("playlist_puzzle_count", playlist.postCount))
                             } label: {
                                 Label(playlist.name, systemImage: "music.note.list")
                             }
@@ -203,7 +203,7 @@ private struct PlaylistSelectionSheet: View {
                     }
                 }
                 Section {
-                    Button("Yeni Liste Oluştur", systemImage: "plus") {
+                    Button(L10n.string("playlist_create_new"), systemImage: "plus") {
                         newName = ""
                         isCreating = true
                     }
@@ -211,17 +211,17 @@ private struct PlaylistSelectionSheet: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .navigationTitle("Listeye Ekle")
+            .navigationTitle(L10n.string("playlist_add_to_list"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Kapat", systemImage: "xmark", action: model.closePlaylistPicker)
+                    Button(L10n.string("common_close"), systemImage: "xmark", action: model.closePlaylistPicker)
                 }
             }
-            .alert("Yeni Liste", isPresented: $isCreating) {
-                TextField("Liste adı", text: $newName)
-                Button("İptal", role: .cancel) {}
-                Button("Ekle") {
+            .alert(L10n.string("playlist_new"), isPresented: $isCreating) {
+                TextField(L10n.string("playlist_name"), text: $newName)
+                Button(L10n.string("common_cancel"), role: .cancel) {}
+                Button(L10n.string("common_add")) {
                     let name = newName.trimmingCharacters(in: .whitespaces)
                     if !name.isEmpty { model.onCreatePlaylist(name) }
                 }

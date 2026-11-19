@@ -11,21 +11,21 @@ struct EditProfileScreen: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        SettingsForm(title: "Profili Düzenle") {
-            SettingsSection("Kullanıcı Adı") {
-                TextField("Kullanıcı Adı", text: $username)
+        SettingsForm(title: L10n.string("edit_profile_title")) {
+            SettingsSection(L10n.string("edit_profile_username")) {
+                TextField(L10n.string("edit_profile_username"), text: $username)
                     .textContentType(.username)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             }
-            SettingsSection(title: "E-posta Adresi") {
+            SettingsSection(title: L10n.string("edit_profile_email")) {
                 Text(email.isEmpty ? " " : email)
                     .foregroundStyle(Color.textSecondary)
             } footer: {
-                Text("E-posta adresi buradan değiştirilemez.")
+                Text(L10n.string("edit_profile_email_note"))
             }
-            SettingsSection(title: "Hakkımda") {
-                TextField("Kendinden bahset", text: $bio, axis: .vertical)
+            SettingsSection(title: L10n.string("edit_profile_bio")) {
+                TextField(L10n.string("edit_profile_bio_placeholder"), text: $bio, axis: .vertical)
                     .lineLimit(3...6)
             } footer: {
                 if let errorMessage {
@@ -36,7 +36,7 @@ struct EditProfileScreen: View {
         }
         .disabled(isLoading)
         .toolbar {
-            ToolbarSaveButton(title: "Kaydet", isLoading: isLoading, isEnabled: !username.isEmpty) {
+            ToolbarSaveButton(title: L10n.string("common_save"), isLoading: isLoading, isEnabled: !username.isEmpty) {
                 errorMessage = nil
                 model.viewModel.updateProfile(username: username, bio: bio)
             }

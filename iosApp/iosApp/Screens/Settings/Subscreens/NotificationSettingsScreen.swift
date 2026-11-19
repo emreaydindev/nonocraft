@@ -8,19 +8,19 @@ struct NotificationSettingsScreen: View {
     @State private var announcements = false
 
     var body: some View {
-        SettingsForm(title: "Bildirim Tercihleri") {
+        SettingsForm(title: L10n.string("settings_notifications")) {
             SettingsSection {
                 Toggle(isOn: $dailyPuzzle) {
-                    SettingsLabel(title: "Günün Bulmacası Hatırlatıcısı", systemImage: "calendar")
+                    SettingsLabel(title: L10n.string("notif_daily"), systemImage: "calendar")
                 }
                 Toggle(isOn: $newFollowers) {
-                    SettingsLabel(title: "Yeni Takipçiler", systemImage: "person.badge.plus", tint: .purpleAccent)
+                    SettingsLabel(title: L10n.string("notif_followers"), systemImage: "person.badge.plus", tint: .purpleAccent)
                 }
                 Toggle(isOn: $likesAndComments) {
-                    SettingsLabel(title: "Beğeni ve Yorumlar", systemImage: "heart.fill", tint: .dangerRed)
+                    SettingsLabel(title: L10n.string("notif_likes_comments"), systemImage: "heart.fill", tint: .dangerRed)
                 }
                 Toggle(isOn: $announcements) {
-                    SettingsLabel(title: "Duyurular ve Etkinlikler", systemImage: "megaphone.fill", tint: .gameGold)
+                    SettingsLabel(title: L10n.string("notif_announcements"), systemImage: "megaphone.fill", tint: .gameGold)
                 }
             }
         }

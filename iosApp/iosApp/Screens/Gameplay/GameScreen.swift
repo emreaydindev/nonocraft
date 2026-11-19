@@ -35,7 +35,7 @@ struct GameScreen: View {
                         .font(.app(15))
                         .foregroundColor(.dangerRed)
                         .multilineTextAlignment(.center)
-                    GhostAuthButton(text: "Geri Dön", action: onNavigateBack)
+                    GhostAuthButton(text: L10n.string("common_go_back"), action: onNavigateBack)
                         .frame(width: 180)
                 }
                 .padding(24)
@@ -46,25 +46,25 @@ struct GameScreen: View {
         .overlay {
             if state.isVictory {
                 GameEndOverlay(
-                    title: "TEBRİKLER!", subtitle: "Bulmacayı başarıyla çözdün.",
-                    buttonText: "Devam Et", isVictory: true, action: onNavigateBack
+                    title: L10n.string("game_congrats"), subtitle: L10n.string("game_congrats_subtitle"),
+                    buttonText: L10n.string("common_continue"), isVictory: true, action: onNavigateBack
                 )
             } else if state.isGameOver {
                 GameEndOverlay(
-                    title: "OYUN BİTTİ", subtitle: "Tüm canların tükendi.",
-                    buttonText: "Tekrar Dene", isVictory: false, action: onNavigateBack
+                    title: L10n.string("game_over"), subtitle: L10n.string("game_over_subtitle"),
+                    buttonText: L10n.string("game_try_again"), isVictory: false, action: onNavigateBack
                 )
             }
         }
         // VoiceOver hears a lost heart, the win and game over as they happen.
         .onChange(of: state.currentLives) { old, new in
-            if new < old && new > 0 { announce("Yanlış hamle, \(new) can kaldı") }
+            if new < old && new > 0 { announce(L10n.format("game_wrong_move", Int(new))) }
         }
         .onChange(of: state.isVictory) { _, isVictory in
-            if isVictory { announce("Tebrikler! Bulmaca çözüldü.") }
+            if isVictory { announce(L10n.string("game_victory_announcement")) }
         }
         .onChange(of: state.isGameOver) { _, isGameOver in
-            if isGameOver { announce("Oyun bitti, tüm canların tükendi.") }
+            if isGameOver { announce(L10n.string("game_over_announcement")) }
         }
         .navigationTitle(state.puzzle?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
@@ -257,7 +257,7 @@ struct GameScreen: View {
         GameControlBar(
             palette: palette,
             colorLabels: paletteHex.indices.map { index in
-                paletteHex.count > 1 ? BoardSpeech.colorLabel(index + 1, paletteHex: paletteHex).capitalizedFirst : "Doldur"
+                paletteHex.count > 1 ? BoardSpeech.colorLabel(index + 1, paletteHex: paletteHex).capitalizedFirst : L10n.string("game_fill")
             },
             showColorPatterns: colorPatterns.isEnabled,
             selectedColorIndex: Int(state.selectedColorIndex),
@@ -318,7 +318,10 @@ private struct GameTitle: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(title)
-        .accessibilityValue("\(timeLimitSeconds == nil ? "Geçen süre" : "Kalan süre"): \(seconds / 60) dakika \(seconds % 60) saniye")
+        .accessibilityValue(L10n.format(
+            timeLimitSeconds == nil ? "game_time_elapsed" : "game_time_remaining",
+            L10n.format("game_minutes", Int(seconds / 60)) + " " + L10n.format("game_seconds", Int(seconds % 60))
+        ))
         .accessibilityAddTraits(.isHeader)
     }
 }
@@ -341,7 +344,7 @@ private struct HeartsIndicator: View {
         .frame(minHeight: 44)
         .contentShape(Rectangle())
         .accessibilityElement()
-        .accessibilityLabel("\(currentLives) can kaldı")
+        .accessibilityLabel(L10n.format("game_lives_left", Int(currentLives)))
     }
 }
 

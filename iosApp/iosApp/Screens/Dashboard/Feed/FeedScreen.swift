@@ -24,12 +24,12 @@ struct FeedScreen: View {
             }
         }
         .background { ScreenBackground { EmptyView() } }
-        .navigationTitle("Keşfet")
+        .navigationTitle(L10n.string("feed_title"))
         // Large title on the same row as the toolbar button instead of a row below it.
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Oluştur", systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
+                Button(L10n.string("common_create"), systemImage: "paintbrush.pointed.fill", action: onNavigateToCrafting)
             }
         }
         .postSheets(sheets)
@@ -106,7 +106,7 @@ struct FeedScreen: View {
             ContentUnavailableView(error.message(.feed), systemImage: "wifi.exclamationmark")
                 .foregroundStyle(Color.dangerRed)
         } else if uiState.posts.isEmpty {
-            ContentUnavailableView("Henüz bir bulmaca bulunamadı.", systemImage: "square.grid.3x3")
+            ContentUnavailableView(L10n.string("feed_empty"), systemImage: "square.grid.3x3")
         } else {
             posts()
         }
@@ -127,7 +127,7 @@ struct FeedScreen: View {
                     let supportsTimeRange = tab == .latest || tab == .mostLiked
                     if isSelected && supportsTimeRange {
                         Menu {
-                            Picker("Zaman aralığı", selection: timeRange) {
+                            Picker(L10n.string("time_range_title"), selection: timeRange) {
                                 ForEach(TimeRange.allCases, id: \.self) { Text($0.label).tag($0) }
                             }
                         } label: {

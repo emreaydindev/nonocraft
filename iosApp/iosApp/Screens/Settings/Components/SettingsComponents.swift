@@ -68,13 +68,13 @@ struct SettingsLabel: View {
 /// Small gold "PRO" capsule for premium-only options (DECISIONS §3).
 struct ProBadge: View {
     var body: some View {
-        Text("PRO")
+        Text(L10n.string("common_pro_badge"))
             .font(.caption2.weight(.heavy))
             .foregroundStyle(Color.gameGold)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
             .background(Color.gameGold.opacity(0.18), in: Capsule())
-            .accessibilityLabel("Premium")
+            .accessibilityLabel(L10n.string("common_premium"))
     }
 }
 

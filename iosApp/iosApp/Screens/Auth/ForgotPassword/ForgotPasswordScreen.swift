@@ -23,19 +23,19 @@ struct ForgotPasswordScreen: View {
 
                 CenteredScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Şifremi Unuttum")
+                        Text(L10n.string("auth_forgot_title"))
                             .font(.app(32, .bold))
                             .foregroundColor(.textPrimary)
-                        Text("E-posta adresini gir, sana bir doğrulama kodu gönderelim.")
+                        Text(L10n.string("auth_forgot_subtitle"))
                             .font(.app(15))
                             .lineSpacing(4)
                             .foregroundColor(.textSecondary)
                             .padding(.top, 8)
 
                         AuthTextField(
-                            text: $email, label: "E-posta adresi", placeholder: "ornek@gmail.com",
+                            text: $email, label: L10n.string("auth_email_address"), placeholder: L10n.string("auth_email_placeholder"),
                             isError: !isEmailValid || uiState.error != nil,
-                            errorMessage: isEmailValid ? uiState.error?.message(.forgotPassword) : "Geçerli bir e-posta adresi girin",
+                            errorMessage: isEmailValid ? uiState.error?.message(.forgotPassword) : L10n.string("auth_email_invalid"),
                             keyboardType: .emailAddress, contentType: .emailAddress, submitLabel: .done
                         )
                         .onSubmit(submit)
@@ -49,10 +49,10 @@ struct ForgotPasswordScreen: View {
                 }
 
                 VStack(spacing: 24) {
-                    PrimaryAuthButton(text: "Kod Gönder", enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
+                    PrimaryAuthButton(text: L10n.string("auth_send_code"), enabled: canSubmit, isLoading: uiState.isLoading, action: submit)
                     Button(action: onNavigateBack) {
-                        (Text("Giriş sayfasına ").foregroundColor(.textSecondary)
-                            + Text("dön").font(.app(13, .semibold)).foregroundColor(.neonCyan))
+                        (Text(L10n.string("auth_back_to_login_prefix")).foregroundColor(.textSecondary)
+                            + Text(L10n.string("auth_back_to_login_link")).font(.app(13, .semibold)).foregroundColor(.neonCyan))
                             .font(.app(13))
                     }
                     .buttonStyle(.plain)

@@ -10,27 +10,27 @@ extension ErrorCode {
     /// Text for a shared error code on the screen it appears on.
     func message(_ context: ErrorContext = .general) -> String {
         switch (self, context) {
-        case (.network, _): return "Bağlantı hatası. Lütfen internetinizi kontrol edin."
-        case (.unauthorized, .login), (.invalidCredentials, _): return "E-posta veya şifre hatalı"
-        case (.conflict, .register): return "Bu e-posta veya kullanıcı adı zaten kullanılıyor"
-        case (.unauthorized, .changePassword), (.wrongPassword, _): return "Mevcut şifre hatalı"
-        case (.notFound, .resetPassword), (.validation, .resetPassword), (.invalidCode, _): return "Geçersiz veya süresi dolmuş kod"
-        case (.conflict, .editProfile), (.usernameTaken, _): return "Bu kullanıcı adı zaten alınmış"
-        case (.notFound, .game), (.puzzleNotFound, _): return "Bulmaca bulunamadı"
-        case (.emailTaken, _): return "Bu e-posta zaten kullanılıyor"
-        case (.sessionExpired, _), (.unauthorized, _): return "Oturum süresi doldu, lütfen tekrar giriş yapın"
-        case (.emailNotVerified, _): return "Önce e-posta adresinizi doğrulayın"
-        case (.insufficientCrystals, _): return "Yetersiz kristal"
-        case (.dailyLimitReached, _): return "Günlük limitine ulaştın"
-        case (.googleSignInFailed, _): return "Google ile giriş yapılamadı"
-        case (.rateLimited, _): return "Çok fazla deneme. Biraz sonra tekrar dene."
-        case (.server, _): return "Sunucu hatası. Lütfen daha sonra tekrar deneyin."
-        case (_, .login): return "Giriş yapılamadı"
-        case (_, .register): return "Kayıt olunamadı"
-        case (_, .changePassword): return "Şifre güncellenemedi"
-        case (_, .editProfile): return "Profil güncellenemedi"
-        case (_, .deleteAccount): return "Hesap silinemedi"
-        default: return "Beklenmedik bir hata oluştu"
+        case (.network, _): return L10n.string("error_network")
+        case (.unauthorized, .login), (.invalidCredentials, _): return L10n.string("error_invalid_credentials")
+        case (.conflict, .register): return L10n.string("error_email_or_username_taken")
+        case (.unauthorized, .changePassword), (.wrongPassword, _): return L10n.string("error_wrong_password")
+        case (.notFound, .resetPassword), (.validation, .resetPassword), (.invalidCode, _): return L10n.string("error_invalid_code")
+        case (.conflict, .editProfile), (.usernameTaken, _): return L10n.string("error_username_taken")
+        case (.notFound, .game), (.puzzleNotFound, _): return L10n.string("error_puzzle_not_found")
+        case (.emailTaken, _): return L10n.string("error_email_taken")
+        case (.sessionExpired, _), (.unauthorized, _): return L10n.string("error_session_expired")
+        case (.emailNotVerified, _): return L10n.string("error_email_not_verified")
+        case (.insufficientCrystals, _): return L10n.string("error_insufficient_crystals")
+        case (.dailyLimitReached, _): return L10n.string("error_daily_limit")
+        case (.googleSignInFailed, _): return L10n.string("error_google_sign_in")
+        case (.rateLimited, _): return L10n.string("error_rate_limited")
+        case (.server, _): return L10n.string("error_server")
+        case (_, .login): return L10n.string("error_login_failed_generic")
+        case (_, .register): return L10n.string("error_register_failed_generic")
+        case (_, .changePassword): return L10n.string("error_change_password_generic")
+        case (_, .editProfile): return L10n.string("error_edit_profile_generic")
+        case (_, .deleteAccount): return L10n.string("error_delete_account_generic")
+        default: return L10n.string("error_unexpected")
         }
     }
 }
@@ -38,10 +38,10 @@ extension ErrorCode {
 extension FeedTab {
     var label: String {
         switch self {
-        case .featured: "Öne Çıkanlar"
-        case .latest: "En Yeniler"
-        case .following: "Takip Edilenler"
-        case .mostLiked: "En Beğenilenler"
+        case .featured: L10n.string("feed_tab_featured")
+        case .latest: L10n.string("feed_tab_latest")
+        case .following: L10n.string("feed_tab_following")
+        case .mostLiked: L10n.string("feed_tab_most_liked")
         }
     }
 }
@@ -49,10 +49,10 @@ extension FeedTab {
 extension TimeRange {
     var label: String {
         switch self {
-        case .today: "Son 24 Saat"
-        case .week: "Bu Hafta"
-        case .month: "Bu Ay"
-        case .allTime: "Tüm Zamanlar"
+        case .today: L10n.string("time_range_today")
+        case .week: L10n.string("time_range_week")
+        case .month: L10n.string("time_range_month")
+        case .allTime: L10n.string("time_range_all")
         }
     }
 }
@@ -60,13 +60,13 @@ extension TimeRange {
 extension LibraryCategory {
     func title(playlistName: String? = nil) -> String {
         switch self {
-        case .liked: "Beğenilenler"
-        case .downloaded: "İndirilenler"
-        case .shared: "Paylaşılanlar"
-        case .drafts: "Taslaklar"
-        case .completed: "Çözülenler"
-        case .dailies: "Günlük Serüven"
-        case .playlist: playlistName ?? "Oynatma Listesi"
+        case .liked: L10n.string("library_liked")
+        case .downloaded: L10n.string("library_downloaded")
+        case .shared: L10n.string("library_shared")
+        case .drafts: L10n.string("library_drafts")
+        case .completed: L10n.string("library_completed")
+        case .dailies: L10n.string("library_dailies")
+        case .playlist: playlistName ?? L10n.string("library_playlist")
         }
     }
 }
@@ -74,9 +74,9 @@ extension LibraryCategory {
 extension Difficulty {
     var label: String {
         switch self {
-        case .easy: "Kolay"
-        case .medium: "Orta"
-        case .hard: "Zor"
+        case .easy: L10n.string("difficulty_easy")
+        case .medium: L10n.string("difficulty_medium")
+        case .hard: L10n.string("difficulty_hard")
         }
     }
 }
@@ -85,7 +85,7 @@ enum DisplayText {
     /// "5×5"; the multiplication sign reads the same in both languages.
     static func boardSize(_ size: Int32) -> String { "\(size)×\(size)" }
 
-    static func author(_ author: String?) -> String { author ?? "Anonim" }
+    static func author(_ author: String?) -> String { author ?? L10n.string("common_anonymous") }
 
     /// "@name", or the localized "Anonymous" when unknown.
     static func handle(_ author: String?) -> String { author.map { "@\($0)" } ?? DisplayText.author(nil) }

@@ -60,7 +60,7 @@ struct GoogleSignInButton: View {
 }
 
 struct AuthDivider: View {
-    var label = "veya"
+    var label = L10n.string("auth_or")
 
     var body: some View {
         HStack(spacing: 10) {
@@ -181,7 +181,7 @@ struct AuthPasswordField: View {
                     .foregroundColor(.textMuted)
                     .frame(width: 24, height: 24)
             }
-            .accessibilityLabel(isVisible ? "Şifreyi gizle" : "Şifreyi göster")
+            .accessibilityLabel(L10n.string(isVisible ? "auth_password_hide" : "auth_password_show"))
         }
     }
 }
@@ -223,9 +223,9 @@ enum PasswordStrength {
 
     var label: String {
         switch self {
-        case .weak: "Zayıf"
-        case .medium: "Orta"
-        case .strong: "Güçlü"
+        case .weak: L10n.string("auth_strength_weak")
+        case .medium: L10n.string("auth_strength_medium")
+        case .strong: L10n.string("auth_strength_strong")
         }
     }
 }
@@ -382,14 +382,14 @@ struct LegalText: View {
     }
 
     private var attributed: AttributedString {
-        var result = AttributedString("Devam ederek ")
+        var result = AttributedString(L10n.string("auth_legal_prefix"))
         result.foregroundColor = .textSecondary
-        result += link("Gizlilik Politikası", Constants.shared.PRIVACY_POLICY_URL)
-        var and = AttributedString(" ve ")
+        result += link(L10n.string("common_privacy_policy"), Constants.shared.PRIVACY_POLICY_URL)
+        var and = AttributedString(L10n.string("auth_legal_and"))
         and.foregroundColor = .textSecondary
         result += and
-        result += link("Kullanım Koşulları", Constants.shared.TERMS_OF_SERVICE_URL)
-        var tail = AttributedString("'nı kabul etmiş olursunuz.")
+        result += link(L10n.string("common_terms"), Constants.shared.TERMS_OF_SERVICE_URL)
+        var tail = AttributedString(L10n.string("auth_legal_suffix"))
         tail.foregroundColor = .textSecondary
         result += tail
         return result
