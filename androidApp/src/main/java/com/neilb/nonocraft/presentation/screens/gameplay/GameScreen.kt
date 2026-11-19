@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.gameplay
 
+import androidx.compose.ui.platform.LocalConfiguration
+import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberBoardSpeech
 import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.platform.LocalContext
@@ -306,6 +308,8 @@ private fun GameControlsPanel(
     showColorPatterns: Boolean
 ) {
     val activeColor = state.puzzle?.paletteHex?.getOrNull(state.selectedColorIndex - 1)?.toColor() ?: NeonCyan
+    val boardSpeech = rememberBoardSpeech()
+    val locale = LocalConfiguration.current.locales[0]
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -322,8 +326,8 @@ private fun GameControlsPanel(
             AnalogStick(
                 onMove = { dRow, dCol -> viewModel.moveCursor(dRow, dCol) },
                 onFocusChange = { isFocused -> viewModel.setAnalogFocus(isFocused) },
-                cursorDescription = BoardSpeech.cellPosition(state.cursorRow, state.cursorCol) + ", " +
-                    BoardSpeech.cellState(state.userGrid.getOrNull(state.cursorRow)?.getOrNull(state.cursorCol) ?: 0, palette)
+                cursorDescription = boardSpeech.cellPosition(state.cursorRow, state.cursorCol) + ", " +
+                    boardSpeech.cellState(state.userGrid.getOrNull(state.cursorRow)?.getOrNull(state.cursorCol) ?: 0, palette)
             )
 
             GameActionButtons(
@@ -340,7 +344,7 @@ private fun GameControlsPanel(
             paletteColors = palette.map { it.toColor() },
             showColorPatterns = showColorPatterns,
             colorLabels = palette.indices.map { index ->
-                if (palette.size > 1) BoardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.uppercase() } else stringResource(R.string.game_fill)
+                if (palette.size > 1) boardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.titlecase(locale) } else stringResource(R.string.game_fill)
             },
             selectedColorIndex = state.selectedColorIndex,
             isCrossMode = state.isCrossMode,

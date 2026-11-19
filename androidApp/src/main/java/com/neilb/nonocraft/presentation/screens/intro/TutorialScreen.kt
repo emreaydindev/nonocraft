@@ -277,10 +277,11 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
 
 @Composable
 private fun Step1Content(grid: List<CellState>, handOffset: Float, onFill: () -> Unit) {
+    val clueLabel = stringResource(R.string.tutorial_row_clue, "4")
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("4", color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier
             .padding(end = 16.dp)
-            .clearAndSetSemantics { contentDescription = "Satır ipucu: 4" })
+            .clearAndSetSemantics { contentDescription = clueLabel })
         Box {
             Text("👆", fontSize = 30.sp, modifier = Modifier
                 .clearAndSetSemantics { }
@@ -307,10 +308,11 @@ private fun Step1Content(grid: List<CellState>, handOffset: Float, onFill: () ->
 
 @Composable
 private fun Step2Content(grid: List<CellState>, onCross: (Int) -> Unit) {
+    val clueLabel = stringResource(R.string.tutorial_row_clue, "1, 3")
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(horizontalAlignment = Alignment.End, modifier = Modifier
             .padding(end = 16.dp)
-            .clearAndSetSemantics { contentDescription = "Satır ipucu: 1, 3" }) {
+            .clearAndSetSemantics { contentDescription = clueLabel }) {
             Text("1", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text("3", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
@@ -324,10 +326,15 @@ private fun Step2Content(grid: List<CellState>, onCross: (Int) -> Unit) {
 
 @Composable
 private fun Step3Content(grid: List<CellState>, handOffset: Float, onFill: () -> Unit) {
+    val clueLabel = stringResource(
+        R.string.tutorial_row_clue,
+        stringResource(R.string.board_clue_part, 3, stringResource(R.string.color_purple)) + ", " +
+            stringResource(R.string.board_clue_part, 2, stringResource(R.string.color_gold))
+    )
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(horizontalAlignment = Alignment.End, modifier = Modifier
             .padding(end = 16.dp)
-            .clearAndSetSemantics { contentDescription = "Satır ipucu: 3 mor, 2 altın" }) {
+            .clearAndSetSemantics { contentDescription = clueLabel }) {
             Text("3", color = PurpleAccent, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text("2", color = GameGold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
@@ -378,9 +385,10 @@ private fun Step4Content() {
     val rowClues = listOf("", "", "1", "3", "5", "1 5", "3 5", "5 5", "9", "7", "5", "3", "1", "")
     val colClues = listOf("1", "3", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "3", "1")
 
+    val finishedLabel = stringResource(R.string.tutorial_finished_puzzle)
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clearAndSetSemantics { contentDescription = "Tamamlanmış bulmaca" }
+        modifier = Modifier.clearAndSetSemantics { contentDescription = finishedLabel }
     ) {
         Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 4.dp)) {
             Box(Modifier.size(16.dp))
@@ -416,16 +424,19 @@ private fun Step4Content() {
     }
 }
 
-/** A practice cell, read as "Kare 2, boş"; tappable when [onClick] is set (the drag steps also fill by tap). */
+/** A practice cell, read as "Square 2, empty"; tappable when [onClick] is set (the drag steps also fill by tap). */
 @Composable
 private fun CellView(state: CellState, index: Int, onClick: (() -> Unit)? = null) {
-    val stateLabel = when (state) {
-        CellState.EMPTY -> "boş"
-        CellState.CYAN -> "dolu"
-        CellState.PURPLE -> "mor"
-        CellState.GOLD -> "altın"
-        CellState.CROSS -> "çarpı"
-    }
+    val stateLabel = stringResource(
+        when (state) {
+            CellState.EMPTY -> R.string.board_empty
+            CellState.CYAN -> R.string.board_filled
+            CellState.PURPLE -> R.string.color_purple
+            CellState.GOLD -> R.string.color_gold
+            CellState.CROSS -> R.string.board_crossed
+        }
+    )
+    val cellLabel = stringResource(R.string.tutorial_square_state, index + 1, stateLabel)
     Box(
         Modifier
             .size(50.dp)
@@ -442,7 +453,7 @@ private fun CellView(state: CellState, index: Int, onClick: (() -> Unit)? = null
             .border(0.5.dp, BorderDark, RoundedCornerShape(8.dp))
             .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
             .clearAndSetSemantics {
-                contentDescription = "Kare ${index + 1}, $stateLabel"
+                contentDescription = cellLabel
                 if (onClick != null) this.onClick { onClick(); true }
             },
         contentAlignment = Alignment.Center
@@ -455,12 +466,14 @@ private fun CellView(state: CellState, index: Int, onClick: (() -> Unit)? = null
 
 @Composable
 private fun ToolButton(tool: Tool, isSelected: Boolean, color: Color, onClick: () -> Unit) {
-    val label = when (tool) {
-        Tool.FILL -> "Doldur"
-        Tool.CROSS -> "Çarpı"
-        Tool.PURPLE -> "Mor"
-        Tool.GOLD -> "Altın"
-    }
+    val label = stringResource(
+        when (tool) {
+            Tool.FILL -> R.string.game_fill
+            Tool.CROSS -> R.string.game_cross_tool
+            Tool.PURPLE -> R.string.tutorial_tool_purple
+            Tool.GOLD -> R.string.tutorial_tool_gold
+        }
+    )
     Box(
         modifier = Modifier
             .size(54.dp)

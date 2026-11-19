@@ -1,5 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import com.neilb.nonocraft.R
+import androidx.compose.ui.platform.LocalContext
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -26,8 +29,8 @@ interface BoardCellActions {
 }
 
 /**
- * Invisible TalkBack nodes over the drawn board: one per clue line ("Satır 3: 1, 1, 1") and one per cell
- * ("Satır 3, sütun 2" with its state). A double tap uses the current tool like a touch; the custom actions
+ * Invisible TalkBack nodes over the drawn board: one per clue line ("Row 3: 1, 1, 1") and one per cell
+ * ("Row 3, column 2" with its state). A double tap uses the current tool like a touch; the custom actions
  * fill with any palette colour, cross an empty cell or clear a cross. They take no touches, so drawing on
  * the board is unchanged. TalkBack reads them top to bottom: column clues, then each row's clue and cells.
  */
@@ -49,11 +52,13 @@ internal fun BoardSemantics(
     val density = LocalDensity.current
     val cellDp = with(density) { cellSize.toDp() }
     val palette = puzzle.paletteHex
+    val speech = rememberBoardSpeech()
+    val res = LocalContext.current.resources
 
     fun Modifier.at(x: Float, y: Float) = offset { IntOffset(x.roundToInt(), y.roundToInt()) }
 
     colClues.forEachIndexed { col, clues ->
-        val label = BoardSpeech.clue(isRow = false, index = col, clues = clues, palette = palette)
+        val label = speech.clue(isRow = false, index = col, clues = clues, palette = palette)
         Box(
             Modifier
                 .at(startX + col * cellSize, startY - maxColClueCount * cellSize)
@@ -63,7 +68,7 @@ internal fun BoardSemantics(
     }
 
     userGrid.forEachIndexed { row, values ->
-        val clueLabel = BoardSpeech.clue(isRow = true, index = row, clues = rowClues.getOrElse(row) { emptyList() }, palette = palette)
+        val clueLabel = speech.clue(isRow = true, index = row, clues = rowClues.getOrElse(row) { emptyList() }, palette = palette)
         Box(
             Modifier
                 .at(startX - maxRowClueCount * cellSize, startY + row * cellSize)
@@ -71,8 +76,8 @@ internal fun BoardSemantics(
                 .semantics { contentDescription = clueLabel }
         )
         values.forEachIndexed { col, value ->
-            val position = BoardSpeech.cellPosition(row, col)
-            val state = BoardSpeech.cellState(value, palette)
+            val position = speech.cellPosition(row, col)
+            val state = speech.cellState(value, palette)
             Box(
                 Modifier
                     .at(startX + col * cellSize, startY + row * cellSize)
@@ -82,8 +87,8 @@ internal fun BoardSemantics(
                         stateDescription = state
                         // Filled cells are final; empty and crossed ones take moves.
                         if (value <= 0) {
-                            onClick(label = "Seçili araçla işaretle") { onCellClick(row, col); true }
-                            if (cellActions != null) customActions = cellActionsFor(row, col, value, palette, cellActions)
+                            onClick(label = res.getString(R.string.board_mark_with_tool)) { onCellClick(row, col); true }
+                            if (cellActions != null) customActions = cellActionsFor(row, col, value, palette, cellActions, speech, res)
                         }
                     }
             )
@@ -97,12 +102,14 @@ private fun cellActionsFor(
     value: Int,
     palette: List<String>,
     actions: BoardCellActions,
+    speech: BoardSpeech,
+    res: Resources,
 ): List<CustomAccessibilityAction> = buildList {
     val colorCount = palette.size.coerceAtLeast(1)
     for (colorIndex in 1..colorCount) {
-        val label = if (colorCount > 1) "Doldur: ${BoardSpeech.colorLabel(colorIndex, palette)}" else "Doldur"
+        val label = if (colorCount > 1) res.getString(R.string.board_fill_color, speech.colorLabel(colorIndex, palette)) else res.getString(R.string.game_fill)
         add(CustomAccessibilityAction(label) { actions.fill(row, col, colorIndex); true })
     }
-    if (value == 0) add(CustomAccessibilityAction("Çarpı koy") { actions.cross(row, col); true })
-    if (value < 0) add(CustomAccessibilityAction("Temizle") { actions.clear(row, col); true })
+    if (value == 0) add(CustomAccessibilityAction(res.getString(R.string.board_cross)) { actions.cross(row, col); true })
+    if (value < 0) add(CustomAccessibilityAction(res.getString(R.string.board_clear)) { actions.clear(row, col); true })
 }

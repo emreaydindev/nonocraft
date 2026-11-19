@@ -18,6 +18,7 @@ final class AccessibilityAuditTests: XCTestCase {
     private var skip: String { t("Skip", "Atla") }
     private var guest: String { t("Continue as guest", "Misafir olarak devam et") }
     private var exploreTab: String { t("Explore", "Keşfet") }
+    private func cellLabel(_ row: Int, _ col: Int) -> String { t("Row \(row), column \(col)", "Satır \(row), sütun \(col)") }
     private var postPlay: XCUIElement { app.buttons["post_play"].firstMatch }
 
     /// Opens Explore and waits for the feed (the staging feed may need a second try).
@@ -85,18 +86,18 @@ final class AccessibilityAuditTests: XCTestCase {
         let play = openFeedPost()
         XCTAssertTrue(play.waitForExistence(timeout: 8))
         play.tap()
-        let cell = app.buttons["Satır 1, sütun 2"]
+        let cell = app.buttons[cellLabel(1, 2)]
         XCTAssertTrue(cell.waitForExistence(timeout: 8))
         report("GameBoard")
         print("AX-GAME cell r1c2 value=\(cell.value ?? "-") frame=\(cell.frame)")
-        print("AX-GAME clue row1=\(app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Satır 1:'")).firstMatch.label)")
+        print("AX-GAME clue row1=\(app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", t("Row 1:", "Satır 1:"))).firstMatch.label)")
         cell.tap()
         sleep(1)
-        print("AX-GAME cell r1c2 after tap value=\(app.buttons["Satır 1, sütun 2"].value ?? "-")")
-        let stick = app.descendants(matching: .any)["İmleç"].firstMatch
+        print("AX-GAME cell r1c2 after tap value=\(app.buttons[cellLabel(1, 2)].value ?? "-")")
+        let stick = app.descendants(matching: .any)[t("Cursor", "İmleç")].firstMatch
         print("AX-GAME stick exists=\(stick.exists) value=\(stick.value ?? "-")")
-        app.buttons["İmleçteki kareyi doldur"].tap(); sleep(1)
-        print("AX-GAME after place r1c3=\(app.buttons["Satır 1, sütun 3"].value ?? "-") hearts=\(app.otherElements.matching(NSPredicate(format: "label ENDSWITH 'can kaldı'")).firstMatch.label)")
+        app.buttons[t("Fill the square under the cursor", "İmleçteki kareyi doldur")].tap(); sleep(1)
+        print("AX-GAME after place r1c3=\(app.buttons[cellLabel(1, 3)].value ?? "-") hearts=\(app.otherElements.matching(NSPredicate(format: "label ENDSWITH %@", t("left", "can kaldı"))).firstMatch.label)")
         // AX_HOLD=<seconds> (TEST_RUNNER_AX_HOLD from xcodebuild) keeps the game open for the Accessibility Inspector.
         sleep(UInt32(ProcessInfo.processInfo.environment["AX_HOLD"] ?? "") ?? 0)
     }
@@ -117,8 +118,8 @@ final class AccessibilityAuditTests: XCTestCase {
         let play = openFeedPost()
         XCTAssertTrue(play.waitForExistence(timeout: 10))
         play.tap()
-        XCTAssertTrue(app.buttons["Satır 1, sütun 1"].waitForExistence(timeout: 8))
-        for col in 1...5 { app.buttons["Satır 1, sütun \(col)"].tap() }
+        XCTAssertTrue(app.buttons[cellLabel(1, 1)].waitForExistence(timeout: 8))
+        for col in 1...5 { app.buttons[cellLabel(1, col)].tap() }
         print("AX-PATTERNS ready")
         sleep(UInt32(ProcessInfo.processInfo.environment["AX_HOLD"] ?? "") ?? 0)
     }

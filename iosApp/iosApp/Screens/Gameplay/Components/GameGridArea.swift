@@ -76,8 +76,8 @@ struct GameGridArea: View {
         }
     }
 
-    /// Invisible VoiceOver elements over the drawn board: one per clue line ("Satır 3: 1, 1, 1") and one per
-    /// cell ("Satır 3, sütun 2" with its state). Activating a cell uses the current tool like a touch; the
+    /// Invisible VoiceOver elements over the drawn board: one per clue line ("Row 3: 1, 1, 1") and one per
+    /// cell ("Row 3, column 2" with its state). Activating a cell uses the current tool like a touch; the
     /// actions fill with any palette colour, cross an empty cell or clear a cross. They take no touches, so
     /// drawing on the board is unchanged, and VoiceOver reads them top to bottom, each row's clue first.
     private func accessibilityNodes(layout: Layout) -> some View {
@@ -120,16 +120,16 @@ struct GameGridArea: View {
             if isOpen { onCellTouched(row, col) }
         }
         // SwiftUI hands these to VoiceOver last-declared first, so they are declared in reverse to read
-        // "Doldur" (each colour in palette order), then "Çarpı koy" or "Temizle", as on Android.
+        // "Fill" (each colour in palette order), then "Place cross" or "Clear", as on Android.
         .accessibilityActions {
             if isOpen, let cellActions {
                 if value == 0 {
-                    Button("Çarpı koy") { cellActions.cross(row, col) }
+                    Button(L10n.string("board_cross")) { cellActions.cross(row, col) }
                 } else {
-                    Button("Temizle") { cellActions.clear(row, col) }
+                    Button(L10n.string("board_clear")) { cellActions.clear(row, col) }
                 }
                 ForEach(Array((1...colorCount).reversed()), id: \.self) { colorIndex in
-                    Button(colorCount > 1 ? "Doldur: \(BoardSpeech.colorLabel(colorIndex, paletteHex: paletteHex))" : "Doldur") {
+                    Button(colorCount > 1 ? L10n.format("board_fill_color", BoardSpeech.colorLabel(colorIndex, paletteHex: paletteHex)) : L10n.string("game_fill")) {
                         cellActions.fill(row, col, colorIndex)
                     }
                 }

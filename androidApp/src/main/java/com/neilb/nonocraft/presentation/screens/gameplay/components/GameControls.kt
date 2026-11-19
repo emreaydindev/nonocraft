@@ -1,5 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.platform.LocalDensity
@@ -89,6 +92,7 @@ fun AnalogStick(
         onFocusChange(false)
         return true
     }
+    val res = LocalContext.current.resources
     val stickSize = 100.dp
     val thumbSize = 44.dp
     val maxRadius = (stickSize / 2) - (thumbSize / 2)
@@ -121,13 +125,13 @@ fun AnalogStick(
             .background(SurfaceDark.copy(alpha = 0.5f))
             .border(2.dp, BorderDark, CircleShape)
             .clearAndSetSemantics {
-                contentDescription = "İmleç"
+                contentDescription = res.getString(R.string.game_cursor)
                 stateDescription = cursorDescription
                 customActions = listOf(
-                    CustomAccessibilityAction("Yukarı") { step(-1, 0) },
-                    CustomAccessibilityAction("Aşağı") { step(1, 0) },
-                    CustomAccessibilityAction("Sola") { step(0, -1) },
-                    CustomAccessibilityAction("Sağa") { step(0, 1) },
+                    CustomAccessibilityAction(res.getString(R.string.game_move_up)) { step(-1, 0) },
+                    CustomAccessibilityAction(res.getString(R.string.game_move_down)) { step(1, 0) },
+                    CustomAccessibilityAction(res.getString(R.string.game_move_left)) { step(0, -1) },
+                    CustomAccessibilityAction(res.getString(R.string.game_move_right)) { step(0, 1) },
                 )
             }
             .pointerInput(Unit) {
@@ -187,6 +191,8 @@ fun GameActionButtons(
     isCrossMode: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val hintLabel = stringResource(R.string.game_hints_left, hintsRemaining)
+    val placeLabel = stringResource(if (isCrossMode) R.string.game_place_cross else R.string.game_place_fill)
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -200,14 +206,14 @@ fun GameActionButtons(
                 .border(2.dp, NeonCyan.copy(alpha = 0.5f), CircleShape)
                 .rippleClickable { onHintAction() }
                 .clearAndSetSemantics {
-                    contentDescription = "İpucu, $hintsRemaining kaldı"
+                    contentDescription = hintLabel
                     role = Role.Button
                     onClick { onHintAction(); true }
                 },
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Icon(Icons.Rounded.Lightbulb, contentDescription = "Hint", tint = NeonCyan, modifier = Modifier.size(24.dp))
+                Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(24.dp))
                 Text(
                     text = hintsRemaining.toString(),
                     color = NeonCyan,
@@ -226,7 +232,7 @@ fun GameActionButtons(
                 .border(3.dp, selectedColor, CircleShape)
                 // Held, it keeps placing while the stick moves; for TalkBack a double tap places once.
                 .clearAndSetSemantics {
-                    contentDescription = if (isCrossMode) "İmleçteki kareye çarpı koy" else "İmleçteki kareyi doldur"
+                    contentDescription = placeLabel
                     role = Role.Button
                     onClick { onPlacePressed(true); onPlacePressed(false); true }
                 }
@@ -241,7 +247,7 @@ fun GameActionButtons(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Rounded.Edit, contentDescription = "Place", tint = selectedColor, modifier = Modifier.size(36.dp))
+            Icon(Icons.Rounded.Edit, contentDescription = null, tint = selectedColor, modifier = Modifier.size(36.dp))
         }
     }
 }
@@ -269,7 +275,7 @@ fun ToolPaletteBar(
     ) {
         ToolItem(
             color = Color.Transparent,
-            label = "Çarpı",
+            label = stringResource(R.string.game_cross_tool),
             isCross = true,
             isSelected = isCrossMode,
             onClick = onCrossSelected
@@ -278,7 +284,7 @@ fun ToolPaletteBar(
             val actualColorIndex = index + 1
             ToolItem(
                 color = color,
-                label = colorLabels.getOrElse(index) { "Renk $actualColorIndex" },
+                label = colorLabels.getOrNull(index) ?: stringResource(R.string.game_color_n, actualColorIndex),
                 isCross = false,
                 isSelected = !isCrossMode && selectedColorIndex == actualColorIndex,
                 onClick = { onColorSelected(actualColorIndex) },

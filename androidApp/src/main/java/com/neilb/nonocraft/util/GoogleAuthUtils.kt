@@ -34,7 +34,7 @@ suspend fun signInWithGoogle(
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             Result.success(googleIdTokenCredential.idToken)
         } else {
-            Result.failure(IllegalStateException("Bilinmeyen bir kimlik bilgisi türü döndü"))
+            Result.failure(IllegalStateException("Unexpected credential type"))
         }
     } catch (e: GoogleIdTokenParsingException) {
         Result.failure(e)

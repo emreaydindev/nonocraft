@@ -4,7 +4,7 @@ import SwiftUI
 struct AnalogStick: View {
     let onMove: (_ dRow: Int, _ dCol: Int) -> Void
     let onFocusChange: (Bool) -> Void
-    /// VoiceOver: the cell under the cursor ("Satır 2, sütun 3, boş").
+    /// VoiceOver: the cell under the cursor ("Row 2, column 3, empty").
     let cursorDescription: String
     /// VoiceOver moves: one cell up, down, left or right, or the next / previous cell in reading order.
     let onAccessibilityMove: (_ dRow: Int, _ dCol: Int) -> Void
@@ -54,7 +54,7 @@ struct AnalogStick: View {
         // The stick is the board cursor for VoiceOver: swipe up or down steps through the cells, the actions
         // move it a cell at a time, and the place button then fills, crosses or clears the cell under it.
         .accessibilityElement()
-        .accessibilityLabel("İmleç")
+        .accessibilityLabel(L10n.string("game_cursor"))
         .accessibilityValue(cursorDescription)
         .accessibilityAdjustableAction { direction in
             switch direction {
@@ -64,11 +64,11 @@ struct AnalogStick: View {
             }
         }
         .accessibilityActions {
-            // Declared in reverse: VoiceOver lists them Yukarı, Aşağı, Sola, Sağa.
-            Button("Sağa") { onAccessibilityMove(0, 1) }
-            Button("Sola") { onAccessibilityMove(0, -1) }
-            Button("Aşağı") { onAccessibilityMove(1, 0) }
-            Button("Yukarı") { onAccessibilityMove(-1, 0) }
+            // Declared in reverse: VoiceOver lists them Up, Down, Left, Right.
+            Button(L10n.string("game_move_right")) { onAccessibilityMove(0, 1) }
+            Button(L10n.string("game_move_left")) { onAccessibilityMove(0, -1) }
+            Button(L10n.string("game_move_down")) { onAccessibilityMove(1, 0) }
+            Button(L10n.string("game_move_up")) { onAccessibilityMove(-1, 0) }
         }
     }
 
@@ -178,7 +178,7 @@ struct GameActionButtons: View {
                 .overlay(Circle().stroke(Color.neonCyan.opacity(0.5), lineWidth: 2))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("İpucu, \(hintsRemaining) kaldı")
+            .accessibilityLabel(L10n.format("game_hints_left", Int(hintsRemaining)))
 
             // Held down while the stick moves, it fills every cell the cursor enters.
             Image(systemName: isCrossMode ? "xmark" : "pencil")
@@ -201,7 +201,7 @@ struct GameActionButtons: View {
                             onPlacePressed(false)
                         }
                 )
-                .accessibilityLabel(isCrossMode ? "İmleçteki kareye çarpı koy" : "İmleçteki kareyi doldur")
+                .accessibilityLabel(L10n.string(isCrossMode ? "game_place_cross" : "game_place_fill"))
                 .accessibilityAddTraits(.isButton)
                 // Held, it keeps placing while the stick moves; for VoiceOver a double tap places once.
                 .accessibilityAction {
@@ -231,7 +231,7 @@ struct ToolPaletteBar: View {
 
     private var items: some View {
         HStack(spacing: 12) {
-            ToolItem(tint: .dangerRed, isSelected: isCrossMode, label: "Çarpı", action: onCrossSelected) {
+            ToolItem(tint: .dangerRed, isSelected: isCrossMode, label: L10n.string("game_cross_tool"), action: onCrossSelected) {
                 Image(systemName: "xmark")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.dangerRed)
@@ -240,7 +240,7 @@ struct ToolPaletteBar: View {
                 let colorIndex = index + 1
                 ToolItem(
                     tint: color, isSelected: !isCrossMode && selectedColorIndex == colorIndex,
-                    label: colorLabels[safe: index] ?? "Renk \(colorIndex)", action: { onColorSelected(colorIndex) }
+                    label: colorLabels[safe: index] ?? L10n.format("game_color_n", colorIndex), action: { onColorSelected(colorIndex) }
                 ) {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(color)

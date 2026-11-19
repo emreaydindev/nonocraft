@@ -115,7 +115,7 @@ struct TutorialScreen: View {
         case 0:
             HStack(spacing: 16) {
                 Text("4").font(.app(24, .bold)).foregroundColor(.textPrimary)
-                    .accessibilityLabel("Satır ipucu: 4")
+                    .accessibilityLabel(L10n.format("tutorial_row_clue", "4"))
                 DragFillRow(cells: grid1, handStartCell: 0, showsHand: grid1.contains(.empty), onReachNextCell: fillStep1)
             }
         case 1:
@@ -127,12 +127,12 @@ struct TutorialScreen: View {
                 .font(.app(18, .bold))
                 .foregroundColor(.textPrimary)
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Satır ipucu: 1, 3")
+                .accessibilityLabel(L10n.format("tutorial_row_clue", "1, 3"))
                 HStack(spacing: 4) {
                     ForEach(grid2.indices, id: \.self) { index in
                         Button { crossStep2(index) } label: { TutorialCell(state: grid2[index]) }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("Kare \(index + 1)")
+                            .accessibilityLabel(L10n.format("tutorial_square", index + 1))
                             .accessibilityValue(grid2[index].spokenName)
                     }
                 }
@@ -146,7 +146,11 @@ struct TutorialScreen: View {
                 }
                 .font(.app(18, .bold))
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Satır ipucu: 3 mor, 2 altın")
+                .accessibilityLabel(L10n.format(
+                    "tutorial_row_clue",
+                    L10n.format("board_clue_part", 3, L10n.string("color_purple")) + ", "
+                        + L10n.format("board_clue_part", 2, L10n.string("color_gold"))
+                ))
                 DragFillRow(cells: grid3, handStartCell: filled, showsHand: filled < 5, onReachNextCell: fillStep3)
             }
         default:
@@ -156,13 +160,13 @@ struct TutorialScreen: View {
 
     private var toolRow: some View {
         HStack(spacing: 16) {
-            toolButton(.cross, tint: .textPrimary, label: "Çarpı") {
+            toolButton(.cross, tint: .textPrimary, label: L10n.string("game_cross_tool")) {
                 Text("✕").font(.system(size: 24, weight: .bold)).foregroundColor(.dangerRed)
             }
-            toolButton(.fill, tint: .neonCyan, label: "Doldur") { swatch(.neonCyan) }
+            toolButton(.fill, tint: .neonCyan, label: L10n.string("game_fill")) { swatch(.neonCyan) }
             if page >= 2 {
-                toolButton(.purple, tint: .purpleAccent, label: "Mor") { swatch(.purpleAccent) }
-                toolButton(.gold, tint: .gameGold, label: "Altın") { swatch(.gameGold) }
+                toolButton(.purple, tint: .purpleAccent, label: L10n.string("tutorial_tool_purple")) { swatch(.purpleAccent) }
+                toolButton(.gold, tint: .gameGold, label: L10n.string("tutorial_tool_gold")) { swatch(.gameGold) }
             }
         }
     }
@@ -223,11 +227,11 @@ struct TutorialScreen: View {
 extension TutorialScreen.CellState {
     var spokenName: String {
         switch self {
-        case .empty: "boş"
-        case .cyan: "dolu"
-        case .purple: "mor"
-        case .gold: "altın"
-        case .cross: "çarpı"
+        case .empty: L10n.string("board_empty")
+        case .cyan: L10n.string("board_filled")
+        case .purple: L10n.string("color_purple")
+        case .gold: L10n.string("color_gold")
+        case .cross: L10n.string("board_crossed")
         }
     }
 }
@@ -304,9 +308,9 @@ private struct DragFillRow: View {
         }
         // VoiceOver: one adjustable-free button; a double tap fills the next cell, like dragging onto it.
         .accessibilityElement()
-        .accessibilityLabel("Doldurulacak satır")
+        .accessibilityLabel(L10n.string("tutorial_drag_row"))
         .accessibilityValue(cells.map(\.spokenName).joined(separator: ", "))
-        .accessibilityHint("Sonraki kareyi doldurmak için iki kez dokun")
+        .accessibilityHint(L10n.string("tutorial_drag_row_hint"))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { onReachNextCell() }
     }
@@ -357,6 +361,6 @@ private struct CompletedCheckmark: View {
             }
         }
         .accessibilityElement()
-        .accessibilityLabel("Tamamlanmış bulmaca")
+        .accessibilityLabel(L10n.string("tutorial_finished_puzzle"))
     }
 }

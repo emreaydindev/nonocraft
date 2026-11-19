@@ -84,31 +84,31 @@ final class BoardAccessibilityTests: XCTestCase {
 
     func testCluesAndCellsReadAsPhrases() throws {
         render(paletteHex: ["#FF0000", "#0000FF"], userGrid: [[0, -1, 2], [0, 0, 0], [0, 0, 0]])
-        XCTAssertNoThrow(try element("Satır 1: 1 kırmızı, 1 mavi"))
-        XCTAssertNoThrow(try element("Satır 3: boş"))
-        XCTAssertNoThrow(try element("Sütun 2: 2 kırmızı"))
-        XCTAssertEqual(try element("Satır 1, sütun 1").accessibilityValue, "boş")
-        XCTAssertEqual(try element("Satır 1, sütun 2").accessibilityValue, "çarpı")
-        XCTAssertEqual(try element("Satır 1, sütun 3").accessibilityValue, "dolu, renk 2, mavi")
+        XCTAssertNoThrow(try element("Row 1: 1 red, 1 blue"))
+        XCTAssertNoThrow(try element("Row 3: empty"))
+        XCTAssertNoThrow(try element("Column 2: 2 red"))
+        XCTAssertEqual(try element("Row 1, column 1").accessibilityValue, "empty")
+        XCTAssertEqual(try element("Row 1, column 2").accessibilityValue, "crossed")
+        XCTAssertEqual(try element("Row 1, column 3").accessibilityValue, "filled, colour 2, blue")
     }
 
     func testEmptyCellOffersFillPerColourAndCross() throws {
         render(paletteHex: ["#FF0000", "#0000FF"], userGrid: [[0, -1, 2], [0, 0, 0], [0, 0, 0]])
-        XCTAssertEqual(try actionNames("Satır 1, sütun 1"), ["Doldur: renk 1, kırmızı", "Doldur: renk 2, mavi", "Çarpı koy"])
-        XCTAssertEqual(try actionNames("Satır 1, sütun 2"), ["Doldur: renk 1, kırmızı", "Doldur: renk 2, mavi", "Temizle"])
-        XCTAssertEqual(try actionNames("Satır 1, sütun 3"), [])
+        XCTAssertEqual(try actionNames("Row 1, column 1"), ["Fill: colour 1, red", "Fill: colour 2, blue", "Place cross"])
+        XCTAssertEqual(try actionNames("Row 1, column 2"), ["Fill: colour 1, red", "Fill: colour 2, blue", "Clear"])
+        XCTAssertEqual(try actionNames("Row 1, column 3"), [])
 
-        try perform("Doldur: renk 2, mavi", on: "Satır 1, sütun 1")
-        try perform("Çarpı koy", on: "Satır 1, sütun 1")
-        try perform("Temizle", on: "Satır 1, sütun 2")
-        XCTAssertTrue(try element("Satır 2, sütun 3").accessibilityActivate())
+        try perform("Fill: colour 2, blue", on: "Row 1, column 1")
+        try perform("Place cross", on: "Row 1, column 1")
+        try perform("Clear", on: "Row 1, column 2")
+        XCTAssertTrue(try element("Row 2, column 3").accessibilityActivate())
         XCTAssertEqual(moves, ["fill 0 0 2", "cross 0 0", "clear 0 1", "tap 1 2"])
     }
 
     func testSingleColourPuzzleSaysFillAndDoesNotNameTheColour() throws {
         render(paletteHex: ["#FFFFFF"], userGrid: [[1, 0, 0], [0, 0, 0], [0, 0, 0]])
-        XCTAssertNoThrow(try element("Satır 1: 1, 1"))
-        XCTAssertEqual(try element("Satır 1, sütun 1").accessibilityValue, "dolu")
-        XCTAssertEqual(try actionNames("Satır 1, sütun 2"), ["Doldur", "Çarpı koy"])
+        XCTAssertNoThrow(try element("Row 1: 1, 1"))
+        XCTAssertEqual(try element("Row 1, column 1").accessibilityValue, "filled")
+        XCTAssertEqual(try actionNames("Row 1, column 2"), ["Fill", "Place cross"])
     }
 }

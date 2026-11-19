@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.gameplay.components
 
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -211,7 +213,7 @@ fun GameGridArea(
             IconButton(
                 onClick = { scale = defaultScale; offsetX = 0f; offsetY = 0f },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).size(48.dp).background(SurfaceDark.copy(0.8f), CircleShape)
-            ) { Icon(Icons.Rounded.ZoomOutMap, contentDescription = "Yakınlaştırmayı sıfırla", tint = NeonCyan) }
+            ) { Icon(Icons.Rounded.ZoomOutMap, contentDescription = stringResource(R.string.game_reset_zoom), tint = NeonCyan) }
         }
     }
 }

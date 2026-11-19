@@ -17,7 +17,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** TalkBack reads every clue and cell on the drawn board, and the cell actions reach the game. */
+/**
+ * TalkBack reads every clue and cell on the drawn board, and the cell actions reach the game. Expects the
+ * English phrases: run with the device and app language set to English.
+ */
 @RunWith(AndroidJUnit4::class)
 class BoardSemanticsTest {
 
@@ -69,40 +72,40 @@ class BoardSemanticsTest {
     @Test
     fun cluesAndCellsReadAsPhrases() {
         setBoard(listOf("#FF0000", "#0000FF"), listOf(listOf(0, -1, 2), List(3) { 0 }, List(3) { 0 }))
-        composeRule.onNodeWithContentDescription("Satır 1: 1 kırmızı, 1 mavi").assertExists()
-        composeRule.onNodeWithContentDescription("Satır 3: boş").assertExists()
-        composeRule.onNodeWithContentDescription("Sütun 2: 2 kırmızı").assertExists()
-        composeRule.onNodeWithContentDescription("Satır 1, sütun 1")
-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "boş"))
-        composeRule.onNodeWithContentDescription("Satır 1, sütun 2")
-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "çarpı"))
-        composeRule.onNodeWithContentDescription("Satır 1, sütun 3")
-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "dolu, renk 2, mavi"))
+        composeRule.onNodeWithContentDescription("Row 1: 1 red, 1 blue").assertExists()
+        composeRule.onNodeWithContentDescription("Row 3: empty").assertExists()
+        composeRule.onNodeWithContentDescription("Column 2: 2 red").assertExists()
+        composeRule.onNodeWithContentDescription("Row 1, column 1")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "empty"))
+        composeRule.onNodeWithContentDescription("Row 1, column 2")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "crossed"))
+        composeRule.onNodeWithContentDescription("Row 1, column 3")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "filled, colour 2, blue"))
     }
 
     @Test
     fun emptyCellOffersFillPerColourAndCross() {
         setBoard(listOf("#FF0000", "#0000FF"), listOf(listOf(0, -1, 2), List(3) { 0 }, List(3) { 0 }))
         assertEquals(
-            listOf("Doldur: renk 1, kırmızı", "Doldur: renk 2, mavi", "Çarpı koy"),
-            customActionLabels("Satır 1, sütun 1")
+            listOf("Fill: colour 1, red", "Fill: colour 2, blue", "Place cross"),
+            customActionLabels("Row 1, column 1")
         )
-        assertEquals(listOf("Doldur: renk 1, kırmızı", "Doldur: renk 2, mavi", "Temizle"), customActionLabels("Satır 1, sütun 2"))
-        assertEquals(emptyList<String>(), customActionLabels("Satır 1, sütun 3"))
+        assertEquals(listOf("Fill: colour 1, red", "Fill: colour 2, blue", "Clear"), customActionLabels("Row 1, column 2"))
+        assertEquals(emptyList<String>(), customActionLabels("Row 1, column 3"))
 
-        runCustomAction("Satır 1, sütun 1", "Doldur: renk 2, mavi")
-        runCustomAction("Satır 1, sütun 1", "Çarpı koy")
-        runCustomAction("Satır 1, sütun 2", "Temizle")
-        composeRule.onNodeWithContentDescription("Satır 2, sütun 3").performClick()
+        runCustomAction("Row 1, column 1", "Fill: colour 2, blue")
+        runCustomAction("Row 1, column 1", "Place cross")
+        runCustomAction("Row 1, column 2", "Clear")
+        composeRule.onNodeWithContentDescription("Row 2, column 3").performClick()
         assertEquals(listOf("fill 0 0 2", "cross 0 0", "clear 0 1", "tap 1 2"), moves)
     }
 
     @Test
     fun singleColourPuzzleSaysFillAndDoesNotNameTheColour() {
         setBoard(listOf("#FFFFFF"), listOf(listOf(1, 0, 0), List(3) { 0 }, List(3) { 0 }))
-        composeRule.onNodeWithContentDescription("Satır 1: 1, 1").assertExists()
-        composeRule.onNodeWithContentDescription("Satır 1, sütun 1")
-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "dolu"))
-        assertEquals(listOf("Doldur", "Çarpı koy"), customActionLabels("Satır 1, sütun 2"))
+        composeRule.onNodeWithContentDescription("Row 1: 1, 1").assertExists()
+        composeRule.onNodeWithContentDescription("Row 1, column 1")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "filled"))
+        assertEquals(listOf("Fill", "Place cross"), customActionLabels("Row 1, column 2"))
     }
 }
