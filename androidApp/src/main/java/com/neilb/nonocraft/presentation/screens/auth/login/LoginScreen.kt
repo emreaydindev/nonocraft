@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.login
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -154,7 +156,7 @@ fun LoginScreen(
                 if (state.error != null) {
                     InfoBanner(
                         message = "Giriş başarısız",
-                        subMessage = state.error!!,
+                        subMessage = state.error!!.message(ErrorContext.LOGIN),
                         isError = true,
                         modifier = Modifier.padding(bottom = 14.dp),
                     )

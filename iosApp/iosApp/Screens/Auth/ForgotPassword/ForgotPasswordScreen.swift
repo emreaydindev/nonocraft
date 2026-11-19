@@ -35,7 +35,7 @@ struct ForgotPasswordScreen: View {
                         AuthTextField(
                             text: $email, label: "E-posta adresi", placeholder: "ornek@gmail.com",
                             isError: !isEmailValid || uiState.error != nil,
-                            errorMessage: isEmailValid ? uiState.error : "Geçerli bir e-posta adresi girin",
+                            errorMessage: isEmailValid ? uiState.error?.message(.forgotPassword) : "Geçerli bir e-posta adresi girin",
                             keyboardType: .emailAddress, contentType: .emailAddress, submitLabel: .done
                         )
                         .onSubmit(submit)

@@ -112,7 +112,7 @@ private struct ProfileHeader: View {
                     .font(.app(20, .bold))
                     .foregroundColor(.textPrimary)
                     .padding(.top, 12)
-                Text(uiState.bio)
+                Text(uiState.bio ?? "Nonocraft Bulmaca Meraklısı")
                     .font(.subheadline)
                     .foregroundColor(.textMuted)
                     .multilineTextAlignment(.center)

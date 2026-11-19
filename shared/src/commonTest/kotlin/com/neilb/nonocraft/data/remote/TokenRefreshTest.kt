@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.data.remote
 
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.local.TokenManager
 import com.neilb.nonocraft.data.remote.service.UserApiService
@@ -64,6 +65,8 @@ class TokenRefreshTest {
         val result = repository.getMyProfile()
 
         assertIs<Resource.Error<*>>(result)
-        assertEquals("Oturum süresi dolmuş", result.message)
+        assertEquals(ErrorCode.UNAUTHORIZED, result.error.code)
+        assertEquals(401, result.error.httpStatus)
+        assertEquals("Oturum süresi dolmuş", result.error.detail)
     }
 }

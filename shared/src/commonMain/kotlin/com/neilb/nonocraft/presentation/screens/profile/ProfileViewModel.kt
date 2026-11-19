@@ -1,6 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.profile
 
 import androidx.lifecycle.ViewModel
+import com.neilb.nonocraft.presentation.model.epochMillisAgo
+import com.neilb.nonocraft.presentation.model.Difficulty
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 import com.neilb.nonocraft.presentation.components.PostAction
 import com.neilb.nonocraft.presentation.model.PostItem
 import com.neilb.nonocraft.presentation.screens.dashboard.feed.Comment
@@ -21,14 +26,14 @@ class ProfileViewModel : ViewModel() {
         val mockPosts = listOf(
             PostItem(
                 id = "${userId}_post_1",
-                title = "Gece Manzarası",
+                title = "Night Skyline",
                 author = userId,
-                timeAgo = "3g önce",
+                createdAtEpochMillis = epochMillisAgo(3.days),
                 likes = 45,
                 comments = 7,
                 isLiked = false,
-                difficulty = "Zor",
-                size = "8×8",
+                difficulty = Difficulty.HARD,
+                size = 8,
                 accentColor = 0xFF00FFCC,
                 pattern = listOf(
                     listOf(1, 1, 1, 1, 1, 1, 1, 1),
@@ -43,14 +48,14 @@ class ProfileViewModel : ViewModel() {
             ),
             PostItem(
                 id = "${userId}_post_2",
-                title = "Yıldız",
+                title = "Star",
                 author = userId,
-                timeAgo = "1h önce",
+                createdAtEpochMillis = epochMillisAgo(7.days),
                 likes = 23,
                 comments = 3,
                 isLiked = true,
-                difficulty = "Kolay",
-                size = "5×5",
+                difficulty = Difficulty.EASY,
+                size = 5,
                 accentColor = 0xFFFFD700,
                 pattern = listOf(
                     listOf(0, 0, 1, 0, 0),
@@ -63,9 +68,9 @@ class ProfileViewModel : ViewModel() {
         )
 
         val mockPlaylists = listOf(
-            Playlist("pl_1", "Favorilerim", 12),
-            Playlist("pl_2", "Zor Bulmacalar", 5),
-            Playlist("pl_3", "Piksel Sanatı", 28)
+            Playlist("pl_1", "My Favourites", 12),
+            Playlist("pl_2", "Hard Puzzles", 5),
+            Playlist("pl_3", "Pixel Art", 28)
         )
 
         _uiState.update { it.copy(posts = mockPosts, playlists = mockPlaylists) }
@@ -107,8 +112,8 @@ class ProfileViewModel : ViewModel() {
 
     fun openComments(postId: String) {
         val mockComments = listOf(
-            Comment("c1", "zeynep", "Renk uyumu harika olmuş!", "1s önce", false),
-            Comment("c2", "burak", "Bunu çözerken çok eğlendim.", "30d önce", true)
+            Comment("c1", "zeynep", "The colours work so well together!", epochMillisAgo(1.hours), false),
+            Comment("c2", "burak", "Had a lot of fun solving this.", epochMillisAgo(30.minutes), true)
         )
         _uiState.update { it.copy(activeCommentPostId = postId, commentsForActivePost = mockComments) }
     }

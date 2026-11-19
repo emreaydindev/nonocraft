@@ -163,7 +163,7 @@ private fun ProfileHeader(
         } else {
             Text(uiState.username, color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
             Spacer(Modifier.height(4.dp))
-            Text(uiState.bio, color = TextMuted, fontSize = 14.sp, fontFamily = AppFont)
+            Text(uiState.bio ?: "Nonocraft Bulmaca Meraklısı", color = TextMuted, fontSize = 14.sp, fontFamily = AppFont)
             Spacer(Modifier.height(20.dp))
             // İstatistik satırı -> gerçek veri gelene kadar TODO
         }

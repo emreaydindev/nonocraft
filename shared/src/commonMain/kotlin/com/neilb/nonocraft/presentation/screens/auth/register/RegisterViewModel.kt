@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.auth.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.session.SessionManager
 import com.neilb.nonocraft.domain.use_case.auth.Register
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 
 data class RegisterUiState(
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: ErrorCode? = null,
     val isSuccess: Boolean = false
 )
 
@@ -34,7 +35,7 @@ class RegisterViewModel(
                     _state.update { it.copy(isLoading = false, isSuccess = true) }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, error = result.error.code) }
                 }
                 is Resource.Loading -> {}
             }

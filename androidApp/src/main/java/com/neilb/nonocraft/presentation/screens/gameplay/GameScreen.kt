@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.gameplay
 
 import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import kotlinx.coroutines.delay
@@ -192,9 +194,9 @@ fun GameScreen(
                 modifier = Modifier.align(Alignment.Center),
                 color = NeonCyan
             )
-        } else if (state.errorMessage != null) {
+        } else if (state.error != null) {
             Text(
-                text = state.errorMessage!!,
+                text = state.error!!.message(ErrorContext.GAME),
                 color = DangerRed,
                 fontFamily = AppFont,
                 modifier = Modifier.align(Alignment.Center)

@@ -29,7 +29,7 @@ struct GameScreen: View {
         ScreenBackground {
             if state.isLoading {
                 ProgressView().tint(.neonCyan)
-            } else if let error = state.errorMessage {
+            } else if let error = state.error?.message(.game) {
                 VStack(spacing: 16) {
                     Text(error)
                         .font(.app(15))

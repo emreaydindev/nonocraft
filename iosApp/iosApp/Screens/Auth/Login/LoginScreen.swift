@@ -37,7 +37,7 @@ struct LoginScreen: View {
                         AuthDivider(label: "veya e-posta ile")
 
                         if let error = uiState.error {
-                            InfoBanner(message: "Giriş başarısız", subMessage: error, isError: true)
+                            InfoBanner(message: "Giriş başarısız", subMessage: error.message(.login), isError: true)
                                 .padding(.bottom, 14)
                         }
 

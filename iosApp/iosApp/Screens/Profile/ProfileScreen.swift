@@ -83,7 +83,7 @@ struct ProfileScreen: View {
         let menuPost = uiState.posts.first { $0.id == uiState.activeMenuPostId }
         return PostSheetsModel(
             comments: uiState.commentsForActivePost.map {
-                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: $0.timeAgo, isLiked: $0.isLiked)
+                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: DisplayText.relativeTime($0.createdAtEpochMillis), isLiked: $0.isLiked)
             },
             playlists: uiState.playlists.map { PlaylistRowData(id: $0.id, name: $0.name, postCount: Int($0.postCount)) },
             isCommentsOpen: uiState.activeCommentPostId != nil,

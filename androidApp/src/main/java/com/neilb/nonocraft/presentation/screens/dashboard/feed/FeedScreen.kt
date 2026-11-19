@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.feed
 
 import androidx.compose.ui.semantics.onClick
+import com.neilb.nonocraft.presentation.text.label
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -285,7 +288,7 @@ fun FeedScreen(
                         onAddToPlaylist = { viewModel.openPlaylistDialog() },
                         onGoToProfile = {
                             viewModel.closeMenu()
-                            onNavigateToProfile(activePost.author)
+                            activePost.author?.let(onNavigateToProfile)
                         },
                         onReport = { viewModel.closeMenu() },
                         onDownload = { viewModel.downloadPuzzle(activePost.id) }
@@ -319,7 +322,7 @@ private fun LazyListScope.feedItems(
     } else if (uiState.error != null) {
         item {
             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(text = uiState.error!!, color = DangerRed, fontFamily = AppFont)
+                Text(text = uiState.error!!.message(ErrorContext.FEED), color = DangerRed, fontFamily = AppFont)
             }
         }
     } else if (uiState.posts.isEmpty()) {
@@ -370,7 +373,7 @@ private fun FeedFilterRow(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = tab.label,
+                        text = tab.label(),
                         color = if (isSelected) BackgroundDark else TextMuted,
                         fontSize = 13.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -399,7 +402,7 @@ private fun FeedFilterRow(
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = range.label,
+                                        text = range.label(),
                                         color = if (range == selectedTimeRange) NeonCyan else TextPrimary,
                                         fontFamily = AppFont,
                                         fontSize = 14.sp,

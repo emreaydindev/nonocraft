@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.domain.use_case.auth.ForgotPassword
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 data class ForgotPasswordUiState(
     val isLoading: Boolean = false,
     val isSent: Boolean = false,
-    val error: String? = null,
+    val error: ErrorCode? = null,
 )
 
 class ForgotPasswordViewModel(
@@ -31,7 +32,7 @@ class ForgotPasswordViewModel(
                     _state.update { it.copy(isLoading = false, isSent = true) }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, error = result.error.code) }
                 }
                 is Resource.Loading -> { /* already handled */ }
             }

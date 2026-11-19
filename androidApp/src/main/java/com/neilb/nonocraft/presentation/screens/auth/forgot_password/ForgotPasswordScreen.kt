@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -94,7 +96,7 @@ fun ForgotPasswordScreen(
                     isError = !isEmailValid || state.error != null,
                     errorMessage = when {
                         !isEmailValid   -> "Geçerli bir e-posta adresi girin"
-                        state.error != null -> state.error
+                        state.error != null -> state.error?.message(ErrorContext.FORGOT_PASSWORD)
                         else            -> null
                     },
                     keyboardOptions = KeyboardOptions(

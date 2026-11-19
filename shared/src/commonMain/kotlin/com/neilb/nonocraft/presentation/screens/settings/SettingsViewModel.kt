@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.session.SessionManager
 import com.neilb.nonocraft.domain.use_case.user.DeleteAccount
@@ -30,7 +31,7 @@ class SettingsViewModel(
                 sessionManager.clearSession()
                 _uiEvent.emit(SettingsUiEvent.NavigateToAuth)
             } else if (result is Resource.Error) {
-                _uiEvent.emit(SettingsUiEvent.ShowError(result.message ?: "Hesap silinemedi"))
+                _uiEvent.emit(SettingsUiEvent.ShowError(result.error.code))
             }
         }
     }
@@ -38,5 +39,5 @@ class SettingsViewModel(
 
 sealed interface SettingsUiEvent {
     object NavigateToAuth : SettingsUiEvent
-    data class ShowError(val message: String) : SettingsUiEvent
+    data class ShowError(val code: ErrorCode) : SettingsUiEvent
 }

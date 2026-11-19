@@ -22,7 +22,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.getPuzzles(limit, offset, type, difficulty) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data?.puzzles?.map { it.toPuzzle() } ?: emptyList())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -31,7 +31,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.getPuzzleById(id) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toPuzzle())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -40,7 +40,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.createPuzzle(request) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toPuzzle())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -52,7 +52,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.likePuzzle(id) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toLikeResult())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -61,7 +61,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.unlikePuzzle(id) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toLikeResult())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -70,7 +70,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.completePuzzle(id) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toCompletionResult())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -82,7 +82,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.getComments(puzzleId) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data?.comments?.map { it.toComment() } ?: emptyList())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -91,7 +91,7 @@ class PuzzleRepositoryImpl(
         safeApiCall { api.createComment(puzzleId, request) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toComment())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }

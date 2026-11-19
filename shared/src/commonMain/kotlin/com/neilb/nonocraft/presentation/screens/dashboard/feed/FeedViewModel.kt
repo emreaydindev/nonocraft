@@ -1,7 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.feed
 
 import androidx.lifecycle.ViewModel
+import com.neilb.nonocraft.presentation.model.epochMillisAgo
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.domain.use_case.puzzle.GetPuzzles
 import com.neilb.nonocraft.presentation.components.PostAction
@@ -19,7 +23,7 @@ data class FeedUiState(
     val selectedTimeRange: TimeRange = TimeRange.ALL_TIME,
     val showTimeRangeDropdown: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: ErrorCode? = null,
     val posts: List<PostItem> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
     val commentsForActivePost: List<Comment> = emptyList(),
@@ -28,25 +32,16 @@ data class FeedUiState(
     val activePlaylistPostId: String? = null
 )
 
-enum class FeedTab(val label: String) {
-    FEATURED("Öne Çıkanlar"),
-    LATEST("En Yeniler"),
-    FOLLOWING("Takip Edilenler"),
-    MOST_LIKED("En Beğenilenler")
-}
+enum class FeedTab { FEATURED, LATEST, FOLLOWING, MOST_LIKED }
 
-enum class TimeRange(val label: String) {
-    TODAY("Son 24 Saat"),
-    WEEK("Bu Hafta"),
-    MONTH("Bu Ay"),
-    ALL_TIME("Tüm Zamanlar")
-}
+enum class TimeRange { TODAY, WEEK, MONTH, ALL_TIME }
 
 data class Comment(
     val id: String,
     val author: String,
     val content: String,
-    val timeAgo: String,
+    /** When it was posted; the UI formats it as relative time. */
+    val createdAtEpochMillis: Long?,
     val isLiked: Boolean
 )
 
@@ -81,7 +76,7 @@ class FeedViewModel(
                     _uiState.update { it.copy(isLoading = false, posts = postItems) }
                 }
                 is Resource.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
+                    _uiState.update { it.copy(isLoading = false, error = result.error.code) }
                 }
                 is Resource.Loading -> { /* already handled */ }
             }
@@ -93,9 +88,9 @@ class FeedViewModel(
 
     private fun getPlaylistsMock(): List<Playlist> {
         return listOf(
-            Playlist("pl_1", "Favorilerim", 12),
-            Playlist("pl_2", "Zor Bulmacalar", 5),
-            Playlist("pl_3", "Piksel Sanatı", 28)
+            Playlist("pl_1", "My Favourites", 12),
+            Playlist("pl_2", "Hard Puzzles", 5),
+            Playlist("pl_3", "Pixel Art", 28)
         )
     }
 
@@ -155,8 +150,8 @@ class FeedViewModel(
 
     fun openComments(postId: String) {
         val mockComments = listOf(
-            Comment("c1", "zeynep", "Renk uyumu harika olmuş!", "1s önce", false),
-            Comment("c2", "burak", "Bunu çözerken çok eğlendim.", "30d önce", true)
+            Comment("c1", "zeynep", "The colours work so well together!", epochMillisAgo(1.hours), false),
+            Comment("c2", "burak", "Had a lot of fun solving this.", epochMillisAgo(30.minutes), true)
         )
         _uiState.update { it.copy(activeCommentPostId = postId, commentsForActivePost = mockComments) }
     }

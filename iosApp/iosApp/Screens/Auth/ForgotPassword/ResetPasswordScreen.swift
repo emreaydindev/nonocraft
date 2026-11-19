@@ -35,7 +35,7 @@ struct ResetPasswordScreen: View {
 
                         AuthTextField(
                             text: $code, label: "Doğrulama kodu", placeholder: "000000",
-                            isError: uiState.error != nil, errorMessage: uiState.error,
+                            isError: uiState.error != nil, errorMessage: uiState.error?.message(.resetPassword),
                             keyboardType: .numberPad, contentType: .oneTimeCode
                         )
                         .onChange(of: code) { _, value in

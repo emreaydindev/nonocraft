@@ -1,5 +1,6 @@
 package com.neilb.nonocraft
 
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.local.TokenManager
 import com.neilb.nonocraft.data.remote.createHttpClient
@@ -44,7 +45,7 @@ class StagingApiIntegrationTest {
     private val ranking = RankingRepositoryImpl(RankingApiService(client))
 
     private fun <T> Resource<T>.describe(): String =
-        if (this is Resource.Success) "Success" else "Error(${message})"
+        if (this is Resource.Success) "Success" else "Error(${error})"
 
     @Test
     fun authenticatedFlow() = runBlocking {
@@ -58,8 +59,10 @@ class StagingApiIntegrationTest {
 
         val wrongPassword = auth.login("$name@example.com", "wrong-password")
         assertIs<Resource.Error<*>>(wrongPassword)
-        assertNotNull(wrongPassword.message)
-        println("bad login message: ${wrongPassword.message}")
+        assertTrue(
+            wrongPassword.error.code in setOf(ErrorCode.INVALID_CREDENTIALS, ErrorCode.UNAUTHORIZED),
+            "bad login code: ${wrongPassword.error}",
+        )
 
         results["login"] = auth.login("$name@example.com", "password123")
         val me = users.getMyProfile()

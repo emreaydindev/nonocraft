@@ -90,7 +90,7 @@ struct SettingsScreen: View {
             for await event in model.viewModel.uiEvent {
                 switch onEnum(of: event) {
                 case .navigateToAuth: onLogoutSuccess()
-                case .showError(let error): errorMessage = error.message
+                case .showError(let error): errorMessage = error.code.message(.deleteAccount)
                 }
             }
         }

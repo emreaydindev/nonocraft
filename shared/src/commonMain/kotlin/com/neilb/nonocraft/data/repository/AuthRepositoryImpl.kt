@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.data.repository
 
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.local.TokenManager
 import com.neilb.nonocraft.data.mapper.toAuthResult
@@ -24,7 +25,7 @@ class AuthRepositoryImpl(
                 tokenManager.clearGuestMode()
                 Resource.Success(result.data.toAuthResult())
             }
-            is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
+            is Resource.Error -> Resource.Error(result.error)
             is Resource.Loading -> Resource.Loading()
         }
     }
@@ -38,13 +39,13 @@ class AuthRepositoryImpl(
                 tokenManager.clearGuestMode()
                 Resource.Success(result.data.toAuthResult())
             }
-            is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
+            is Resource.Error -> Resource.Error(result.error)
             is Resource.Loading -> Resource.Loading()
         }
     }
 
     override suspend fun refreshToken(): Resource<AuthResult> {
-        val rt = tokenManager.refreshToken ?: return Resource.Error("Oturum süresi dolmuş")
+        val rt = tokenManager.refreshToken ?: return Resource.Error(ErrorCode.SESSION_EXPIRED)
         val result = safeApiCall { api.refreshToken(RefreshTokenRequest(rt)) }
         return when (result) {
             is Resource.Success -> {
@@ -54,7 +55,7 @@ class AuthRepositoryImpl(
             }
             is Resource.Error -> {
                 tokenManager.clear()
-                Resource.Error(result.message ?: "Unknown error")
+                Resource.Error(result.error)
             }
             is Resource.Loading -> Resource.Loading()
         }
@@ -85,7 +86,7 @@ class AuthRepositoryImpl(
                 tokenManager.clearGuestMode()
                 Resource.Success(result.data.toAuthResult())
             }
-            is Resource.Error -> Resource.Error(result.message ?: "Unknown error")
+            is Resource.Error -> Resource.Error(result.error)
             is Resource.Loading -> Resource.Loading()
         }
     }

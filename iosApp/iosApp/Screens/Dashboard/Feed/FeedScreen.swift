@@ -103,7 +103,7 @@ struct FeedScreen: View {
         if uiState.isLoading {
             ProgressView().tint(.neonCyan).padding(32)
         } else if let error = uiState.error {
-            ContentUnavailableView(error, systemImage: "wifi.exclamationmark")
+            ContentUnavailableView(error.message(.feed), systemImage: "wifi.exclamationmark")
                 .foregroundStyle(Color.dangerRed)
         } else if uiState.posts.isEmpty {
             ContentUnavailableView("Henüz bir bulmaca bulunamadı.", systemImage: "square.grid.3x3")
@@ -178,7 +178,7 @@ struct FeedScreen: View {
     private func handle(_ action: PostCardAction, for post: PostItem) {
         switch action {
         case .play: onNavigateToGame(post.id)
-        case .profile: onNavigateToProfile(post.author)
+        case .profile: if let author = post.author { onNavigateToProfile(author) }
         case .like: viewModel.toggleLike(postId: post.id)
         case .comment: viewModel.openComments(postId: post.id)
         case .more: viewModel.openMenu(postId: post.id)
@@ -190,7 +190,7 @@ struct FeedScreen: View {
         let menuPost = uiState.posts.first { $0.id == uiState.activeMenuPostId }
         return PostSheetsModel(
             comments: uiState.commentsForActivePost.map {
-                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: $0.timeAgo, isLiked: $0.isLiked)
+                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: DisplayText.relativeTime($0.createdAtEpochMillis), isLiked: $0.isLiked)
             },
             playlists: uiState.playlists.map { PlaylistRowData(id: $0.id, name: $0.name, postCount: Int($0.postCount)) },
             isCommentsOpen: uiState.activeCommentPostId != nil,
@@ -206,7 +206,7 @@ struct FeedScreen: View {
             onAddToPlaylist: { viewModel.openPlaylistDialog() },
             onGoToProfile: {
                 viewModel.closeMenu()
-                if let menuPost { onNavigateToProfile(menuPost.author) }
+                if let author = menuPost?.author { onNavigateToProfile(author) }
             },
             onDownload: { if let menuPost { viewModel.downloadPuzzle(postId: menuPost.id) } },
             onSelectPlaylist: { viewModel.addToPlaylist(playlistId: $0) },

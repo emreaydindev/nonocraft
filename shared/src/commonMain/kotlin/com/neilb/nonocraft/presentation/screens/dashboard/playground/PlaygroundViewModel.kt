@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.dashboard.playground
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.data.local.TokenManager
 import com.neilb.nonocraft.data.session.SessionManager
 import com.neilb.nonocraft.domain.model.User
@@ -31,7 +32,7 @@ class PlaygroundViewModel(
 
     private fun observeUser() {
         if (tokenManager.isGuest) {
-            _uiState.update { it.copy(userSection = SectionState.Success(GUEST_USER)) }
+            _uiState.update { it.copy(isGuest = true, userSection = SectionState.Success(GUEST_USER)) }
             return
         }
         viewModelScope.launch {
@@ -47,7 +48,7 @@ class PlaygroundViewModel(
         if (tokenManager.isGuest) return
         viewModelScope.launch {
             if (!sessionManager.refreshSession()) {
-                _uiState.update { it.copy(userSection = SectionState.Error("Profil yüklenemedi")) }
+                _uiState.update { it.copy(userSection = SectionState.Error(ErrorCode.UNKNOWN)) }
             }
         }
     }
@@ -56,7 +57,7 @@ class PlaygroundViewModel(
         val GUEST_USER = User(
             id = "guest",
             email = "",
-            username = "Misafir",
+            username = "",
             bio = null,
             avatarPuzzleId = null,
             isPremium = false,

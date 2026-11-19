@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.material3.minimumInteractiveComponentSize
+import com.neilb.nonocraft.presentation.text.relativeTime
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
@@ -157,7 +158,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                                 fontFamily = AppFont
                             )
                             Text(
-                                text = comment.timeAgo,
+                                text = relativeTime(comment.createdAtEpochMillis),
                                 color = TextMuted,
                                 fontSize = 12.sp,
                                 fontFamily = AppFont
@@ -300,7 +301,9 @@ fun PostMenuSheetContent(
             onClick = onDownload
         )
 
-        MenuRowItem(icon = Icons.Rounded.Person, text = "@${post.author} Profiline Git", onClick = onGoToProfile)
+        post.author?.let { author ->
+            MenuRowItem(icon = Icons.Rounded.Person, text = "@$author Profiline Git", onClick = onGoToProfile)
+        }
         MenuRowItem(icon = Icons.Rounded.Report, text = "Şikayet Et", tint = DangerRed, onClick = onReport)
     }
 }

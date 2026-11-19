@@ -30,7 +30,7 @@ struct PostCard: View {
         AdaptiveStack(spacing: 8) {
             Button { onAction(.profile) } label: {
                 HStack(spacing: 12) {
-                    Text(post.author.prefix(1).uppercased())
+                    Text(DisplayText.author(post.author).prefix(1).uppercased())
                         .font(.app(14, .bold))
                         .foregroundColor(accent)
                         .frame(width: avatarSize, height: avatarSize)
@@ -39,10 +39,10 @@ struct PostCard: View {
                         .overlay(Circle().stroke(accent.opacity(0.5), lineWidth: 1))
                         .accessibilityHidden(true) // the initial repeats the name read next
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("@\(post.author)")
+                        Text(DisplayText.handle(post.author))
                             .font(.app(14, .bold))
                             .foregroundColor(.textPrimary)
-                        Text(post.timeAgo)
+                        Text(DisplayText.relativeTime(post.createdAtEpochMillis))
                             .font(.caption)
                             .foregroundColor(.textMuted)
                     }
@@ -140,7 +140,7 @@ struct PostCard: View {
                     .font(.app(15, .bold))
                     .foregroundColor(.textPrimary)
                     .lineLimit(1)
-                Text("\(post.size) · \(post.difficulty)")
+                Text([DisplayText.boardSize(post.size), post.difficulty?.label].compactMap { $0 }.joined(separator: " · "))
                     .font(.footnote)
                     .foregroundColor(.textMuted)
             }

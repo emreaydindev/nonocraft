@@ -15,7 +15,7 @@ class UserRepositoryImpl(
         safeApiCall { api.getMyProfile() }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toUser())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -24,7 +24,7 @@ class UserRepositoryImpl(
         safeApiCall { api.getUserProfile(userId) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data!!.toUser())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -46,7 +46,7 @@ class UserRepositoryImpl(
         safeApiCall { api.getFollowers(userId, limit, offset) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data?.map { it.toUser() } ?: emptyList())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }
@@ -55,7 +55,7 @@ class UserRepositoryImpl(
         safeApiCall { api.getFollowing(userId, limit, offset) }.let { resource ->
             when (resource) {
                 is Resource.Success -> Resource.Success(resource.data?.map { it.toUser() } ?: emptyList())
-                is Resource.Error -> Resource.Error(resource.message ?: "Unknown error")
+                is Resource.Error -> Resource.Error(resource.error)
                 is Resource.Loading -> Resource.Loading()
             }
         }

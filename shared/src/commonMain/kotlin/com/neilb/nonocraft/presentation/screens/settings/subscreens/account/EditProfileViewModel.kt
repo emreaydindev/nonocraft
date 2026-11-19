@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.settings.subscreens.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.data.session.SessionManager
 import com.neilb.nonocraft.domain.use_case.user.UpdateProfile
@@ -30,7 +31,7 @@ class EditProfileViewModel(
                     _uiEvent.emit(EditProfileUiEvent.Success)
                 }
                 is Resource.Error -> {
-                    _uiEvent.emit(EditProfileUiEvent.Error(result.message ?: "Profil güncellenemedi"))
+                    _uiEvent.emit(EditProfileUiEvent.Error(result.error.code))
                 }
                 else -> {}
             }
@@ -41,5 +42,5 @@ class EditProfileViewModel(
 sealed interface EditProfileUiEvent {
     object Loading : EditProfileUiEvent
     object Success : EditProfileUiEvent
-    data class Error(val message: String) : EditProfileUiEvent
+    data class Error(val code: ErrorCode) : EditProfileUiEvent
 }

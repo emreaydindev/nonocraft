@@ -49,7 +49,7 @@ private struct PlaygroundContent: View {
                 LevelProgressCard(
                     currentLevel: Int(state.currentLevelNumber),
                     hasDraft: state.hasDraft,
-                    draftSize: state.draftSize,
+                    draftSize: DisplayText.boardSize(state.draftSize),
                     draftProgress: Int(state.draftProgress),
                     onContinue: { onNavigateToGame(state.currentLevelId) }
                 )

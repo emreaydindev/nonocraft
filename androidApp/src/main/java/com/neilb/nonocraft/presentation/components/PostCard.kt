@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.foundation.layout.heightIn
+import com.neilb.nonocraft.presentation.text.label
+import com.neilb.nonocraft.presentation.text.boardSizeText
+import com.neilb.nonocraft.presentation.text.relativeTime
+import com.neilb.nonocraft.presentation.text.authorName
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -65,7 +69,7 @@ fun PostCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.rippleClickable { onAction(PostAction.ProfileClick(post.author)) }
+                    modifier = Modifier.rippleClickable { post.author?.let { onAction(PostAction.ProfileClick(it)) } }
                 ) {
                     Box(
                         modifier = Modifier
@@ -77,7 +81,7 @@ fun PostCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = post.author.take(1).uppercase(),
+                            text = authorName(post.author).take(1).uppercase(),
                             color = Color(post.accentColor),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
@@ -86,14 +90,14 @@ fun PostCard(
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            text = "@${post.author}",
+                            text = post.author?.let { "@$it" } ?: authorName(null),
                             color = TextPrimary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = AppFont
                         )
                         Text(
-                            text = post.timeAgo,
+                            text = relativeTime(post.createdAtEpochMillis),
                             color = TextMuted,
                             fontSize = 11.sp,
                             fontFamily = AppFont
@@ -240,7 +244,7 @@ fun PostCard(
                         fontFamily = AppFont
                     )
                     Text(
-                        text = "${post.size} · ${post.difficulty}",
+                        text = listOfNotNull(boardSizeText(post.size), post.difficulty?.label()).joinToString(" · "),
                         color = TextMuted,
                         fontSize = 12.sp,
                         fontFamily = AppFont

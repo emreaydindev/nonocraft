@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings
 
 import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.toMessage
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
@@ -104,7 +106,7 @@ fun SettingsScreen(
         viewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is SettingsUiEvent.NavigateToAuth -> onLogoutSuccess()
-                is SettingsUiEvent.ShowError -> context.showToast(event.message)
+                is SettingsUiEvent.ShowError -> context.showToast(event.code.toMessage(context, ErrorContext.DELETE_ACCOUNT))
             }
         }
     }

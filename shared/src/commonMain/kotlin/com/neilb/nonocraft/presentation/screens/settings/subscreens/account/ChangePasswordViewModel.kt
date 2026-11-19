@@ -2,6 +2,7 @@ package com.neilb.nonocraft.presentation.screens.settings.subscreens.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.domain.use_case.user.ChangePassword
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +25,7 @@ class ChangePasswordViewModel(
                     _uiEvent.emit(ChangePasswordUiEvent.Success)
                 }
                 is Resource.Error -> {
-                    _uiEvent.emit(ChangePasswordUiEvent.Error(result.message ?: "Şifre güncellenemedi"))
+                    _uiEvent.emit(ChangePasswordUiEvent.Error(result.error.code))
                 }
                 else -> {}
             }
@@ -35,5 +36,5 @@ class ChangePasswordViewModel(
 sealed interface ChangePasswordUiEvent {
     object Loading : ChangePasswordUiEvent
     object Success : ChangePasswordUiEvent
-    data class Error(val message: String) : ChangePasswordUiEvent
+    data class Error(val code: ErrorCode) : ChangePasswordUiEvent
 }

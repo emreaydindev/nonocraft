@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.playground
 
 import androidx.compose.foundation.Image
+import com.neilb.nonocraft.presentation.text.boardSizeText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -156,7 +157,7 @@ fun PlaygroundContent(
             LevelProgressCard(
                 currentLevel = state.currentLevelNumber,
                 hasDraft = state.hasDraft,
-                draftSize = state.draftSize,
+                draftSize = boardSizeText(state.draftSize),
                 draftProgress = state.draftProgress,
                 onContinue = { onNavigateToGame(state.currentLevelId) },
             )

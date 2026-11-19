@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library.detail
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.title
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -91,7 +92,7 @@ fun LibraryDetailScreen(
                     }
                 }
                 Text(
-                    text = uiState.title,
+                    text = uiState.category.title(uiState.playlistName),
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -189,7 +190,7 @@ fun LibraryDetailScreen(
                         onAddToPlaylist = { viewModel.openPlaylistDialog() },
                         onGoToProfile = {
                             viewModel.closeMenu()
-                            onNavigateToProfile(activePost.author)
+                            activePost.author?.let(onNavigateToProfile)
                         },
                         onReport = { viewModel.closeMenu() },
                         onDownload = { viewModel.downloadPuzzle(activePost.id) }

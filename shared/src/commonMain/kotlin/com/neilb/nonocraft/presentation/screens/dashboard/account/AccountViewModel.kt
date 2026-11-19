@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.stateIn
 data class AccountUiState(
     val isGuest: Boolean = false,
     val username: String = "",
-    val bio: String = "Nonocraft Bulmaca Meraklısı",
+    /** The user's own bio; null shows the UI's localized placeholder. */
+    val bio: String? = null,
     val avatarUrl: String? = null,
     // TODO: solvedCount/followers/following -> GetUserStats use case gelince eklenecek
 )
@@ -28,6 +29,7 @@ class AccountViewModel(
                 AccountUiState(
                     isGuest = false,
                     username = "@${profile.username}",
+                    bio = profile.bio?.takeIf { it.isNotBlank() },
                     avatarUrl = profile.avatarPuzzleId,
                 )
             } else {

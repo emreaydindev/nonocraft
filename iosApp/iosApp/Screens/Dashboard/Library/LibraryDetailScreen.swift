@@ -50,7 +50,7 @@ struct LibraryDetailContent: View {
         ScrollView {
             LazyVStack(spacing: 20) {
                 if showsTitleHeader {
-                    Text(uiState.title)
+                    Text(uiState.category.title(playlistName: uiState.playlistName))
                         .font(.app(22, .bold))
                         .foregroundStyle(Color.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -60,7 +60,7 @@ struct LibraryDetailContent: View {
                     PostCard(post: post, showFollowButton: false) { action in
                         switch action {
                         case .play: onNavigateToGame(post.id)
-                        case .profile: onNavigateToProfile(post.author)
+                        case .profile: if let author = post.author { onNavigateToProfile(author) }
                         case .like: viewModel.handlePostAction(action: PostActionLikeClick(postId: post.id))
                         case .comment: viewModel.openComments(postId: post.id)
                         case .more: viewModel.openMenu(postId: post.id)
@@ -81,7 +81,7 @@ struct LibraryDetailContent: View {
                 ContentUnavailableView("Burada henüz bir şey yok.", systemImage: "tray")
             }
         }
-        .modifier(InlineNavigationTitle(title: uiState.title, isEnabled: !showsTitleHeader))
+        .modifier(InlineNavigationTitle(title: uiState.category.title(playlistName: uiState.playlistName), isEnabled: !showsTitleHeader))
         .postSheets(sheets)
     }
 
@@ -89,7 +89,7 @@ struct LibraryDetailContent: View {
         let menuPost = uiState.posts.first { $0.id == uiState.activeMenuPostId }
         return PostSheetsModel(
             comments: uiState.commentsForActivePost.map {
-                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: $0.timeAgo, isLiked: $0.isLiked)
+                CommentRowData(id: $0.id, author: $0.author, content: $0.content, timeAgo: DisplayText.relativeTime($0.createdAtEpochMillis), isLiked: $0.isLiked)
             },
             playlists: uiState.playlists.map { PlaylistRowData(id: $0.id, name: $0.name, postCount: Int($0.postCount)) },
             isCommentsOpen: uiState.activeCommentPostId != nil,
@@ -105,7 +105,7 @@ struct LibraryDetailContent: View {
             onAddToPlaylist: { viewModel.openPlaylistDialog() },
             onGoToProfile: {
                 viewModel.closeMenu()
-                if let menuPost { onNavigateToProfile(menuPost.author) }
+                if let author = menuPost?.author { onNavigateToProfile(author) }
             },
             onDownload: { if let menuPost { viewModel.downloadPuzzle(postId: menuPost.id) } },
             onSelectPlaylist: { viewModel.addToPlaylist(playlistId: $0) },

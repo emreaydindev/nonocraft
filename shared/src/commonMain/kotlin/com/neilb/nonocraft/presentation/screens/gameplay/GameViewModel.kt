@@ -3,6 +3,7 @@ package com.neilb.nonocraft.presentation.screens.gameplay
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neilb.nonocraft.common.ErrorCode
 import com.neilb.nonocraft.common.Resource
 import com.neilb.nonocraft.domain.model.Clue
 import com.neilb.nonocraft.domain.model.Puzzle
@@ -29,7 +30,7 @@ sealed class GameEvent {
 
 data class GameUiState(
     val isLoading: Boolean = true,
-    val errorMessage: String? = null,
+    val error: ErrorCode? = null,
     val puzzle: Puzzle? = null,
     val rowClues: List<List<Clue>> = emptyList(),
     val colClues: List<List<Clue>> = emptyList(),
@@ -67,7 +68,7 @@ class GameViewModel(
     init {
         val gameId: String? = savedStateHandle["gameId"]
         if (gameId != null) loadGame(gameId)
-        else _state.update { it.copy(isLoading = false, errorMessage = "Puzzle ID bulunamadı") }
+        else _state.update { it.copy(isLoading = false, error = ErrorCode.PUZZLE_NOT_FOUND) }
     }
 
     fun setAnalogFocus(isFocused: Boolean) {
@@ -92,7 +93,7 @@ class GameViewModel(
 
     private fun loadGame(id: String) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
             when (val result = getPuzzle(id)) {
                 is Resource.Success -> {
                     val puzzle = result.data!!
@@ -119,7 +120,7 @@ class GameViewModel(
                     playPuzzle(id) // Register play session
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, errorMessage = result.message) }
+                    _state.update { it.copy(isLoading = false, error = result.error.code) }
                 }
                 is Resource.Loading -> { /* handled above */ }
             }

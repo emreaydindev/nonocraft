@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -103,7 +105,7 @@ fun ResetPasswordScreen(
                     label = "Doğrulama kodu",
                     placeholder = "000000",
                     isError = state.error != null,
-                    errorMessage = state.error,
+                    errorMessage = state.error?.message(ErrorContext.RESET_PASSWORD),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.NumberPassword,
                         imeAction = ImeAction.Next,

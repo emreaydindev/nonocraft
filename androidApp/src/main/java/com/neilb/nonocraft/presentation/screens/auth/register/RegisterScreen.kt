@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.register
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.presentation.text.ErrorContext
+import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -169,7 +171,7 @@ fun RegisterScreen(
                 if (state.error != null) {
                     InfoBanner(
                         message = "Kayıt başarısız",
-                        subMessage = state.error!!,
+                        subMessage = state.error!!.message(ErrorContext.REGISTER),
                         isError = true,
                         modifier = Modifier.padding(bottom = 14.dp),
                     )

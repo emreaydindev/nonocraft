@@ -29,7 +29,7 @@ struct EditProfileScreen: View {
                     .lineLimit(3...6)
             } footer: {
                 if let errorMessage {
-                    Label("Profil güncellenemedi: \(errorMessage)", systemImage: "exclamationmark.triangle.fill")
+                    Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(Color.dangerRed)
                 }
             }
@@ -60,7 +60,7 @@ struct EditProfileScreen: View {
                     dismiss()
                 case .error(let error):
                     isLoading = false
-                    errorMessage = error.message
+                    errorMessage = error.code.message(.editProfile)
                 }
             }
         }

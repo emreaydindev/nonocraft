@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.presentation.text.authorName
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -85,7 +86,7 @@ fun PostRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = "@${post.author}",
+                text = post.author?.let { "@$it" } ?: authorName(null),
                 color = TextSecondary,
                 fontSize = 13.sp,
                 fontFamily = AppFont,

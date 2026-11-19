@@ -20,7 +20,7 @@ struct PostRow: View {
                         .font(.app(15, .bold))
                         .foregroundStyle(Color.textPrimary)
                         .lineLimit(2)
-                    Text("@\(post.author)")
+                    Text(DisplayText.handle(post.author))
                         .font(.footnote)
                         .foregroundStyle(Color.textSecondary)
                         .lineLimit(1)

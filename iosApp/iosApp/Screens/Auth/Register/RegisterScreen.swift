@@ -37,7 +37,7 @@ struct RegisterScreen: View {
                         AuthDivider(label: "veya e-posta ile")
 
                         if let error = uiState.error {
-                            InfoBanner(message: "Kayıt başarısız", subMessage: error, isError: true)
+                            InfoBanner(message: "Kayıt başarısız", subMessage: error.message(.register), isError: true)
                                 .padding(.bottom, 14)
                         }
 

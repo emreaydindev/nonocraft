@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library
 
 import androidx.lifecycle.ViewModel
+
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,9 +65,9 @@ class LibraryViewModel : ViewModel() {
                 completedLevelsCount = 42,
                 completedDailiesCount = 18,
                 playlists = listOf(
-                    PlaylistItem("pl_1", "Zor Bulmacalar", 15, 0xFFE24B4A),
-                    PlaylistItem("pl_2", "Radiohead Dinlerken", 24, 0xFF00FFDC),
-                    PlaylistItem("pl_3", "Piksel Sanatı", 8, 0xFFFFD700)
+                    PlaylistItem("pl_1", "Hard Puzzles", 15, 0xFFE24B4A),
+                    PlaylistItem("pl_2", "Rainy Day Picks", 24, 0xFF00FFDC),
+                    PlaylistItem("pl_3", "Pixel Art", 8, 0xFFFFD700)
                 )
             )
         }
