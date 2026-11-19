@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.components
 
+import com.neilb.nonocraft.presentation.text.uppercaseForDisplay
 import androidx.compose.foundation.background
 import androidx.annotation.StringRes
 import com.neilb.nonocraft.R
@@ -177,7 +178,7 @@ private fun NavLabel(text: String, isSelected: Boolean) {
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
-        text = text.uppercase(),
+        text = text.uppercaseForDisplay(),
         color = TextMuted,
         fontSize = 11.sp,
         letterSpacing = 1.2.sp,

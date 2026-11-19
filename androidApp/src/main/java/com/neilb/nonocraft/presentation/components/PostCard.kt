@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.components
 
+import com.neilb.nonocraft.presentation.text.uppercaseForDisplay
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.res.pluralStringResource
 import com.neilb.nonocraft.R
@@ -88,7 +89,7 @@ fun PostCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = authorName(post.author).take(1).uppercase(),
+                            text = authorName(post.author).take(1).uppercaseForDisplay(),
                             color = Color(post.accentColor),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,

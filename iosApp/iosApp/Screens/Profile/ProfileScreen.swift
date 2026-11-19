@@ -42,7 +42,7 @@ struct ProfileScreen: View {
     private var header: some View {
         DashboardCard(cornerRadius: 24) {
             VStack(spacing: 0) {
-                Text(userId.prefix(1).uppercased())
+                Text(userId.prefix(1).uppercased(with: .current))
                     .font(.app(32, .bold))
                     .foregroundColor(.neonCyan)
                     .frame(width: 80, height: 80)

@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.components
 
+import com.neilb.nonocraft.presentation.text.uppercaseForDisplay
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.ui.res.pluralStringResource
 import com.neilb.nonocraft.R
@@ -139,7 +140,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = comment.author.take(1).uppercase(),
+                            text = comment.author.take(1).uppercaseForDisplay(),
                             color = TextMuted,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,

@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.profile
 
+import com.neilb.nonocraft.presentation.text.uppercaseForDisplay
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import com.neilb.nonocraft.R
 import androidx.compose.ui.res.stringResource
@@ -135,7 +136,7 @@ fun ProfileScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = userId.take(1).uppercase(),
+                                    text = userId.take(1).uppercaseForDisplay(),
                                     color = NeonCyan,
                                     fontSize = 32.sp,
                                     fontWeight = FontWeight.Bold,

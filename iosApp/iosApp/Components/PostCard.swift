@@ -30,7 +30,7 @@ struct PostCard: View {
         AdaptiveStack(spacing: 8) {
             Button { onAction(.profile) } label: {
                 HStack(spacing: 12) {
-                    Text(DisplayText.author(post.author).prefix(1).uppercased())
+                    Text(DisplayText.author(post.author).prefix(1).uppercased(with: .current))
                         .font(.app(14, .bold))
                         .foregroundColor(accent)
                         .frame(width: avatarSize, height: avatarSize)

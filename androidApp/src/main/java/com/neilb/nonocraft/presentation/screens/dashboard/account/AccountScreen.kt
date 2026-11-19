@@ -1,5 +1,6 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.account
 
+import com.neilb.nonocraft.presentation.text.uppercaseForDisplay
 import androidx.compose.ui.semantics.contentDescription
 import com.neilb.nonocraft.R
 import androidx.compose.ui.res.stringResource
@@ -146,7 +147,7 @@ private fun ProfileHeader(
                 // AsyncImage(model = uiState.avatarUrl, ...) -- coil eklenmeli TODO
             } else {
                 Text(
-                    text = if (uiState.isGuest) "?" else uiState.username.getOrNull(1)?.uppercase() ?: "N",
+                    text = if (uiState.isGuest) "?" else uiState.username.getOrNull(1)?.toString()?.uppercaseForDisplay() ?: "N",
                     color = NeonCyan,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,

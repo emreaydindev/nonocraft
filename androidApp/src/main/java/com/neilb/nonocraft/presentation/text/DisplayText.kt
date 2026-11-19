@@ -1,5 +1,7 @@
 package com.neilb.nonocraft.presentation.text
 
+import java.util.Locale
+import androidx.compose.ui.platform.LocalConfiguration
 import android.content.Context
 import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
@@ -96,6 +98,14 @@ fun Difficulty.label(): String = when (this) {
 
 /** "5×5"; the multiplication sign reads the same in both languages. */
 fun boardSizeText(size: Int): String = "$size×$size"
+
+/** The app language's locale, for case changes on display text (Turkish dotted İ: "ÖZELLEŞTİRME"). */
+@Composable
+fun appLocale(): Locale = LocalConfiguration.current.locales[0]
+
+/** Display text in capitals by the app language's rules. Not for identifiers such as usernames. */
+@Composable
+fun String.uppercaseForDisplay(): String = uppercase(appLocale())
 
 @Composable
 fun authorName(author: String?): String = author ?: stringResource(R.string.common_anonymous)

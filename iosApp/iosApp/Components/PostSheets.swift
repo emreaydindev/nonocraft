@@ -66,7 +66,7 @@ private struct CommentsSheetContent: View {
             List {
                 ForEach(comments) { comment in
                     HStack(alignment: .top, spacing: 12) {
-                        Text(comment.author.prefix(1).uppercased())
+                        Text(comment.author.prefix(1).uppercased(with: .current))
                             .font(.app(14, .bold))
                             .foregroundStyle(Color.neonCyan)
                             .frame(width: 36, height: 36)

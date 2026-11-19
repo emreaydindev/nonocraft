@@ -80,7 +80,7 @@ private struct ProfileHeader: View {
     /// The username is shown as "@name", so the initial is its second character.
     private var initial: String {
         if uiState.isGuest { return "?" }
-        return uiState.username.dropFirst().first.map { String($0).uppercased() } ?? "N"
+        return uiState.username.dropFirst().first.map { String($0).uppercased(with: .current) } ?? "N"
     }
 
     var body: some View {

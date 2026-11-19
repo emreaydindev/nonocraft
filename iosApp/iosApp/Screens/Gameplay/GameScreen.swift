@@ -283,7 +283,7 @@ extension GridClue {
 }
 
 private extension String {
-    var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
+    var capitalizedFirst: String { prefix(1).uppercased(with: .current) + dropFirst() }
 }
 
 extension Array {
