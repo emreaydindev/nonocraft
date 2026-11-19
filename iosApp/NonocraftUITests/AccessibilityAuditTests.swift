@@ -55,7 +55,10 @@ final class AccessibilityAuditTests: XCTestCase {
         app.tabBars.buttons[t("Profile", "Profil")].tap()
         let premium = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", t("Go Premium", "Premium'a Geç"))).firstMatch
         if premium.waitForExistence(timeout: 3) {
-            premium.tap()
+            // At the largest text sizes the row is taller than the space above the tab bar: scroll its top
+            // into view and tap near it.
+            for _ in 0..<3 where premium.frame.minY > app.frame.height / 2 { app.swipeUp() }
+            premium.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)).tap()
             sleep(2)
             report("Paywall")
             app.buttons[t("Close", "Kapat")].firstMatch.tap()

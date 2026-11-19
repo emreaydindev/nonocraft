@@ -349,6 +349,8 @@ private struct LibrarySectionRow<Icon: View>: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
+                // The icon moves above the text at accessibility sizes so long words (Paylaşılanlar) keep one line.
+                AdaptiveStack(spacing: 12) {
                 icon
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
@@ -362,6 +364,7 @@ private struct LibrarySectionRow<Icon: View>: View {
                         ProBadge()
                             .padding(.top, 4)
                     }
+                }
                 }
                 Spacer(minLength: 0)
                 if isPremium && !dynamicTypeSize.isAccessibilitySize {

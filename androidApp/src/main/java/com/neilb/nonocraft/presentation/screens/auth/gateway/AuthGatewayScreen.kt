@@ -152,7 +152,7 @@ fun AuthGatewayScreen(
                     isLoading = authState.isLoading
                 )
 
-                AuthDivider(label = "veya")
+                AuthDivider(label = stringResource(R.string.auth_or))
 
                 PrimaryAuthButton(
                     text = stringResource(R.string.auth_sign_up),

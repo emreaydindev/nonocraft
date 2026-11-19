@@ -308,6 +308,9 @@
     <string name="theme_retro">Retro Wave</string>
     <string name="theme_cyberpunk">Cyberpunk</string>
     <string name="theme_premium_a11y">%1$s, Premium</string>
+    <string name="auth_or">or</string>
+    <string name="crafting_title">Design Studio</string>
+    <string name="crafting_coming_soon">The puzzle design screen is coming soon.</string>
     <string name="board_cell_position">Row %1$d, column %2$d</string>
     <string name="board_empty">empty</string>
     <string name="board_crossed">crossed</string>

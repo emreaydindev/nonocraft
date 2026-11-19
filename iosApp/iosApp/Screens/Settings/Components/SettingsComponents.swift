@@ -7,14 +7,42 @@ struct SettingsForm<Content: View>: View {
     var titleDisplayMode: NavigationBarItem.TitleDisplayMode = .inline
     @ViewBuilder var content: Content
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         Form { content }
+            .modifier(StackedValuesModifier(isActive: dynamicTypeSize.isAccessibilitySize))
             .scrollContentBackground(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .background { ScreenBackground { EmptyView() } }
             .tint(.neonCyan)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(titleDisplayMode)
+    }
+}
+
+/// At accessibility text sizes the row value (Dark, Classic PRO, English) goes under the title, so neither is
+/// squeezed into a narrow column. iOS 26 and later already do this; iOS 18-25 keep them side by side.
+private struct StackedValuesModifier: ViewModifier {
+    let isActive: Bool
+
+    func body(content: Content) -> some View {
+        if isActive {
+            content.labeledContentStyle(StackedLabeledContentStyle())
+        } else {
+            content
+        }
+    }
+}
+
+private struct StackedLabeledContentStyle: LabeledContentStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            configuration.label
+            configuration.content
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -49,19 +77,33 @@ struct SettingsLabel: View {
     var tint: Color = .neonCyan
 
     @ScaledMetric(relativeTo: .body) private var tileSize: CGFloat = 30
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        // The tile grows with the text, capped so it doesn't crowd the title at accessibility sizes.
-        let side = min(tileSize, 44)
-        Label {
-            Text(title)
-        } icon: {
-            Image(systemName: systemImage)
-                .font(.system(size: side * 0.47, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: side, height: side)
-                .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        if dynamicTypeSize.isAccessibilitySize {
+            // The tile sits above the title so long words (Uygulama, Customisation) keep a full line.
+            VStack(alignment: .leading, spacing: 6) {
+                tile
+                Text(title)
+            }
+        } else {
+            Label {
+                Text(title)
+            } icon: {
+                tile
+            }
         }
+    }
+
+    private var tile: some View {
+        // The tile grows with the text, capped at accessibility sizes.
+        let side = min(tileSize, 44)
+        return Image(systemName: systemImage)
+            .font(.system(size: side * 0.47, weight: .semibold))
+            .foregroundStyle(tint)
+            .frame(width: side, height: side)
+            .background(tint.opacity(0.16), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .accessibilityHidden(true)
     }
 }
 

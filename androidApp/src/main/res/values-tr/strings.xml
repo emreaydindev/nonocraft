@@ -307,6 +307,9 @@
     <string name="theme_retro">Retro Wave</string>
     <string name="theme_cyberpunk">Cyberpunk</string>
     <string name="theme_premium_a11y">%1$s, Premium</string>
+    <string name="auth_or">veya</string>
+    <string name="crafting_title">Tasarım Stüdyosu</string>
+    <string name="crafting_coming_soon">Bulmaca tasarlama ekranı yakında burada olacak.</string>
     <string name="board_cell_position">Satır %1$d, sütun %2$d</string>
     <string name="board_empty">boş</string>
     <string name="board_crossed">çarpı</string>

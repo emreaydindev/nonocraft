@@ -97,7 +97,8 @@ fun RandomPuzzleDialog(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = AppFont,
-                        modifier = Modifier.semantics { heading() }
+                        // Takes the space left by the close button, wrapping at large font sizes.
+                        modifier = Modifier.weight(1f).semantics { heading() }
                     )
                     Box(
                         modifier = Modifier

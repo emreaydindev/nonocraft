@@ -70,7 +70,11 @@ final class BoardAccessibilityTests: XCTestCase {
     }
 
     private func element(_ label: String) throws -> NSObject {
-        try XCTUnwrap(elements().first { $0.accessibilityLabel == label }, "no element '\(label)'")
+        let all = elements()
+        return try XCTUnwrap(
+            all.first { $0.accessibilityLabel == label },
+            "no element '\(label)'; found \(all.prefix(6).compactMap(\.accessibilityLabel))"
+        )
     }
 
     private func actionNames(_ label: String) throws -> [String] {
