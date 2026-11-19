@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.playground.components
 
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.res.pluralStringResource
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.selectable
@@ -63,6 +66,7 @@ fun RandomPuzzleDialog(
     onDismiss: () -> Unit,
     onGenerate: (isColored: Boolean, size: String, lives: Int) -> Unit
 ) {
+    val closeLabel = stringResource(R.string.common_close)
     var isColored by remember { mutableStateOf(false) }
     var selectedSize by remember { mutableStateOf("10×10") }
     var selectedLives by remember { mutableIntStateOf(3) }
@@ -88,7 +92,7 @@ fun RandomPuzzleDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Rastgele Oluştur",
+                        text = stringResource(R.string.random_title),
                         color = TextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -102,7 +106,7 @@ fun RandomPuzzleDialog(
                             .clip(CircleShape)
                             .background(SurfaceVariantDark)
                             .rippleClickable(onDismiss)
-                            .semantics { contentDescription = "Kapat" },
+                            .semantics { contentDescription = closeLabel },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -115,19 +119,19 @@ fun RandomPuzzleDialog(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DialogSectionHeader(icon = Icons.Rounded.ColorLens, title = "Oyun Modu")
+                    DialogSectionHeader(icon = Icons.Rounded.ColorLens, title = stringResource(R.string.random_game_mode))
                     Row(
                         modifier = Modifier.fillMaxWidth().selectableGroup(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         SelectableOptionCard(
-                            text = "Klasik",
+                            text = stringResource(R.string.random_classic),
                             isSelected = !isColored,
                             onClick = { isColored = false },
                             modifier = Modifier.weight(1f)
                         )
                         SelectableOptionCard(
-                            text = "Renkli",
+                            text = stringResource(R.string.random_colored),
                             isSelected = isColored,
                             onClick = { isColored = true },
                             modifier = Modifier.weight(1f)
@@ -139,7 +143,7 @@ fun RandomPuzzleDialog(
                                     "10×10", "12×12", "15×15", "20×20")
 
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    DialogSectionHeader(icon = Icons.Rounded.GridOn, title = "Matris Boyutu")
+                    DialogSectionHeader(icon = Icons.Rounded.GridOn, title = stringResource(R.string.random_grid_size))
                     // Four per row; two at the largest font scales so "20×20" stays on one line.
                     val perRow = if (isLargeFontScale()) 2 else 4
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.selectableGroup()) {
@@ -168,10 +172,10 @@ fun RandomPuzzleDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        DialogSectionHeader(icon = Icons.Rounded.Favorite, title = "Can Sayısı")
+                        DialogSectionHeader(icon = Icons.Rounded.Favorite, title = stringResource(R.string.random_lives))
                         if (selectedLives == 1) {
                             Text(
-                                text = "Hardcore",
+                                text = stringResource(R.string.random_hardcore),
                                 color = DangerRed,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -186,7 +190,7 @@ fun RandomPuzzleDialog(
                         livesOptions.forEach { life ->
                             SelectableChip(
                                 text = life.toString(),
-                                label = if (life == 1) "1 can, Hardcore" else "$life can",
+                                label = if (life == 1) stringResource(R.string.random_one_life_hardcore) else pluralStringResource(R.plurals.random_lives_count, life, life),
                                 isSelected = selectedLives == life,
                                 onClick = { selectedLives = life },
                                 activeColor = if (life == 1) DangerRed else PurpleAccent,
@@ -209,7 +213,7 @@ fun RandomPuzzleDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Oluştur ve Başla",
+                        text = stringResource(R.string.random_create_and_start),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,

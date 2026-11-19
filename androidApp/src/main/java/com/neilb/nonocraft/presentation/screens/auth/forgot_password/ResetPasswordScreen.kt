@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
@@ -50,7 +52,7 @@ fun ResetPasswordScreen(
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
-            context.showToast("Şifren başarıyla güncellendi.", isError = false)
+            context.showToast(context.getString(R.string.auth_password_updated), isError = false)
             onResetSuccess()
         }
     }
@@ -80,7 +82,7 @@ fun ResetPasswordScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Yeni Şifre Belirle",
+                    text = stringResource(R.string.auth_reset_title),
                     color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -89,7 +91,7 @@ fun ResetPasswordScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "E-postana gönderdiğimiz 6 haneli kodu gir ve yeni şifreni belirle.",
+                    text = stringResource(R.string.auth_reset_subtitle),
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
@@ -102,7 +104,7 @@ fun ResetPasswordScreen(
                     onValueChange = {
                         code = it.filter { ch -> ch.isDigit() }.take(6)
                     },
-                    label = "Doğrulama kodu",
+                    label = stringResource(R.string.auth_verification_code),
                     placeholder = "000000",
                     isError = state.error != null,
                     errorMessage = state.error?.message(ErrorContext.RESET_PASSWORD),
@@ -117,7 +119,7 @@ fun ResetPasswordScreen(
                 AuthPasswordField(
                     value = password,
                     onValueChange = { password = it },
-                    label = "Yeni şifre",
+                    label = stringResource(R.string.auth_new_password),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Next,
@@ -136,9 +138,9 @@ fun ResetPasswordScreen(
                 AuthPasswordField(
                     value = confirm,
                     onValueChange = { confirm = it },
-                    label = "Şifreyi onayla",
+                    label = stringResource(R.string.auth_confirm_password),
                     isError = confirm.isNotEmpty() && !passwordsMatch,
-                    errorMessage = if (confirm.isNotEmpty() && !passwordsMatch) "Şifreler eşleşmiyor" else null,
+                    errorMessage = if (confirm.isNotEmpty() && !passwordsMatch) stringResource(R.string.auth_passwords_dont_match) else null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done,
@@ -148,7 +150,7 @@ fun ResetPasswordScreen(
                 if (passwordsMatch) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "✓ Şifreler eşleşiyor",
+                        text = stringResource(R.string.auth_passwords_match),
                         color = NeonCyan.copy(alpha = 0.80f),
                         fontSize = 11.sp,
                         fontFamily = AppFont,
@@ -167,16 +169,16 @@ fun ResetPasswordScreen(
                 ) {
                     Column {
                         Text(
-                            text = "GEREKSİNİMLER",
+                            text = stringResource(R.string.auth_requirements),
                             color = TextMuted,
                             fontSize = 10.sp,
                             letterSpacing = 0.8.sp,
                             fontFamily = AppFont,
                             modifier = Modifier.padding(bottom = 8.dp),
                         )
-                        PasswordRequirementRow("En az 8 karakter",   met = hasMinLength)
-                        PasswordRequirementRow("Büyük harf içeriyor", met = hasUpper)
-                        PasswordRequirementRow("Rakam içeriyor",      met = hasDigit)
+                        PasswordRequirementRow(stringResource(R.string.auth_req_min_length),   met = hasMinLength)
+                        PasswordRequirementRow(stringResource(R.string.auth_req_uppercase), met = hasUpper)
+                        PasswordRequirementRow(stringResource(R.string.auth_req_digit),      met = hasDigit)
                     }
                 }
             }
@@ -186,7 +188,7 @@ fun ResetPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PrimaryAuthButton(
-                    text = "Şifremi Güncelle",
+                    text = stringResource(R.string.auth_update_password),
                     enabled = canSubmit,
                     isLoading = state.isLoading,
                     onClick = { viewModel.resetPassword(code, password) },

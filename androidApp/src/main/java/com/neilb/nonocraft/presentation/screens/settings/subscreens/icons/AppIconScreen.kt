@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.icons
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -46,12 +48,12 @@ fun AppIconScreen(
     var selectedIcon by remember { mutableStateOf("classic") }
 
     val icons = listOf(
-        AppIconOption("classic", "Klasik", false),
-        AppIconOption("dark", "Gece Modu", false),
-        AppIconOption("neon", "Neon Küp", true),
-        AppIconOption("gold", "Altın Taç", true),
-        AppIconOption("pixel", "8-Bit Nostalji", true),
-        AppIconOption("synth", "Synthwave", true)
+        AppIconOption("classic", stringResource(R.string.icon_classic), false),
+        AppIconOption("dark", stringResource(R.string.icon_dark), false),
+        AppIconOption("neon", stringResource(R.string.icon_neon), true),
+        AppIconOption("gold", stringResource(R.string.icon_gold), true),
+        AppIconOption("pixel", stringResource(R.string.icon_pixel), true),
+        AppIconOption("synth", stringResource(R.string.icon_synth), true)
     )
 
     Box(modifier = Modifier.fillMaxSize().background(BackgroundDark).navigationBarsPadding()) {
@@ -63,10 +65,10 @@ fun AppIconScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = TextPrimary)
                 }
                 Text(
-                    text = "Uygulama İkonu",
+                    text = stringResource(R.string.settings_icon),
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -106,6 +108,8 @@ private fun AppIconCard(
     hasPremium: Boolean,
     onClick: () -> Unit
 ) {
+    val premiumLabel = stringResource(R.string.common_premium)
+    val lockedLabel = stringResource(R.string.common_locked)
     val isLocked = option.isPremium && !hasPremium
 
     Column(
@@ -123,8 +127,8 @@ private fun AppIconCard(
             .clearAndSetSemantics {
                 contentDescription = listOfNotNull(
                     option.name,
-                    "Premium".takeIf { option.isPremium },
-                    "Kilitli".takeIf { isLocked },
+                    premiumLabel.takeIf { option.isPremium },
+                    lockedLabel.takeIf { isLocked },
                 ).joinToString(", ")
             }
             .padding(16.dp)
@@ -142,7 +146,7 @@ private fun AppIconCard(
                     modifier = Modifier.fillMaxSize().background(BackgroundDark.copy(alpha = 0.6f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Rounded.Lock, contentDescription = "Kilitli", tint = TextMuted, modifier = Modifier.size(28.dp))
+                    Icon(Icons.Rounded.Lock, contentDescription = lockedLabel, tint = TextMuted, modifier = Modifier.size(28.dp))
                 }
             }
         }
@@ -165,7 +169,7 @@ private fun AppIconCard(
                 Icon(Icons.Rounded.Check, contentDescription = null, tint = BackgroundDark, modifier = Modifier.size(16.dp))
             }
         } else if (option.isPremium) {
-            Text(text = "PREMIUM", color = GameGold, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+            Text(text = stringResource(R.string.common_premium_badge), color = GameGold, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
         } else {
             Box(modifier = Modifier.size(24.dp))
         }

@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
 import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
+import androidx.compose.ui.platform.LocalContext
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.contentDescription
@@ -281,7 +284,7 @@ private fun BottomSection(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = if (isLastPage) "Başla" else "Devam Et",
+                text = stringResource(if (isLastPage) R.string.common_start else R.string.common_continue),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = backgroundColor,
@@ -290,7 +293,7 @@ private fun BottomSection(
 
         if (!isLastPage) {
             Text(
-                text = "Atla",
+                text = stringResource(R.string.common_skip),
                 fontSize = 13.sp,
                 color = textMuted,
                 modifier = Modifier
@@ -309,11 +312,12 @@ private fun PageIndicator(
     activeColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    val resources = LocalContext.current.resources
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
 
     Row(
         modifier = modifier.clearAndSetSemantics {
-            contentDescription = "Sayfa ${pagerState.currentPage + 1} / $count"
+            contentDescription = resources.getString(R.string.common_page_of, pagerState.currentPage + 1, count)
         },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -341,6 +345,7 @@ private fun PageIndicator(
 
 @Composable
 private fun VisualSolve(accentColor: Color) {
+    val heartSampleLabel = stringResource(R.string.onboarding_heart_sample)
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val borderColor = MaterialTheme.colorScheme.outline
 
@@ -382,7 +387,7 @@ private fun VisualSolve(accentColor: Color) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         // One phrase for the animated sample instead of its clue digits, as on iOS.
-        modifier = Modifier.clearAndSetSemantics { contentDescription = "Kalp şeklinde dolan örnek bulmaca" },
+        modifier = Modifier.clearAndSetSemantics { contentDescription = heartSampleLabel },
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Spacer(modifier = Modifier.width(28.dp))
@@ -439,6 +444,7 @@ private fun VisualSolve(accentColor: Color) {
 
 @Composable
 private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColor: (Int) -> Unit) {
+    val resources = LocalContext.current.resources
 
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val borderColor = MaterialTheme.colorScheme.outline
@@ -498,7 +504,7 @@ private fun VisualCraft(selectedColor: Int, colors: List<Color>, setSelectedColo
                         // 48 dp touch area around the small swatch; read as "Renk 2, selected".
                         .minimumInteractiveComponentSize()
                         .selectable(selected = isSelected, role = Role.RadioButton) { setSelectedColor(i) }
-                        .semantics { contentDescription = "Renk ${i + 1}" }
+                        .semantics { contentDescription = resources.getString(R.string.onboarding_color_n, i + 1) }
                         .size(if (isSelected) 28.dp else 22.dp)
                         .clip(CircleShape)
                         .background(color)
@@ -549,10 +555,10 @@ private fun VisualPremium(accentColor: Color) {
         Spacer(modifier = Modifier.height(12.dp))
 
         val features = listOf(
-            "Reklamsız deneyim",
-            "Sınırsız kristal paketleri",
-            "Ekstra yaşam kalpleri",
-            "Gönderilerini öne çıkar"
+            stringResource(R.string.onboarding_feature_no_ads),
+            stringResource(R.string.onboarding_feature_crystals),
+            stringResource(R.string.onboarding_feature_hearts),
+            stringResource(R.string.onboarding_feature_boost)
         )
 
         features.forEach { feature ->
@@ -588,29 +594,29 @@ private fun Modifier.rippleClickable(role: Role? = Role.Button, onClick: () -> U
 
 @Composable
 private fun rememberSlides(cyan: Color, selectedColor: Int, colors: List<Color>, setSelectedColor: (Int) -> Unit, gold: Color) =
-    remember(selectedColor) {
+    run {
         listOf(
             OnboardingSlide(
-                tag          = "BULMACA · MANTIK · SINIRSIZ",
-                title        = "Çöz!",
-                titleAccent  = "Çöz",
-                description  = "Her gün yenilenen, binlerce benzersiz nonogram bulmacasını keşfet. Mantığını konuştur.",
+                tag          = stringResource(R.string.onboarding_1_tag),
+                title        = stringResource(R.string.onboarding_1_title),
+                titleAccent  = stringResource(R.string.onboarding_1_accent),
+                description  = stringResource(R.string.onboarding_1_body),
                 accentColor  = cyan,
                 visual       = { color -> VisualSolve(color) },
             ),
             OnboardingSlide(
-                tag          = "TASARIM · PAYLAŞIM · TOPLULUK",
-                title        = "Tasarla ve Paylaş!",
-                titleAccent  = "Paylaş",
-                description  = "Kendi pixel artını oluştur, toplulukla paylaş. Beğenileri topla, efsane ol.",
+                tag          = stringResource(R.string.onboarding_2_tag),
+                title        = stringResource(R.string.onboarding_2_title),
+                titleAccent  = stringResource(R.string.onboarding_2_accent),
+                description  = stringResource(R.string.onboarding_2_body),
                 accentColor  = colors[selectedColor],
                 visual       = { color -> VisualCraft(selectedColor, colors, setSelectedColor) },
             ),
             OnboardingSlide(
-                tag          = "PREMIUM · AVANTAJLAR",
-                title        = "Sınırlarını Aş!",
-                titleAccent  = "Sınırlarını",
-                description  = "Premium ile reklamsız bir deneyim yaşa; sınırsız kristal, fazladan kalpler ve özel öne çıkarmalar kazan.",
+                tag          = stringResource(R.string.onboarding_3_tag),
+                title        = stringResource(R.string.onboarding_3_title),
+                titleAccent  = stringResource(R.string.onboarding_3_accent),
+                description  = stringResource(R.string.onboarding_3_body),
                 accentColor  = gold,
                 visual       = { color -> VisualPremium(color) },
             ),

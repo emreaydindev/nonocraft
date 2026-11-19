@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
 import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -217,7 +218,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Çöz ve Tasarla",
+                text = stringResource(R.string.splash_tagline),
                 color = primaryColor.copy(alpha = 0.55f),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier

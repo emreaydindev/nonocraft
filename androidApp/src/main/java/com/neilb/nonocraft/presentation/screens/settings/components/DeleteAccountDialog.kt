@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.components
 
 import androidx.compose.material3.AlertDialog
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,19 +20,19 @@ fun DeleteAccountDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = SurfaceDark,
-        title = { Text("Hesabı Sil", color = TextPrimary, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.delete_title), color = TextPrimary, fontWeight = FontWeight.Bold) },
         text = {
-            Text("Bu işlem geri alınamaz. Tüm verilerin, bulmacaların ve ilerlemen kalıcı olarak silinecek. Emin misin?",
+            Text(stringResource(R.string.delete_body),
                 color = TextMuted)
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Evet, Sil", color = DangerRed, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.delete_confirm), color = DangerRed, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("İptal", color = TextPrimary)
+                Text(stringResource(R.string.common_cancel), color = TextPrimary)
             }
         }
     )

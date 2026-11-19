@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Nonocraft" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- AppCompat parent: MainActivity is an AppCompatActivity so per-app languages work below API 33. -->
+    <style name="Theme.Nonocraft" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>

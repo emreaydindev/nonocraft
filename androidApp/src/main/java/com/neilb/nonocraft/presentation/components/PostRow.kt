@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.pluralStringResource
+import com.neilb.nonocraft.R
 import com.neilb.nonocraft.presentation.text.authorName
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.Canvas
@@ -55,6 +57,7 @@ fun PostRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val likesDescription = pluralStringResource(R.plurals.post_likes_count, post.likes, post.likes)
     val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = modifier
@@ -96,7 +99,7 @@ fun PostRow(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clearAndSetSemantics { contentDescription = "${post.likes} beğeni" },
+                modifier = Modifier.clearAndSetSemantics { contentDescription = likesDescription },
             ) {
                 Icon(
                     imageVector = if (post.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,

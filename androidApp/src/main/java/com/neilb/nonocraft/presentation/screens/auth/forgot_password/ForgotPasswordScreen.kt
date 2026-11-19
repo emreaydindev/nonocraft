@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.auth.forgot_password
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
@@ -68,7 +70,7 @@ fun ForgotPasswordScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Şifremi Unuttum",
+                    text = stringResource(R.string.auth_forgot_title),
                     color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -77,7 +79,7 @@ fun ForgotPasswordScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "E-posta adresini gir, sana bir doğrulama kodu gönderelim.",
+                    text = stringResource(R.string.auth_forgot_subtitle),
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
@@ -91,11 +93,11 @@ fun ForgotPasswordScreen(
                         email = it.trim()
                         viewModel.clearError()
                     },
-                    label = "E-posta adresi",
-                    placeholder = "ornek@gmail.com",
+                    label = stringResource(R.string.auth_email_address),
+                    placeholder = stringResource(R.string.auth_email_placeholder),
                     isError = !isEmailValid || state.error != null,
                     errorMessage = when {
-                        !isEmailValid   -> "Geçerli bir e-posta adresi girin"
+                        !isEmailValid   -> stringResource(R.string.auth_email_invalid)
                         state.error != null -> state.error?.message(ErrorContext.FORGOT_PASSWORD)
                         else            -> null
                     },
@@ -111,7 +113,7 @@ fun ForgotPasswordScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PrimaryAuthButton(
-                    text = "Kod Gönder",
+                    text = stringResource(R.string.auth_send_code),
                     enabled = canSubmit,
                     isLoading = state.isLoading,
                     onClick = { viewModel.sendResetCode(email) },
@@ -121,8 +123,8 @@ fun ForgotPasswordScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextSecondary)) { append("Giriş sayfasına ") }
-                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append("dön") }
+                        withStyle(SpanStyle(color = TextSecondary)) { append(stringResource(R.string.auth_back_to_login_prefix)) }
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append(stringResource(R.string.auth_back_to_login_link)) }
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,

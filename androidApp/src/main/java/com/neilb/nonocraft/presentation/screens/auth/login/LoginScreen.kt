@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.screens.auth.login
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.toMessage
+import com.neilb.nonocraft.common.ErrorCode
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.semantics
@@ -119,7 +123,7 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Tekrar Hoş Geldin",
+                    text = stringResource(R.string.auth_login_title),
                     color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -128,7 +132,7 @@ fun LoginScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Devam etmek için giriş yap.",
+                    text = stringResource(R.string.auth_login_subtitle),
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
@@ -136,14 +140,14 @@ fun LoginScreen(
                 Spacer(Modifier.height(32.dp))
 
                 GoogleSignInButton(
-                    label = "Google ile giriş yap",
+                    label = stringResource(R.string.auth_sign_in_with_google),
                     onClick = {
                         scope.launch {
                             authViewModel.changeLoadingState(true)
                             signInWithGoogle(context, credentialManager, request)
                                 .onSuccess { idToken -> authViewModel.googleLogin(idToken) }
                                 .onFailure { e ->
-                                    context.showToast(e.localizedMessage)
+                                    context.showToast(ErrorCode.GOOGLE_SIGN_IN_FAILED.toMessage(context))
                                     authViewModel.changeLoadingState(false)
                                 }
                         }
@@ -151,11 +155,11 @@ fun LoginScreen(
                     isLoading = authState.isLoading
                 )
 
-                AuthDivider(label = "veya e-posta ile")
+                AuthDivider(label = stringResource(R.string.auth_or_with_email))
 
                 if (state.error != null) {
                     InfoBanner(
-                        message = "Giriş başarısız",
+                        message = stringResource(R.string.auth_login_failed),
                         subMessage = state.error!!.message(ErrorContext.LOGIN),
                         isError = true,
                         modifier = Modifier.padding(bottom = 14.dp),
@@ -167,8 +171,8 @@ fun LoginScreen(
                     onValueChange = {
                         identifier = it.trim()
                     },
-                    label = "E-posta veya kullanıcı adı",
-                    placeholder = "ornek@gmail.com veya @kullanici",
+                    label = stringResource(R.string.auth_email_or_username),
+                    placeholder = stringResource(R.string.auth_email_or_username_placeholder),
                     isError = state.error != null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -182,7 +186,7 @@ fun LoginScreen(
                     onValueChange = {
                         password = it
                     },
-                    label = "Şifre",
+                    label = stringResource(R.string.auth_password),
                     isError = state.error != null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -197,7 +201,7 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     Text(
-                        text = "Şifremi unuttum",
+                        text = stringResource(R.string.auth_forgot_password_link),
                         color = NeonCyan,
                         fontSize = 13.sp,
                         fontFamily = AppFont,
@@ -213,7 +217,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PrimaryAuthButton(
-                    text = "Giriş Yap",
+                    text = stringResource(R.string.auth_sign_in),
                     enabled = identifier.isNotEmpty() && password.isNotEmpty() && !state.isLoading,
                     isLoading = state.isLoading,
                     onClick = {
@@ -225,8 +229,8 @@ fun LoginScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextSecondary)) { append("Hesabın yok mu? ") }
-                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append("Kayıt Ol") }
+                        withStyle(SpanStyle(color = TextSecondary)) { append(stringResource(R.string.auth_no_account_prefix)) }
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append(stringResource(R.string.auth_sign_up)) }
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,

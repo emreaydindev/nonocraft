@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.account
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -80,7 +82,7 @@ fun AccountScreen(
                 .padding(top = 16.dp, bottom = 24.dp),
         ) {
             Text(
-                text = "Profilim",
+                text = stringResource(R.string.account_title),
                 color = TextPrimary,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
@@ -106,14 +108,14 @@ fun AccountScreen(
             MenuRow(
                 icon = Icons.Rounded.WorkspacePremium,
                 iconColor = GameGold,
-                label = "Premium'a Geç",
+                label = stringResource(R.string.account_go_premium),
                 onClick = onNavigateToPremium,
             )
             Spacer(Modifier.height(8.dp))
             MenuRow(
                 icon = Icons.Rounded.Settings,
                 iconColor = TextSecondary,
-                label = "Ayarlar",
+                label = stringResource(R.string.common_settings),
                 onClick = onNavigateToSettings,
             )
         }
@@ -126,6 +128,7 @@ private fun ProfileHeader(
     onNavigateToCrafting: () -> Unit,
     onNavigateToAuthGateway: () -> Unit,
 ) {
+    val editAvatarLabel = stringResource(R.string.account_edit_avatar)
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,7 +139,7 @@ private fun ProfileHeader(
                 .clip(CircleShape)
                 .background(SurfaceVariantDark)
                 .rippleClickable(onNavigateToCrafting)
-                .clearAndSetSemantics { contentDescription = "Avatarı düzenle" },
+                .clearAndSetSemantics { contentDescription = editAvatarLabel },
             contentAlignment = Alignment.Center,
         ) {
             if (uiState.avatarUrl != null) {
@@ -155,15 +158,15 @@ private fun ProfileHeader(
         Spacer(Modifier.height(12.dp))
 
         if (uiState.isGuest) {
-            Text("Misafir Kullanıcı", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+            Text(stringResource(R.string.account_guest_user), color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
             Spacer(Modifier.height(4.dp))
-            Text("İlerlemeni kaybetmemek için giriş yap", color = TextMuted, fontSize = 13.sp, fontFamily = AppFont)
+            Text(stringResource(R.string.account_guest_hint), color = TextMuted, fontSize = 13.sp, fontFamily = AppFont)
             Spacer(Modifier.height(16.dp))
-            PrimaryAuthButton(text = "Giriş Yap / Kayıt Ol", onClick = onNavigateToAuthGateway)
+            PrimaryAuthButton(text = stringResource(R.string.account_sign_in_or_up), onClick = onNavigateToAuthGateway)
         } else {
             Text(uiState.username, color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
             Spacer(Modifier.height(4.dp))
-            Text(uiState.bio ?: "Nonocraft Bulmaca Meraklısı", color = TextMuted, fontSize = 14.sp, fontFamily = AppFont)
+            Text(uiState.bio ?: stringResource(R.string.common_bio_placeholder), color = TextMuted, fontSize = 14.sp, fontFamily = AppFont)
             Spacer(Modifier.height(20.dp))
             // İstatistik satırı -> gerçek veri gelene kadar TODO
         }

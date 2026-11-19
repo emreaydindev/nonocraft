@@ -3,10 +3,10 @@ package com.neilb.nonocraft
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,7 +16,8 @@ import androidx.compose.ui.graphics.toArgb
 import com.neilb.nonocraft.presentation.navigation.NavigationView
 import com.neilb.nonocraft.presentation.theme.NonogramTheme
 
-class MainActivity : ComponentActivity() {
+/** AppCompatActivity so the per-app language (AppCompatDelegate) also applies below API 33. */
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyOrientationPolicy(resources.configuration)

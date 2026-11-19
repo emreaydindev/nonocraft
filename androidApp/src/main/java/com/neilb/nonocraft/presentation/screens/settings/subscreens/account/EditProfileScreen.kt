@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.account
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -57,9 +59,9 @@ fun EditProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = TextPrimary)
                 }
-                Text("Profili Düzenle", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.edit_profile_title), color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
             }
 
             Column(
@@ -69,11 +71,11 @@ fun EditProfileScreen(
                     .padding(horizontal = 18.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                CustomTextField(value = username, onValueChange = { username = it }, label = "Kullanıcı Adı")
+                CustomTextField(value = username, onValueChange = { username = it }, label = stringResource(R.string.edit_profile_username))
                 // Email typically shouldn't be edited here if we have a separate change email flow, 
                 // but let's keep it for now as a read-only or editable if backend supports it.
-                CustomTextField(value = email, onValueChange = { email = it }, label = "E-posta Adresi", enabled = false)
-                CustomTextField(value = bio, onValueChange = { bio = it }, label = "Hakkımda", singleLine = false, modifier = Modifier.height(100.dp))
+                CustomTextField(value = email, onValueChange = { email = it }, label = stringResource(R.string.edit_profile_email), enabled = false)
+                CustomTextField(value = bio, onValueChange = { bio = it }, label = stringResource(R.string.edit_profile_bio), singleLine = false, modifier = Modifier.height(100.dp))
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -86,7 +88,7 @@ fun EditProfileScreen(
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Değişiklikleri Kaydet", color = BackgroundDark, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+                    Text(stringResource(R.string.edit_profile_save), color = BackgroundDark, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
                 }
             }
         }

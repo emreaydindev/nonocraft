@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.screens.gameplay
 
 import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.neilb.nonocraft.R
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.input.pointer.pointerInput
@@ -113,6 +117,7 @@ fun GameScreen(
     viewModel: GameViewModel,
     onNavigateBack: () -> Unit
 ) {
+    val resources = LocalContext.current.resources
     val state by viewModel.state.collectAsStateWithLifecycle()
     val haptic = LocalHapticFeedback.current
 
@@ -149,7 +154,7 @@ fun GameScreen(
     var previousLives by remember { mutableIntStateOf(-1) }
     LaunchedEffect(state.currentLives) {
         if (previousLives > state.currentLives && state.currentLives > 0) {
-            announcement = "Yanlış hamle, ${state.currentLives} can kaldı"
+            announcement = resources.getQuantityString(R.plurals.game_wrong_move, state.currentLives, state.currentLives)
         }
         previousLives = state.currentLives
     }
@@ -208,7 +213,7 @@ fun GameScreen(
                     .safeContentPadding()
             ) {
                 GameTopBar(
-                    title = state.puzzle?.title ?: "Yükleniyor...",
+                    title = state.puzzle?.title ?: stringResource(R.string.common_loading_ellipsis),
                     timeLimitSeconds = state.puzzle?.timeLimitSeconds,
                     timeElapsed = state.timeElapsed,
                     onBackClick = onNavigateBack
@@ -231,9 +236,9 @@ fun GameScreen(
 
         if (state.isVictory) {
             GameEndOverlay(
-                title = "TEBRİKLER!",
-                subtitle = "Bulmacayı başarıyla çözdün.",
-                buttonText = "Devam Et",
+                title = stringResource(R.string.game_congrats),
+                subtitle = stringResource(R.string.game_congrats_subtitle),
+                buttonText = stringResource(R.string.common_continue),
                 isVictory = true,
                 onAction = onNavigateBack
             )
@@ -241,9 +246,9 @@ fun GameScreen(
 
         if (state.isGameOver) {
             GameEndOverlay(
-                title = "OYUN BİTTİ",
-                subtitle = "Tüm canların tükendi.",
-                buttonText = "Tekrar Dene",
+                title = stringResource(R.string.game_over),
+                subtitle = stringResource(R.string.game_over_subtitle),
+                buttonText = stringResource(R.string.game_try_again),
                 isVictory = false,
                 onAction = onNavigateBack // Or implement retry
             )
@@ -335,7 +340,7 @@ private fun GameControlsPanel(
             paletteColors = palette.map { it.toColor() },
             showColorPatterns = showColorPatterns,
             colorLabels = palette.indices.map { index ->
-                if (palette.size > 1) BoardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.uppercase() } else "Doldur"
+                if (palette.size > 1) BoardSpeech.colorLabel(index + 1, palette).replaceFirstChar { it.uppercase() } else stringResource(R.string.game_fill)
             },
             selectedColorIndex = state.selectedColorIndex,
             isCrossMode = state.isCrossMode,
@@ -481,6 +486,7 @@ private fun GameTopBar(
     timeElapsed: Long,
     onBackClick: () -> Unit
 ) {
+    val resources = LocalContext.current.resources
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -491,7 +497,7 @@ private fun GameTopBar(
         IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = "Geri",
+                contentDescription = stringResource(R.string.common_back),
                 tint = TextPrimary
             )
         }
@@ -521,7 +527,11 @@ private fun GameTopBar(
                 Text(
                     text = formatTime(remaining),
                     modifier = Modifier.clearAndSetSemantics {
-                        contentDescription = "Kalan süre: ${remaining / 60} dakika ${remaining % 60} saniye"
+                        contentDescription = resources.getString(
+                            R.string.game_time_remaining,
+                            resources.getQuantityString(R.plurals.game_minutes, (remaining / 60).toInt(), (remaining / 60).toInt()) + " " +
+                                resources.getQuantityString(R.plurals.game_seconds, (remaining % 60).toInt(), (remaining % 60).toInt()),
+                        )
                     },
                     color = DangerRed,
                     fontSize = 16.sp,
@@ -538,11 +548,12 @@ private fun LivesBar(
     currentLives: Int,
     maxLives: Int
 ) {
+    val livesDescription = pluralStringResource(R.plurals.game_lives_left, currentLives, currentLives)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
-            .clearAndSetSemantics { contentDescription = "$currentLives can kaldı" },
+            .clearAndSetSemantics { contentDescription = livesDescription },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -550,7 +561,7 @@ private fun LivesBar(
             val hasLife = index < currentLives
             Icon(
                 imageVector = if (hasLife) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                contentDescription = "Life",
+                contentDescription = null, // the row is read as a whole
                 tint = if (hasLife) DangerRed else DangerRed.copy(alpha = 0.3f),
                 modifier = Modifier
                     .padding(horizontal = 2.dp)

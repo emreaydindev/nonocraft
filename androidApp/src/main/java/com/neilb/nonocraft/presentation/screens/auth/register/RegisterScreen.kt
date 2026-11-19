@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.screens.auth.register
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.presentation.text.toMessage
+import com.neilb.nonocraft.common.ErrorCode
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -82,6 +86,7 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
     authViewModel: AuthViewModel = koinViewModel(),
 ) {
+    val validDescription = stringResource(R.string.auth_valid)
     val state by viewModel.state.collectAsState()
     val authState by authViewModel.state.collectAsState()
     val context = LocalContext.current
@@ -141,7 +146,7 @@ fun RegisterScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Hesap Oluştur",
+                    text = stringResource(R.string.auth_register_title),
                     color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -151,14 +156,14 @@ fun RegisterScreen(
                 Spacer(Modifier.height(32.dp))
 
                 GoogleSignInButton(
-                    label = "Google ile kayıt ol",
+                    label = stringResource(R.string.auth_sign_up_with_google),
                     onClick = {
                         scope.launch {
                             authViewModel.changeLoadingState(true)
                             signInWithGoogle(context, credentialManager, request)
                                 .onSuccess { idToken -> authViewModel.googleLogin(idToken) }
                                 .onFailure { e ->
-                                    context.showToast(e.localizedMessage)
+                                    context.showToast(ErrorCode.GOOGLE_SIGN_IN_FAILED.toMessage(context))
                                     authViewModel.changeLoadingState(false)
                                 }
                         }
@@ -166,11 +171,11 @@ fun RegisterScreen(
                     isLoading = authState.isLoading
                 )
 
-                AuthDivider(label = "veya e-posta ile")
+                AuthDivider(label = stringResource(R.string.auth_or_with_email))
 
                 if (state.error != null) {
                     InfoBanner(
-                        message = "Kayıt başarısız",
+                        message = stringResource(R.string.auth_register_failed),
                         subMessage = state.error!!.message(ErrorContext.REGISTER),
                         isError = true,
                         modifier = Modifier.padding(bottom = 14.dp),
@@ -180,15 +185,15 @@ fun RegisterScreen(
                 AuthTextField(
                     value = username,
                     onValueChange = { username = it.trim().lowercase() },
-                    label = "Kullanıcı adı",
-                    placeholder = "@kullaniciadi",
+                    label = stringResource(R.string.auth_username),
+                    placeholder = stringResource(R.string.auth_username_placeholder),
                     isError = state.error != null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Ascii,
                         imeAction = ImeAction.Next,
                     ),
                     trailingIcon = if (username.isNotEmpty() && state.error == null) {
-                        { Text("✓", color = NeonCyan, fontSize = 15.sp, modifier = Modifier.clearAndSetSemantics { contentDescription = "Geçerli" }) }
+                        { Text("✓", color = NeonCyan, fontSize = 15.sp, modifier = Modifier.clearAndSetSemantics { contentDescription = validDescription }) }
                     } else null,
                 )
                 Spacer(Modifier.height(12.dp))
@@ -196,10 +201,10 @@ fun RegisterScreen(
                 AuthTextField(
                     value = email,
                     onValueChange = { email = it.trim() },
-                    label = "E-posta",
-                    placeholder = "ornek@gmail.com",
+                    label = stringResource(R.string.auth_email),
+                    placeholder = stringResource(R.string.auth_email_placeholder),
                     isError = !isEmailValid,
-                    errorMessage = if (!isEmailValid) "Geçerli bir e-posta adresi girin" else null,
+                    errorMessage = if (!isEmailValid) stringResource(R.string.auth_email_invalid) else null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next,
@@ -210,7 +215,7 @@ fun RegisterScreen(
                 AuthPasswordField(
                     value = password,
                     onValueChange = { password = it },
-                    label = "Şifre",
+                    label = stringResource(R.string.auth_password),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done,
@@ -230,16 +235,16 @@ fun RegisterScreen(
                     ) {
                         Column {
                             Text(
-                                text = "GEREKSİNİMLER",
+                                text = stringResource(R.string.auth_requirements),
                                 color = TextMuted,
                                 fontSize = 11.sp,
                                 letterSpacing = 0.8.sp,
                                 fontFamily = AppFont,
                                 modifier = Modifier.padding(bottom = 8.dp),
                             )
-                            PasswordRequirementRow("En az 8 karakter",   met = isPasswordLongEnough)
-                            PasswordRequirementRow("Büyük harf içeriyor", met = isPasswordHasUpper)
-                            PasswordRequirementRow("Rakam içeriyor",      met = isPasswordHasDigit)
+                            PasswordRequirementRow(stringResource(R.string.auth_req_min_length),   met = isPasswordLongEnough)
+                            PasswordRequirementRow(stringResource(R.string.auth_req_uppercase), met = isPasswordHasUpper)
+                            PasswordRequirementRow(stringResource(R.string.auth_req_digit),      met = isPasswordHasDigit)
                         }
                     }
                 }
@@ -252,7 +257,7 @@ fun RegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PrimaryAuthButton(
-                    text = "Kayıt Ol",
+                    text = stringResource(R.string.auth_sign_up),
                     enabled = canSubmit,
                     isLoading = state.isLoading,
                     onClick = {
@@ -264,8 +269,8 @@ fun RegisterScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = TextSecondary)) { append("Hesabın var mı? ") }
-                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append("Giriş Yap") }
+                        withStyle(SpanStyle(color = TextSecondary)) { append(stringResource(R.string.auth_have_account_prefix)) }
+                        withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) { append(stringResource(R.string.auth_sign_in)) }
                     },
                     fontSize = 13.sp,
                     fontFamily = AppFont,
@@ -276,7 +281,7 @@ fun RegisterScreen(
 
                 val legalText = buildAnnotatedString {
                     withStyle(SpanStyle(color = TextSecondary)) {
-                        append("Devam ederek ")
+                        append(stringResource(R.string.auth_legal_prefix))
                     }
                     withLink(
                         LinkAnnotation.Clickable(
@@ -287,11 +292,11 @@ fun RegisterScreen(
                         )
                     ) {
                         withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                            append("Gizlilik Politikası")
+                            append(stringResource(R.string.common_privacy_policy))
                         }
                     }
                     withStyle(SpanStyle(color = TextSecondary)) {
-                        append(" ve ")
+                        append(stringResource(R.string.auth_legal_and))
                     }
                     withLink(
                         LinkAnnotation.Clickable(
@@ -302,11 +307,11 @@ fun RegisterScreen(
                         )
                     ) {
                         withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                            append("Kullanım Koşulları")
+                            append(stringResource(R.string.common_terms))
                         }
                     }
                     withStyle(SpanStyle(color = TextSecondary)) {
-                        append("'nı kabul etmiş olursunuz.")
+                        append(stringResource(R.string.auth_legal_suffix))
                     }
                 }
 

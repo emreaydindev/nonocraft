@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.ui.res.pluralStringResource
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.relativeTime
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -79,6 +82,7 @@ import com.neilb.nonocraft.presentation.theme.TextPrimary
 
 @Composable
 fun CommentsSheetContent(comments: List<Comment>) {
+    val reportLabel = stringResource(R.string.common_report)
     var textValue by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
 
@@ -92,7 +96,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
             .fillMaxHeight()
     ) {
         Text(
-            text = "Yorumlar",
+            text = stringResource(R.string.post_comments_title),
             color = TextPrimary,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
@@ -122,7 +126,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                         }
                         // One TalkBack stop per comment; the long-press menu is offered as an action.
                         .semantics(mergeDescendants = true) {
-                            customActions = listOf(CustomAccessibilityAction("Şikayet Et") { showMenu = true; true })
+                            customActions = listOf(CustomAccessibilityAction(reportLabel) { showMenu = true; true })
                         },
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
@@ -180,7 +184,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = "Şikayet Et",
+                                            text = stringResource(R.string.common_report),
                                             color = DangerRed,
                                             fontFamily = AppFont,
                                             fontSize = 15.sp
@@ -202,7 +206,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                     }
                     Icon(
                         imageVector = if (comment.isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = if (comment.isLiked) "Beğendin" else null,
+                        contentDescription = if (comment.isLiked) stringResource(R.string.post_you_liked) else null,
                         tint = if (comment.isLiked) DangerRed else TextMuted,
                         modifier = Modifier
                             .size(20.dp)
@@ -233,7 +237,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                         .focusRequester(focusRequester),
                     placeholder = {
                         Text(
-                            text = "Yorum ekle...",
+                            text = stringResource(R.string.post_add_comment),
                             color = TextMuted,
                             fontFamily = AppFont,
                             fontSize = 14.sp
@@ -264,7 +268,7 @@ fun CommentsSheetContent(comments: List<Comment>) {
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.Send,
-                        contentDescription = "Gönder",
+                        contentDescription = stringResource(R.string.common_send),
                         tint = if (textValue.isNotBlank()) BackgroundDark else TextMuted,
                         modifier = Modifier.size(20.dp)
                     )
@@ -289,22 +293,22 @@ fun PostMenuSheetContent(
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
-        MenuRowItem(icon = Icons.Rounded.PlayArrow, text = "Şimdi Oyna", onClick = onPlay)
-        MenuRowItem(icon = Icons.Rounded.BookmarkBorder, text = "Kaydet", onClick = onSave)
-        MenuRowItem(icon = Icons.AutoMirrored.Rounded.PlaylistAdd, text = "Oynatma Listesine Ekle", onClick = onAddToPlaylist)
+        MenuRowItem(icon = Icons.Rounded.PlayArrow, text = stringResource(R.string.post_menu_play_now), onClick = onPlay)
+        MenuRowItem(icon = Icons.Rounded.BookmarkBorder, text = stringResource(R.string.post_menu_save), onClick = onSave)
+        MenuRowItem(icon = Icons.AutoMirrored.Rounded.PlaylistAdd, text = stringResource(R.string.post_menu_add_to_playlist), onClick = onAddToPlaylist)
 
         MenuRowItem(
             icon = Icons.Rounded.Download,
-            text = "İndir",
+            text = stringResource(R.string.post_menu_download),
             trailingIcon = Icons.Rounded.WorkspacePremium,
             trailingIconTint = Color(0xFFFFD700),
             onClick = onDownload
         )
 
         post.author?.let { author ->
-            MenuRowItem(icon = Icons.Rounded.Person, text = "@$author Profiline Git", onClick = onGoToProfile)
+            MenuRowItem(icon = Icons.Rounded.Person, text = stringResource(R.string.post_menu_go_to_profile, author), onClick = onGoToProfile)
         }
-        MenuRowItem(icon = Icons.Rounded.Report, text = "Şikayet Et", tint = DangerRed, onClick = onReport)
+        MenuRowItem(icon = Icons.Rounded.Report, text = stringResource(R.string.common_report), tint = DangerRed, onClick = onReport)
     }
 }
 
@@ -337,7 +341,7 @@ fun PlaylistSelectionDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Listeye Ekle",
+                        text = stringResource(R.string.playlist_add_to_list),
                         color = TextPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -346,7 +350,7 @@ fun PlaylistSelectionDialog(
                     )
                     Icon(
                         imageVector = Icons.Rounded.Close,
-                        contentDescription = "Kapat",
+                        contentDescription = stringResource(R.string.common_close),
                         tint = TextMuted,
                         modifier = Modifier
                             .minimumInteractiveComponentSize()
@@ -387,7 +391,7 @@ fun PlaylistSelectionDialog(
                                     fontFamily = AppFont
                                 )
                                 Text(
-                                    text = "${playlist.postCount} bulmaca",
+                                    text = pluralStringResource(R.plurals.playlist_puzzle_count, playlist.postCount, playlist.postCount),
                                     color = TextMuted,
                                     fontSize = 12.sp,
                                     fontFamily = AppFont
@@ -409,7 +413,7 @@ fun PlaylistSelectionDialog(
                             modifier = Modifier.weight(1f),
                             placeholder = {
                                 Text(
-                                    text = "Liste adı...",
+                                    text = stringResource(R.string.playlist_name_hint),
                                     color = TextMuted,
                                     fontSize = 13.sp,
                                     fontFamily = AppFont
@@ -437,7 +441,7 @@ fun PlaylistSelectionDialog(
                                 .padding(horizontal = 16.dp, vertical = 14.dp)
                         ) {
                             Text(
-                                text = "Ekle",
+                                text = stringResource(R.string.common_add),
                                 color = BackgroundDark,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
@@ -469,7 +473,7 @@ fun PlaylistSelectionDialog(
                             )
                         }
                         Text(
-                            text = "Yeni Liste Oluştur",
+                            text = stringResource(R.string.playlist_create_new),
                             color = PurpleAccent,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,

@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.account
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -52,9 +54,9 @@ fun ChangePasswordScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = TextPrimary)
                 }
-                Text("Şifre Değiştir", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.settings_change_password), color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
             }
 
             Column(
@@ -64,9 +66,9 @@ fun ChangePasswordScreen(
                     .padding(horizontal = 18.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                CustomTextField(value = currentPassword, onValueChange = { currentPassword = it }, label = "Mevcut Şifre", isPassword = true)
-                CustomTextField(value = newPassword, onValueChange = { newPassword = it }, label = "Yeni Şifre", isPassword = true)
-                CustomTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = "Yeni Şifre (Tekrar)", isPassword = true)
+                CustomTextField(value = currentPassword, onValueChange = { currentPassword = it }, label = stringResource(R.string.change_password_current), isPassword = true)
+                CustomTextField(value = newPassword, onValueChange = { newPassword = it }, label = stringResource(R.string.change_password_new), isPassword = true)
+                CustomTextField(value = confirmPassword, onValueChange = { confirmPassword = it }, label = stringResource(R.string.change_password_repeat), isPassword = true)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -83,7 +85,7 @@ fun ChangePasswordScreen(
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Şifreyi Güncelle", color = BackgroundDark, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
+                    Text(stringResource(R.string.change_password_submit), color = BackgroundDark, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont)
                 }
             }
         }

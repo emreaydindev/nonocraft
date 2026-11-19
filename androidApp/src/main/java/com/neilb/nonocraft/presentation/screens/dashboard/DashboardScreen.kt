@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.dashboard
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.res.stringResource
+import com.neilb.nonocraft.R
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -45,6 +47,7 @@ fun DashboardScreen(
     onExitApp: () -> Unit,
     viewModel: DashboardViewModel = koinViewModel(),
 ) {
+    val exitMessage = stringResource(R.string.common_press_back_to_exit)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -58,7 +61,7 @@ fun DashboardScreen(
                     scope.launch {
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar(
-                            message = "Çıkmak için tekrar geri basın.",
+                            message = exitMessage,
                             withDismissAction = true,
                         )
                     }

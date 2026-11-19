@@ -12,7 +12,7 @@ fun Context.showToast(message: String?, isError: Boolean = true) {
     val layout = inflater.inflate(R.layout.toast_snackbar, null)
 
     val text = layout.findViewById<TextView>(R.id.toast_text)
-    text.text = message ?: "Bilinmeyen bir hata oluştu"
+    text.text = message ?: getString(R.string.common_unknown_error)
 
     val toast = Toast(this)
     toast.duration = Toast.LENGTH_SHORT

@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library.detail
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.title
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
@@ -86,7 +88,7 @@ fun LibraryDetailScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Geri",
+                            contentDescription = stringResource(R.string.common_back),
                             tint = TextPrimary
                         )
                     }
@@ -108,7 +110,7 @@ fun LibraryDetailScreen(
             } else if (uiState.posts.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Burada henüz bir şey yok.",
+                        text = stringResource(R.string.library_empty),
                         color = TextMuted,
                         fontFamily = AppFont,
                         fontSize = 15.sp

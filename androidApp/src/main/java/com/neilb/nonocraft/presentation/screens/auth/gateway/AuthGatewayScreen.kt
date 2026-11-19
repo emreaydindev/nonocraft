@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.screens.auth.gateway
 
 import androidx.compose.ui.semantics.heading
+import com.neilb.nonocraft.presentation.text.toMessage
+import com.neilb.nonocraft.common.ErrorCode
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -53,7 +57,7 @@ fun AuthGatewayScreen(
 
     val legalText = buildAnnotatedString {
         withStyle(SpanStyle(color = TextSecondary)) {
-            append("Devam ederek ")
+            append(stringResource(R.string.auth_legal_prefix))
         }
         withLink(
             LinkAnnotation.Clickable(
@@ -64,11 +68,11 @@ fun AuthGatewayScreen(
             )
         ) {
             withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                append("Gizlilik Politikası")
+                append(stringResource(R.string.common_privacy_policy))
             }
         }
         withStyle(SpanStyle(color = TextSecondary)) {
-            append(" ve ")
+            append(stringResource(R.string.auth_legal_and))
         }
         withLink(
             LinkAnnotation.Clickable(
@@ -79,11 +83,11 @@ fun AuthGatewayScreen(
             )
         ) {
             withStyle(SpanStyle(color = NeonCyan, fontWeight = FontWeight.SemiBold)) {
-                append("Kullanım Koşulları")
+                append(stringResource(R.string.common_terms))
             }
         }
         withStyle(SpanStyle(color = TextSecondary)) {
-            append("'nı kabul etmiş olursunuz.")
+            append(stringResource(R.string.auth_legal_suffix))
         }
     }
 
@@ -112,7 +116,7 @@ fun AuthGatewayScreen(
                 AuthLogoRow(modifier = Modifier.padding(bottom = 32.dp))
 
                 Text(
-                    text = "Hemen Başla",
+                    text = stringResource(R.string.auth_gateway_title),
                     color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
@@ -121,7 +125,7 @@ fun AuthGatewayScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Topluluğa katıl, tasarla ve keşfet.",
+                    text = stringResource(R.string.auth_gateway_subtitle),
                     color = TextSecondary,
                     fontSize = 15.sp,
                     fontFamily = AppFont,
@@ -133,14 +137,14 @@ fun AuthGatewayScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 GoogleSignInButton(
-                    label = "Google ile devam et",
+                    label = stringResource(R.string.auth_continue_with_google),
                     onClick = {
                         scope.launch {
                             authViewModel.changeLoadingState(true)
                             signInWithGoogle(context, credentialManager, request)
                                 .onSuccess { idToken -> authViewModel.googleLogin(idToken) }
                                 .onFailure { e ->
-                                    context.showToast(e.localizedMessage)
+                                    context.showToast(ErrorCode.GOOGLE_SIGN_IN_FAILED.toMessage(context))
                                     authViewModel.changeLoadingState(false)
                                 }
                         }
@@ -151,19 +155,19 @@ fun AuthGatewayScreen(
                 AuthDivider(label = "veya")
 
                 PrimaryAuthButton(
-                    text = "Kayıt Ol",
+                    text = stringResource(R.string.auth_sign_up),
                     onClick = onNavigateToRegister,
                 )
                 Spacer(Modifier.height(12.dp))
 
                 OutlineAuthButton(
-                    text = "Zaten hesabım var",
+                    text = stringResource(R.string.auth_have_account),
                     onClick = onNavigateToLogin,
                 )
                 Spacer(Modifier.height(12.dp))
 
                 GhostAuthButton(
-                    text = "Misafir olarak devam et",
+                    text = stringResource(R.string.auth_continue_as_guest),
                     onClick = onContinueAsGuest,
                 )
 

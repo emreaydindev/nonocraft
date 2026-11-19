@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.profile
 
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
@@ -88,12 +90,12 @@ fun ProfileScreen(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Geri",
+                        contentDescription = stringResource(R.string.common_back),
                         tint = TextPrimary
                     )
                 }
                 Text(
-                    text = "Profil",
+                    text = stringResource(R.string.profile_title),
                     color = TextPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -151,7 +153,7 @@ fun ProfileScreen(
                             )
 
                             Text(
-                                text = "Nonocraft Bulmaca Meraklısı",
+                                text = stringResource(R.string.common_bio_placeholder),
                                 color = TextMuted,
                                 fontSize = 14.sp,
                                 fontFamily = AppFont,
@@ -164,9 +166,9 @@ fun ProfileScreen(
                                     .padding(top = 20.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                StatItem(value = "28", label = "Bulmaca")
-                                StatItem(value = "156", label = "Beğeni")
-                                StatItem(value = "12", label = "Liste")
+                                StatItem(value = "28", label = stringResource(R.string.profile_stat_puzzles))
+                                StatItem(value = "156", label = stringResource(R.string.profile_stat_likes))
+                                StatItem(value = "12", label = stringResource(R.string.profile_stat_lists))
                             }
                         }
                     }

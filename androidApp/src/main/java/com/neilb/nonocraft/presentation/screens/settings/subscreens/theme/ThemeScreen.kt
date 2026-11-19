@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.theme
 
 import androidx.compose.ui.semantics.contentDescription
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -51,10 +53,10 @@ fun ThemeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = TextPrimary)
                 }
                 Text(
-                    text = "Uygulama Teması",
+                    text = stringResource(R.string.settings_theme),
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -72,28 +74,28 @@ fun ThemeScreen(
             ) {
                 // ÜCRETSİZ TEMALAR
                 Column {
-                    SectionLabel(text = "Standart (Ücretsiz)", modifier = Modifier.padding(start = 4.dp))
+                    SectionLabel(text = stringResource(R.string.theme_standard), modifier = Modifier.padding(start = 4.dp))
                     DashboardCard(modifier = Modifier.fillMaxWidth(), cornerRadius = 20) {
                         Column {
-                            ThemeOptionRow("Sistem Teması", "system", selectedTheme, false) { selectedTheme = "system" }
+                            ThemeOptionRow(stringResource(R.string.theme_system), "system", selectedTheme, false) { selectedTheme = "system" }
                             Box(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(BorderDark))
-                            ThemeOptionRow("Karanlık Mod", "dark", selectedTheme, false) { selectedTheme = "dark" }
+                            ThemeOptionRow(stringResource(R.string.theme_dark), "dark", selectedTheme, false) { selectedTheme = "dark" }
                             Box(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(BorderDark))
-                            ThemeOptionRow("Aydınlık Mod", "light", selectedTheme, false) { selectedTheme = "light" }
+                            ThemeOptionRow(stringResource(R.string.theme_light), "light", selectedTheme, false) { selectedTheme = "light" }
                         }
                     }
                 }
 
                 // PREMIUM TEMALAR
                 Column {
-                    SectionLabel(text = "Özel Koleksiyon (Premium)", modifier = Modifier.padding(start = 4.dp))
+                    SectionLabel(text = stringResource(R.string.theme_exclusive), modifier = Modifier.padding(start = 4.dp))
                     DashboardCard(modifier = Modifier.fillMaxWidth(), cornerRadius = 20) {
                         Column {
-                            ThemeOptionRow("AMOLED Siyah", "amoled", selectedTheme, true) { selectedTheme = "amoled" }
+                            ThemeOptionRow(stringResource(R.string.theme_amoled), "amoled", selectedTheme, true) { selectedTheme = "amoled" }
                             Box(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(BorderDark))
-                            ThemeOptionRow("Retro Wave", "retro", selectedTheme, true) { selectedTheme = "retro" }
+                            ThemeOptionRow(stringResource(R.string.theme_retro), "retro", selectedTheme, true) { selectedTheme = "retro" }
                             Box(modifier = Modifier.fillMaxWidth().height(0.5.dp).background(BorderDark))
-                            ThemeOptionRow("Cyberpunk", "cyberpunk", selectedTheme, true) { selectedTheme = "cyberpunk" }
+                            ThemeOptionRow(stringResource(R.string.theme_cyberpunk), "cyberpunk", selectedTheme, true) { selectedTheme = "cyberpunk" }
                         }
                     }
                 }
@@ -110,13 +112,14 @@ private fun ThemeOptionRow(
     isPremium: Boolean,
     onClick: () -> Unit
 ) {
+    val premiumTitle = stringResource(R.string.theme_premium_a11y, title)
     val isSelected = themeId == selectedId
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
-            .clearAndSetSemantics { contentDescription = if (isPremium) "$title, Premium" else title }
+            .clearAndSetSemantics { contentDescription = if (isPremium) premiumTitle else title }
             .background(if (isSelected) NeonCyan.copy(alpha = 0.05f) else Color.Transparent)
             .padding(horizontal = 16.dp, vertical = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,7 +127,7 @@ private fun ThemeOptionRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (isPremium) {
-                Icon(Icons.Rounded.WorkspacePremium, contentDescription = "Premium", tint = GameGold, modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.WorkspacePremium, contentDescription = stringResource(R.string.common_premium), tint = GameGold, modifier = Modifier.size(20.dp))
             }
             Text(
                 text = title,

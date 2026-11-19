@@ -1,6 +1,7 @@
 package com.neilb.nonocraft.presentation.screens.auth.components
 
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.stateDescription
@@ -125,7 +126,7 @@ fun AuthBackRow(
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = "Geri",
+                contentDescription = stringResource(R.string.common_back),
                 tint = TextPrimary
             )
         }
@@ -139,6 +140,7 @@ fun GoogleSignInButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
+    val loadingLabel = stringResource(R.string.common_loading)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -150,7 +152,7 @@ fun GoogleSignInButton(
             .semantics(mergeDescendants = true) {
                 if (isLoading) {
                     contentDescription = label
-                    stateDescription = "Yükleniyor"
+                    stateDescription = loadingLabel
                 }
             },
         contentAlignment = Alignment.Center
@@ -192,7 +194,7 @@ fun GoogleSignInButton(
 }
 
 @Composable
-fun AuthDivider(label: String = "veya") {
+fun AuthDivider(label: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -326,9 +328,9 @@ fun AuthPasswordField(
                     else
                         Icons.Filled.Visibility,
                     contentDescription = if (visible)
-                        "Şifreyi gizle"
+                        stringResource(R.string.auth_password_hide)
                     else
-                        "Şifreyi göster",
+                        stringResource(R.string.auth_password_show),
                     tint = TextMuted,
                 )
             }
@@ -358,9 +360,9 @@ fun PasswordStrengthBar(
 ) {
     val strength = evaluatePasswordStrength(password)
     val (filledSegments, barColor, label) = when (strength) {
-        PasswordStrength.WEAK   -> Triple(1, DangerRed,       "Zayıf")
-        PasswordStrength.MEDIUM -> Triple(2, GameGold,         "Orta")
-        PasswordStrength.STRONG -> Triple(3, NeonCyan,         "Güçlü")
+        PasswordStrength.WEAK   -> Triple(1, DangerRed,       stringResource(R.string.auth_strength_weak))
+        PasswordStrength.MEDIUM -> Triple(2, GameGold,         stringResource(R.string.auth_strength_medium))
+        PasswordStrength.STRONG -> Triple(3, NeonCyan,         stringResource(R.string.auth_strength_strong))
     }
 
     Column(modifier = modifier) {
@@ -392,6 +394,7 @@ fun PasswordStrengthBar(
 
 @Composable
 fun PasswordRequirementRow(text: String, met: Boolean) {
+    val metDescription = stringResource(if (met) R.string.auth_requirement_met else R.string.auth_requirement_not_met)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -399,7 +402,7 @@ fun PasswordRequirementRow(text: String, met: Boolean) {
             .padding(vertical = 3.dp)
             .clearAndSetSemantics {
                 contentDescription = text
-                stateDescription = if (met) "Karşılandı" else "Karşılanmadı"
+                stateDescription = metDescription
             },
     ) {
         Box(
@@ -435,6 +438,7 @@ fun PrimaryAuthButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
 ) {
+    val loadingLabel = stringResource(R.string.common_loading)
 
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -454,7 +458,7 @@ fun PrimaryAuthButton(
             .semantics(mergeDescendants = true) {
                 if (isLoading) {
                     contentDescription = text
-                    stateDescription = "Yükleniyor"
+                    stateDescription = loadingLabel
                 }
             },
         contentAlignment = Alignment.Center,

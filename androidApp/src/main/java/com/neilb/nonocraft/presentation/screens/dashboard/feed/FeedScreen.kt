@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.feed
 
 import androidx.compose.ui.semantics.onClick
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.label
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.message
@@ -95,6 +97,7 @@ fun FeedScreen(
     onNavigateToProfile: (String) -> Unit,
     onNavigateToCrafting: () -> Unit
 ) {
+    val createLabel = stringResource(R.string.common_create)
     val uiState by viewModel.uiState.collectAsState()
 
     val listState = rememberLazyListState()
@@ -111,7 +114,7 @@ fun FeedScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = "Keşfet",
+                text = stringResource(R.string.feed_title),
                 color = TextPrimary,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
@@ -222,7 +225,7 @@ fun FeedScreen(
             icon = { Icon(Icons.Filled.Brush, contentDescription = null) },
             text = {
                 Text(
-                    text = "Oluştur",
+                    text = stringResource(R.string.common_create),
                     fontFamily = AppFont,
                     fontWeight = FontWeight.Bold
                 )
@@ -234,7 +237,7 @@ fun FeedScreen(
                 .padding(end = 20.dp, bottom = 20.dp)
                 // One label whether the text is shown or collapsed (it is hidden while animating).
                 .clearAndSetSemantics {
-                    contentDescription = "Oluştur"
+                    contentDescription = createLabel
                     role = Role.Button
                     onClick { onNavigateToCrafting(); true }
                 }
@@ -328,7 +331,7 @@ private fun LazyListScope.feedItems(
     } else if (uiState.posts.isEmpty()) {
         item {
             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(text = "Henüz bir bulmaca bulunamadı.", color = TextMuted, fontFamily = AppFont)
+                Text(text = stringResource(R.string.feed_empty), color = TextMuted, fontFamily = AppFont)
             }
         }
     } else {

@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.components
 
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.res.pluralStringResource
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.label
 import com.neilb.nonocraft.presentation.text.boardSizeText
 import com.neilb.nonocraft.presentation.text.relativeTime
@@ -57,6 +60,10 @@ fun PostCard(
     showFollowButton: Boolean = true,
     onAction: (PostAction) -> Unit
 ) {
+    val moreOptionsLabel = stringResource(R.string.post_more_options)
+    val likeDescription = pluralStringResource(R.plurals.post_like_a11y, post.likes, post.likes)
+    val likeState = stringResource(if (post.isLiked) R.string.post_liked else R.string.post_not_liked)
+    val commentsDescription = pluralStringResource(R.plurals.post_comments_a11y, post.comments, post.comments)
     DashboardCard(
         modifier = Modifier.fillMaxWidth(),
         cornerRadius = 20
@@ -118,7 +125,7 @@ fun PostCard(
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = if (post.isFollowed) "Takipte" else "Takip Et",
+                                text = if (post.isFollowed) stringResource(R.string.post_following) else stringResource(R.string.post_follow),
                                 color = if (post.isFollowed) TextPrimary else BackgroundDark,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
@@ -134,7 +141,7 @@ fun PostCard(
                             .minimumInteractiveComponentSize()
                             .clip(CircleShape)
                             .rippleClickable { onAction(PostAction.MoreClick(post.id)) }
-                            .semantics { contentDescription = "Diğer seçenekler" }
+                            .semantics { contentDescription = moreOptionsLabel }
                             .padding(12.dp)
                             .size(24.dp)
                     )
@@ -185,8 +192,8 @@ fun PostCard(
                         .heightIn(min = 48.dp)
                         .rippleClickable { onAction(PostAction.LikeClick(post.id)) }
                         .clearAndSetSemantics {
-                            contentDescription = "Beğen, ${post.likes} beğeni"
-                            stateDescription = if (post.isLiked) "Beğenildi" else "Beğenilmedi"
+                            contentDescription = likeDescription
+                            stateDescription = likeState
                         }
                 ) {
                     Icon(
@@ -209,7 +216,7 @@ fun PostCard(
                     modifier = Modifier
                         .heightIn(min = 48.dp)
                         .rippleClickable { onAction(PostAction.CommentClick(post.id)) }
-                        .clearAndSetSemantics { contentDescription = "Yorumlar, ${post.comments} yorum" }
+                        .clearAndSetSemantics { contentDescription = commentsDescription }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ChatBubbleOutline,
@@ -270,7 +277,7 @@ fun PostCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "Oyna",
+                            text = stringResource(R.string.common_play),
                             color = BackgroundDark,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,

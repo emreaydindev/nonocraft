@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.intro
 
 import com.neilb.nonocraft.presentation.accessibility.rememberReduceMotion
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
@@ -121,7 +123,7 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                         .visible(page != 3)
                 ) {
                     Text(
-                        text = "Atla",
+                        text = stringResource(R.string.common_skip),
                         color = TextSecondary,
                         fontSize = 12.sp,
                         fontFamily = AppFont
@@ -143,15 +145,18 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val titles = listOf("Satırları Doldur", "Boş Kareler", "Renkli Gruplar", "Tebrikler")
+                    val titles = listOf(
+                        stringResource(R.string.tutorial_1_title), stringResource(R.string.tutorial_2_title),
+                        stringResource(R.string.tutorial_3_title), stringResource(R.string.tutorial_4_title),
+                    )
                     val descriptions = listOf(
-                        "Soldaki sayı o satırda kaç kareyi doldurman gerektiğini belirtir. İlk satırı doldurmak için sürükle.",
-                        "Kesin boş olduğunu bildiğin kareleri çarpı ile işaretle. Boşluğu işaretlemek için çarpı aracını seç.",
-                        "Renkli bulmacalarda farklı renkler yan yana gelebilir. İstenen renkleri kullanarak hücreleri doldur.",
-                        "Tüm temel kuralları öğrendin. Artık Nonocraft dünyasına girmeye hazırsın."
+                        stringResource(R.string.tutorial_1_body),
+                        stringResource(R.string.tutorial_2_body),
+                        stringResource(R.string.tutorial_3_body),
+                        stringResource(R.string.tutorial_4_body)
                     )
                     Text(
-                        text = "ADIM ${p + 1} / 4",
+                        text = stringResource(R.string.tutorial_step, p + 1, 4),
                         color = NeonCyan.copy(alpha = 0.7f),
                         fontSize = 11.sp,
                         letterSpacing = 1.5.sp,
@@ -241,7 +246,7 @@ fun TutorialScreen(onNavigateToDashboard: () -> Unit) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Başla",
+                        text = stringResource(R.string.common_start),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White,

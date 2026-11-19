@@ -1,6 +1,11 @@
 package com.neilb.nonocraft.presentation.screens.settings
 
 import com.neilb.nonocraft.presentation.screens.gameplay.components.rememberColorPatternSetting
+import com.neilb.nonocraft.presentation.screens.settings.components.LanguageDialog
+import com.neilb.nonocraft.presentation.screens.settings.components.AppLanguage
+import androidx.compose.material.icons.rounded.Language
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.ErrorContext
 import com.neilb.nonocraft.presentation.text.toMessage
 import androidx.compose.material.icons.rounded.Category
@@ -101,6 +106,8 @@ fun SettingsScreen(
     var isSoundEnabled by remember { mutableStateOf(true) }
     var isErrorWarningEnabled by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val currentLanguage = remember { AppLanguage.current() }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collectLatest { event ->
@@ -109,6 +116,17 @@ fun SettingsScreen(
                 is SettingsUiEvent.ShowError -> context.showToast(event.code.toMessage(context, ErrorContext.DELETE_ACCOUNT))
             }
         }
+    }
+
+    if (showLanguageDialog) {
+        LanguageDialog(
+            selected = currentLanguage,
+            onSelect = { language ->
+                showLanguageDialog = false
+                if (language != currentLanguage) AppLanguage.apply(language)
+            },
+            onDismiss = { showLanguageDialog = false },
+        )
     }
 
     if (showDeleteDialog) {
@@ -143,12 +161,12 @@ fun SettingsScreen(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Geri",
+                        contentDescription = stringResource(R.string.common_back),
                         tint = TextPrimary
                     )
                 }
                 Text(
-                    text = "Ayarlar",
+                    text = stringResource(R.string.common_settings),
                     color = TextPrimary,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -167,78 +185,84 @@ fun SettingsScreen(
             ) {
 
                 val colorPatterns = rememberColorPatternSetting()
-                SettingsGroup(title = "Görünüm & Özelleştirme") {
+                SettingsGroup(title = stringResource(R.string.settings_group_appearance)) {
                     SettingsRow(
                         icon = Icons.Rounded.Palette,
-                        label = "Uygulama Teması",
-                        value = "Karanlık",
+                        label = stringResource(R.string.settings_theme),
+                        value = stringResource(R.string.settings_theme_dark),
                         onClick = onNavigateToTheme
                     )
                     SettingsRow(
                         icon = Icons.Rounded.AppShortcut,
-                        label = "Uygulama İkonu",
-                        value = "Klasik",
+                        label = stringResource(R.string.settings_icon),
+                        value = stringResource(R.string.settings_icon_classic),
                         isPremium = true,
                         onClick = onNavigateToAppIcon
                     )
+                    SettingsRow(
+                        icon = Icons.Rounded.Language,
+                        label = stringResource(R.string.settings_language),
+                        value = stringResource(currentLanguage.label),
+                        onClick = { showLanguageDialog = true }
+                    )
                     SettingsSwitchRow(
                         icon = Icons.Rounded.AutoAwesome,
-                        label = "Neon Efektleri",
+                        label = stringResource(R.string.settings_neon),
                         isChecked = isNeonEffectsEnabled,
                         onCheckedChange = { isNeonEffectsEnabled = it }
                     )
                 }
 
-                SettingsGroup(title = "Oyun Deneyimi") {
+                SettingsGroup(title = stringResource(R.string.settings_group_game)) {
                     SettingsSwitchRow(
                         icon = Icons.Rounded.Vibration,
-                        label = "Titreşim",
+                        label = stringResource(R.string.settings_vibration),
                         isChecked = isVibrationEnabled,
                         onCheckedChange = { isVibrationEnabled = it }
                     )
                     SettingsSwitchRow(
                         icon = Icons.AutoMirrored.Rounded.VolumeUp,
-                        label = "Ses Efektleri",
+                        label = stringResource(R.string.settings_sound),
                         isChecked = isSoundEnabled,
                         onCheckedChange = { isSoundEnabled = it }
                     )
                     SettingsSwitchRow(
                         icon = Icons.Rounded.Warning,
-                        label = "Hatalı Hamle Uyarısı",
+                        label = stringResource(R.string.settings_wrong_move_alert),
                         isChecked = isErrorWarningEnabled,
                         onCheckedChange = { isErrorWarningEnabled = it }
                     )
                     // Off by default unless the system colour correction is on; saved on the device.
                     SettingsSwitchRow(
                         icon = Icons.Rounded.Category,
-                        label = "Renk Körü Desenleri",
+                        label = stringResource(R.string.settings_colorblind),
                         isChecked = colorPatterns.isEnabled,
                         onCheckedChange = { colorPatterns.isEnabled = it }
                     )
                 }
 
-                SettingsGroup(title = "Hesap & Güvenlik") {
+                SettingsGroup(title = stringResource(R.string.settings_group_account)) {
                     SettingsRow(
                         icon = Icons.Rounded.ManageAccounts,
-                        label = "Hesap Bilgilerini Düzenle",
+                        label = stringResource(R.string.settings_edit_account),
                         onClick = onNavigateToEditProfile
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Lock,
-                        label = "Şifre Değiştir",
+                        label = stringResource(R.string.settings_change_password),
                         onClick = onNavigateToChangePassword
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Notifications,
-                        label = "Bildirim Tercihleri",
+                        label = stringResource(R.string.settings_notifications),
                         onClick = onNavigateToNotifications
                     )
                 }
 
-                SettingsGroup(title = "Destek & Yasal") {
+                SettingsGroup(title = stringResource(R.string.settings_group_support)) {
                     SettingsRow(
                         icon = Icons.Rounded.Email,
-                        label = "Bize Ulaşın",
+                        label = stringResource(R.string.settings_contact),
                         isExternalLink = true,
                         onClick = {
                             val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
@@ -249,29 +273,29 @@ fun SettingsScreen(
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Policy,
-                        label = "Gizlilik Politikası",
+                        label = stringResource(R.string.common_privacy_policy),
                         isExternalLink = true,
                         onClick = { context.openInCustomTab(Constants.PRIVACY_POLICY_URL) }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.Description,
-                        label = "Kullanım Koşulları",
+                        label = stringResource(R.string.common_terms),
                         isExternalLink = true,
                         onClick = { context.openInCustomTab(Constants.TERMS_OF_SERVICE_URL) }
                     )
                 }
 
-                SettingsGroup(title = "Oturum") {
+                SettingsGroup(title = stringResource(R.string.settings_group_session)) {
                     SettingsRow(
                         icon = Icons.AutoMirrored.Rounded.Logout,
-                        label = "Çıkış Yap",
+                        label = stringResource(R.string.settings_log_out),
                         contentColor = DangerRed,
                         hideTrailingIcon = true,
                         onClick = { viewModel.logout() }
                     )
                     SettingsRow(
                         icon = Icons.Rounded.DeleteForever,
-                        label = "Hesabı Kalıcı Olarak Sil",
+                        label = stringResource(R.string.settings_delete_account),
                         contentColor = DangerRed,
                         hideTrailingIcon = true,
                         onClick = { showDeleteDialog = true }
@@ -375,14 +399,14 @@ private fun SettingsRow(
             if (isPremium) {
                 Icon(
                     imageVector = Icons.Rounded.WorkspacePremium,
-                    contentDescription = "Premium",
+                    contentDescription = stringResource(R.string.common_premium),
                     tint = GameGold,
                     modifier = Modifier.size(18.dp)
                 )
             } else if (!hideTrailingIcon) {
                 Icon(
                     imageVector = if (isExternalLink) Icons.AutoMirrored.Rounded.OpenInNew else Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                    contentDescription = if (isExternalLink) "Tarayıcıda açılır" else null,
+                    contentDescription = if (isExternalLink) stringResource(R.string.common_opens_in_browser) else null,
                     tint = TextMuted.copy(alpha = 0.5f),
                     modifier = Modifier.size(if (isExternalLink) 18.dp else 14.dp)
                 )

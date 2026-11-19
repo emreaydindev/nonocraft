@@ -1,6 +1,8 @@
 package com.neilb.nonocraft.presentation.screens.settings.subscreens.notifications
 
 import androidx.compose.foundation.selection.toggleable
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
@@ -38,9 +40,9 @@ fun NotificationSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Geri", tint = TextPrimary)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = TextPrimary)
                 }
-                Text("Bildirim Tercihleri", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
+                Text(stringResource(R.string.settings_notifications), color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = AppFont, modifier = Modifier.semantics { heading() })
             }
 
             Column(
@@ -52,13 +54,13 @@ fun NotificationSettingsScreen(
             ) {
                 DashboardCard(modifier = Modifier.fillMaxWidth(), cornerRadius = 20) {
                     Column {
-                        NotificationSwitchRow("Günün Bulmacası Hatırlatıcısı", dailyPuzzle) { dailyPuzzle = it }
+                        NotificationSwitchRow(stringResource(R.string.notif_daily), dailyPuzzle) { dailyPuzzle = it }
                         HorizontalDivider(color = BorderDark, thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
-                        NotificationSwitchRow("Yeni Takipçiler", newFollowers) { newFollowers = it }
+                        NotificationSwitchRow(stringResource(R.string.notif_followers), newFollowers) { newFollowers = it }
                         HorizontalDivider(color = BorderDark, thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
-                        NotificationSwitchRow("Beğeni ve Yorumlar", likesAndComments) { likesAndComments = it }
+                        NotificationSwitchRow(stringResource(R.string.notif_likes_comments), likesAndComments) { likesAndComments = it }
                         HorizontalDivider(color = BorderDark, thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
-                        NotificationSwitchRow("Duyurular ve Etkinlikler", announcements) { announcements = it }
+                        NotificationSwitchRow(stringResource(R.string.notif_announcements), announcements) { announcements = it }
                     }
                 }
             }

@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.premium
 
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.platform.LocalContext
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -108,6 +111,7 @@ fun PremiumScreen(
     onNavigateBack: () -> Unit,
     viewModel: PremiumViewModel = viewModel()
 ) {
+    val resources = LocalContext.current.resources
     val isProcessing by viewModel.isProcessing.collectAsStateWithLifecycle()
     var selectedPlanId by remember { mutableStateOf("yearly") }
     var showSuccess by remember { mutableStateOf(false) }
@@ -124,60 +128,60 @@ fun PremiumScreen(
         }
     }
 
-    val plans = remember {
+    val plans = run {
         listOf(
             Plan(
                 id = "monthly",
-                title = "Aylık Plan",
+                title = stringResource(R.string.premium_monthly),
                 price = "₺89",
-                period = "/ay",
+                period = stringResource(R.string.premium_per_month),
                 accentColor = NeonCyan
             ),
             Plan(
                 id = "yearly",
-                title = "Yıllık Plan",
+                title = stringResource(R.string.premium_yearly),
                 price = "₺599",
-                period = "/yıl",
-                monthlyEquiv = "Aylık ₺49.90'a gelir",
+                period = stringResource(R.string.premium_per_year),
+                monthlyEquiv = stringResource(R.string.premium_yearly_equiv, "₺49.90"),
                 accentColor = GameGold
             )
         )
     }
 
-    val slides = remember {
+    val slides = run {
         listOf(
             FeatureSlide(
-                title = "Sınırsız Oyun Deneyimi",
-                description = "Reklamları kaldırın ve bekleme sürelerine veda edin.",
+                title = stringResource(R.string.premium_s1_title),
+                description = stringResource(R.string.premium_s1_body),
                 icon = Icons.Rounded.OfflineBolt,
                 color = NeonCyan,
                 bulletPoints = listOf(
-                    "Hiçbir reklam gösterilmez.",
-                    "Sınırsız kristal ile can doldurma beklemesi yok.",
-                    "Hata payı 3 yerine 5 kalbe çıkarılır.",
-                    "Çevrimdışı oynamak için 50'ye kadar bölüm otomatik indirilir."
+                    stringResource(R.string.premium_s1_b1),
+                    stringResource(R.string.premium_s1_b2),
+                    stringResource(R.string.premium_s1_b3),
+                    stringResource(R.string.premium_s1_b4)
                 )
             ),
             FeatureSlide(
-                title = "Yaratıcılığınızı Özgür Bırakın",
-                description = "Yapay zeka ile yeni bulmacalar ve tasarımlar üretin.",
+                title = stringResource(R.string.premium_s2_title),
+                description = stringResource(R.string.premium_s2_body),
                 icon = Icons.Rounded.AutoAwesome,
                 color = PurpleAccent,
                 bulletPoints = listOf(
-                    "AI ile piksel sanat tasarımları oluşturun.",
-                    "Tek renkli çizimlerinizi AI ile saniyeler içinde renklendirin.",
-                    "Çizimleriniz çözülebilirlik algoritmasına takılınca AI'dan ipucu alın."
+                    stringResource(R.string.premium_s2_b1),
+                    stringResource(R.string.premium_s2_b2),
+                    stringResource(R.string.premium_s2_b3)
                 )
             ),
             FeatureSlide(
-                title = "Öne Çıkın ve Kişiselleştirin",
-                description = "Toplulukta fark yaratın ve uygulamayı kendinize göre özelleştirin.",
+                title = stringResource(R.string.premium_s3_title),
+                description = stringResource(R.string.premium_s3_body),
                 icon = Icons.Rounded.WorkspacePremium,
                 color = GameGold,
                 bulletPoints = listOf(
-                    "Paylaşımlarınız Keşfet bölümünde algoritma tarafından daha çok öne çıkarılır.",
-                    "Profilinizde prestijli altın renkli highlight sergilenir.",
-                    "Uygulama ikonu ve teması için özel premium seçeneklere erişim."
+                    stringResource(R.string.premium_s3_b1),
+                    stringResource(R.string.premium_s3_b2),
+                    stringResource(R.string.premium_s3_b3)
                 )
             )
         )
@@ -226,7 +230,7 @@ fun PremiumScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
-                    .clearAndSetSemantics { contentDescription = "Sayfa ${pagerState.currentPage + 1} / ${slides.size}" },
+                    .clearAndSetSemantics { contentDescription = resources.getString(R.string.common_page_of, pagerState.currentPage + 1, slides.size) },
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -278,7 +282,7 @@ fun PremiumScreen(
             }
 
             Text(
-                text = "Abonelik seçilen plana göre otomatik yenilenir. İstediğin zaman iptal edebilirsin.",
+                text = stringResource(R.string.premium_renewal_note),
                 color = TextMuted,
                 fontSize = 10.sp,
                 fontFamily = AppFont,
@@ -510,7 +514,7 @@ private fun PurchaseButton(
                 )
             } else {
                 Text(
-                    text = "Devam Et (${plan.price}${plan.period})",
+                    text = stringResource(R.string.premium_continue_with_price, plan.price, plan.period),
                     color = BackgroundDark,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -536,7 +540,7 @@ private fun ProcessingOverlay() {
         ) {
             CircularProgressIndicator(color = GameGold)
             Text(
-                text = "İşleminiz tamamlanıyor...",
+                text = stringResource(R.string.premium_processing),
                 color = TextPrimary,
                 fontFamily = AppFont,
                 fontWeight = FontWeight.Medium
@@ -573,14 +577,14 @@ private fun SuccessOverlay() {
                 )
             }
             Text(
-                text = "Aramıza Hoş Geldin!",
+                text = stringResource(R.string.premium_welcome),
                 color = GameGold,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = AppFont
             )
             Text(
-                text = "Tüm premium özellikler aktif edildi.",
+                text = stringResource(R.string.premium_welcome_body),
                 color = TextSecondary,
                 fontSize = 14.sp,
                 fontFamily = AppFont

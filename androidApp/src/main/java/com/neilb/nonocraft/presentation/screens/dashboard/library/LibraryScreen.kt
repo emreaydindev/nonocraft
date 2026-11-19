@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.library
 
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.res.pluralStringResource
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -128,30 +131,30 @@ fun LibraryScreen(
     }
 
     val sections = listOf(
-        LibrarySection("liked", "Beğenilenler", "${uiState.likedArtsCount} Pixelart", Icons.Rounded.Favorite, DangerRed) {
+        LibrarySection("liked", stringResource(R.string.library_liked), pluralStringResource(R.plurals.library_pixelart_count, uiState.likedArtsCount, uiState.likedArtsCount), Icons.Rounded.Favorite, DangerRed) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("liked"))
         },
         LibrarySection(
-            "downloaded", "İndirilenler", "${uiState.downloadedLevelsCount} Bölüm", Icons.Rounded.Download, GameGold,
+            "downloaded", stringResource(R.string.library_downloaded), pluralStringResource(R.plurals.library_level_count, uiState.downloadedLevelsCount, uiState.downloadedLevelsCount), Icons.Rounded.Download, GameGold,
             isPremium = true
         ) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("downloaded"))
             onNavigateToPremium()
         },
-        LibrarySection("shared", "Paylaşılanlar", "${uiState.sharedArtsCount} Tasarım", Icons.Rounded.Palette, NeonCyan) {
+        LibrarySection("shared", stringResource(R.string.library_shared), pluralStringResource(R.plurals.library_design_count, uiState.sharedArtsCount, uiState.sharedArtsCount), Icons.Rounded.Palette, NeonCyan) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("shared"))
         },
-        LibrarySection("drafts", "Taslaklar", "${uiState.draftArtsCount} Kayıt", Icons.Rounded.Edit, TextMuted) {
+        LibrarySection("drafts", stringResource(R.string.library_drafts), pluralStringResource(R.plurals.library_saved_count, uiState.draftArtsCount, uiState.draftArtsCount), Icons.Rounded.Edit, TextMuted) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("drafts"))
             onNavigateToCrafting()
         },
         LibrarySection(
-            "completed", "Çözülenler", "${uiState.completedLevelsCount} Bölüm", Icons.Rounded.CheckCircle, Color(0xFF4CAF50)
+            "completed", stringResource(R.string.library_completed), pluralStringResource(R.plurals.library_level_count, uiState.completedLevelsCount, uiState.completedLevelsCount), Icons.Rounded.CheckCircle, Color(0xFF4CAF50)
         ) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("completed"))
         },
         LibrarySection(
-            "dailies", "Günlük Serüven", "${uiState.completedDailiesCount} Çözüm", Icons.Rounded.Today, Color(0xFFB388FF)
+            "dailies", stringResource(R.string.library_dailies), pluralStringResource(R.plurals.library_solution_count, uiState.completedDailiesCount, uiState.completedDailiesCount), Icons.Rounded.Today, Color(0xFFB388FF)
         ) {
             viewModel.handleAction(LibraryAction.OnCategoryClick("dailies"))
         },
@@ -309,7 +312,7 @@ private fun LibraryCardGrid(
                         )
                     }
                     Text(
-                        text = "Yeni Liste",
+                        text = stringResource(R.string.playlist_new),
                         color = TextPrimary,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
@@ -363,7 +366,7 @@ private fun LibraryRowList(
         item { PlaylistsTitle(modifier = Modifier.padding(top = 20.dp)) }
         item {
             LibraryRow(
-                title = "Yeni Liste",
+                title = stringResource(R.string.playlist_new),
                 subtitle = null,
                 icon = Icons.Rounded.Add,
                 tint = TextPrimary,
@@ -375,7 +378,7 @@ private fun LibraryRowList(
         items(playlists, key = { it.id }) { playlist ->
             LibraryRow(
                 title = playlist.name,
-                subtitle = "${playlist.postCount} Bulmaca",
+                subtitle = pluralStringResource(R.plurals.playlist_puzzle_count, playlist.postCount, playlist.postCount),
                 icon = Icons.Rounded.QueueMusic,
                 tint = Color(playlist.coverColor),
                 isSelected = playlist.id == selectedId,
@@ -389,7 +392,7 @@ private fun LibraryRowList(
 @Composable
 private fun LibraryTitle() {
     Text(
-        text = "Kütüphanem",
+        text = stringResource(R.string.library_title),
         color = TextPrimary,
         fontSize = 28.sp,
         fontWeight = FontWeight.Bold,
@@ -403,7 +406,7 @@ private fun LibraryTitle() {
 @Composable
 private fun PlaylistsTitle(modifier: Modifier = Modifier) {
     Text(
-        text = "Oynatma Listeleri",
+        text = stringResource(R.string.library_playlists),
         color = TextPrimary,
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold,
@@ -480,7 +483,7 @@ private fun ProBadge() {
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = "PRO",
+            text = stringResource(R.string.common_pro_badge),
             color = GameGold,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
@@ -498,6 +501,7 @@ private fun LibraryGridCard(
     isPremium: Boolean = false,
     onClick: () -> Unit
 ) {
+    val proLabel = stringResource(R.string.common_pro)
     DashboardCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -505,7 +509,7 @@ private fun LibraryGridCard(
             .rippleClickable(onClick)
             // Title first, then the count and the Pro mark (the badge is drawn above the title).
             .clearAndSetSemantics {
-                contentDescription = listOfNotNull(title, subtitle, "Pro".takeIf { isPremium }).joinToString(", ")
+                contentDescription = listOfNotNull(title, subtitle, proLabel.takeIf { isPremium }).joinToString(", ")
             },
         cornerRadius = 24
     ) {
@@ -605,7 +609,7 @@ private fun PlaylistGridCard(
                     maxLines = 1
                 )
                 Text(
-                    text = "${playlist.postCount} Bulmaca",
+                    text = pluralStringResource(R.plurals.playlist_puzzle_count, playlist.postCount, playlist.postCount),
                     color = TextMuted,
                     fontSize = 13.sp,
                     fontFamily = AppFont,

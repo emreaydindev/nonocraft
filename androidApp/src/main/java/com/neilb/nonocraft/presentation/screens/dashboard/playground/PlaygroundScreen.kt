@@ -1,6 +1,10 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.playground
 
 import androidx.compose.foundation.Image
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalConfiguration
+import android.text.format.DateFormat
+import androidx.compose.ui.res.stringResource
 import com.neilb.nonocraft.presentation.text.boardSizeText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -244,6 +248,7 @@ private fun LevelProgressCard(
     draftProgress: Int,
     onContinue: () -> Unit,
 ) {
+    val currentLevelDescription = stringResource(R.string.playground_current_level_a11y, currentLevel)
     DashboardCard(
         modifier = Modifier.fillMaxWidth(),
         cornerRadius = 20,
@@ -254,12 +259,12 @@ private fun LevelProgressCard(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                     modifier = Modifier.clearAndSetSemantics {
-                        contentDescription = "Mevcut seviye $currentLevel"
+                        contentDescription = currentLevelDescription
                         heading()
                     },
                 ) {
                     Text(
-                        text = "MEVCUT SEVİYE",
+                        text = stringResource(R.string.playground_current_level),
                         color = TextMuted,
                         fontSize = 11.sp,
                         letterSpacing = 1.sp,
@@ -285,7 +290,7 @@ private fun LevelProgressCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = if (hasDraft) "Devam Et" else "Başla",
+                        text = stringResource(if (hasDraft) R.string.common_continue else R.string.common_start),
                         color = Color(0xFF0A0A0F),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -315,7 +320,7 @@ private fun LevelProgressCard(
                         modifier = Modifier.size(17.dp),
                     )
                     Text(
-                        text = "Yarım kalan bölüm: $draftSize · %$draftProgress",
+                        text = stringResource(R.string.playground_draft, draftSize, draftProgress),
                         color = TextSecondary,
                         fontSize = 13.sp,
                         fontFamily = AppFont,
@@ -352,14 +357,14 @@ private fun PlaygroundHeader(
             IconButton(onClick = onNavigateToTutorial) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.HelpOutline,
-                    contentDescription = "Nasıl oynanır",
+                    contentDescription = stringResource(R.string.playground_how_to_play),
                     tint = PurpleAccent,
                 )
             }
             IconButton(onClick = onNavigateToSettings) {
                 Icon(
                     imageVector = Icons.Rounded.Settings,
-                    contentDescription = "Ayarlar",
+                    contentDescription = stringResource(R.string.common_settings),
                     tint = PurpleAccent,
                 )
             }
@@ -377,6 +382,9 @@ private fun WalletStrip(
     crystals: Int,
     crystalRefillMinutes: Int,
 ) {
+    val starsDescription = pluralStringResource(R.plurals.playground_stars_a11y, stars, stars)
+    val crystalsDescription = pluralStringResource(R.plurals.playground_crystals_a11y, CRYSTAL_CAP, crystals, CRYSTAL_CAP)
+    val refillDescription = pluralStringResource(R.plurals.playground_refill_a11y, crystalRefillMinutes, crystalRefillMinutes)
     DashboardCard(
         modifier = Modifier.fillMaxWidth(),
         cornerRadius = 18,
@@ -390,7 +398,7 @@ private fun WalletStrip(
         ) {
             Row(
                 modifier = Modifier.clearAndSetSemantics {
-                    contentDescription = "$stars yıldız"
+                    contentDescription = starsDescription
                 },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -419,7 +427,7 @@ private fun WalletStrip(
 
             Row(
                 modifier = Modifier.clearAndSetSemantics {
-                    contentDescription = "$crystals / $CRYSTAL_CAP kristal"
+                    contentDescription = crystalsDescription
                 },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -456,7 +464,7 @@ private fun WalletStrip(
                 val timerColor = if (crystals == 0) DangerRed else TextSecondary
                 Row(
                     modifier = Modifier.clearAndSetSemantics {
-                        contentDescription = "Yeni kristale $crystalRefillMinutes dakika"
+                        contentDescription = refillDescription
                     },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -468,7 +476,7 @@ private fun WalletStrip(
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "$crystalRefillMinutes dk",
+                        text = stringResource(R.string.playground_refill_short, crystalRefillMinutes),
                         color = timerColor,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -519,20 +527,28 @@ private fun DailyChallengeCard(
     onPlayToday: () -> Unit,
     onPlayPast: (String) -> Unit,
 ) {
-    val locale = Locale.forLanguageTag("tr-TR")
-    val today = remember {
-        val calendar = Calendar.getInstance()
-        SimpleDateFormat("d MMMM", locale).format(calendar.time)
+    // Dates follow the app language (per-app locale), not a fixed Turkish format.
+    val locale = LocalConfiguration.current.locales[0]
+    val todayLabel = stringResource(R.string.playground_today)
+    val todayPuzzleLabel = stringResource(R.string.playground_today_puzzle_a11y)
+    val dayPuzzleFormat = stringResource(R.string.playground_day_puzzle_a11y)
+    val today = remember(locale) {
+        SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "dMMMM"), locale).format(Calendar.getInstance().time)
     }
     // This week as a calendar row: the six days before today, then today.
-    val week = remember {
+    val week = remember(locale, todayLabel) {
+        val keyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT)
+        val weekdayFormat = SimpleDateFormat("EEE", locale)
+        val numberFormat = SimpleDateFormat("d", locale)
+        val fullFormat = SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM"), locale)
         (6 downTo 0).map { daysAgo ->
             val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
             WeekDay(
-                key = SimpleDateFormat("yyyy-MM-dd", locale).format(calendar.time),
-                weekday = if (daysAgo == 0) "Bugün" else SimpleDateFormat("EEE", locale).format(calendar.time),
-                number = SimpleDateFormat("d", locale).format(calendar.time),
+                key = keyFormat.format(calendar.time),
+                weekday = if (daysAgo == 0) todayLabel else weekdayFormat.format(calendar.time),
+                number = numberFormat.format(calendar.time),
+                fullDate = fullFormat.format(calendar.time),
                 isToday = daysAgo == 0,
             )
         }
@@ -571,7 +587,7 @@ private fun DailyChallengeCard(
                         modifier = Modifier.semantics(mergeDescendants = true) { heading() },
                     ) {
                         Text(
-                            text = "GÜNÜN BULMACASI",
+                            text = stringResource(R.string.playground_daily_title),
                             color = if (!isSolved) NeonCyan else TextMuted,
                             fontSize = 11.sp,
                             letterSpacing = 1.sp,
@@ -599,7 +615,7 @@ private fun DailyChallengeCard(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "Oyna",
+                            text = stringResource(R.string.common_play),
                             color = Color(0xFF0A0A0F),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
@@ -625,7 +641,7 @@ private fun DailyChallengeCard(
                                 modifier = Modifier.size(15.dp),
                             )
                             Text(
-                                text = "Çözüldü",
+                                text = stringResource(R.string.playground_solved),
                                 color = NeonCyan,
                                 fontSize = 13.sp,
                                 fontFamily = AppFont,
@@ -656,7 +672,7 @@ private fun DailyChallengeCard(
                             .padding(vertical = 4.dp, horizontal = if (largeText) 4.dp else 0.dp)
                             .clearAndSetSemantics {
                                 contentDescription =
-                                    if (day.isToday) "Bugünün bulmacası" else "${day.number} ${day.weekday} bulmacası"
+                                    if (day.isToday) todayPuzzleLabel else dayPuzzleFormat.format(day.fullDate)
                             },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -695,6 +711,8 @@ private data class WeekDay(
     val key: String,
     val weekday: String,
     val number: String,
+    /** "Monday, 17 November" in the app language, for TalkBack. */
+    val fullDate: String,
     val isToday: Boolean,
 )
 
@@ -733,14 +751,14 @@ private fun RandomPuzzleButton(onClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
             ) {
                 Text(
-                    text = "Rastgele Bölüm Oluştur",
+                    text = stringResource(R.string.playground_random_title),
                     color = TextPrimary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = AppFont,
                 )
                 Text(
-                    text = "İnternetsiz de çalışır",
+                    text = stringResource(R.string.playground_random_subtitle),
                     color = TextMuted,
                     fontSize = 12.sp,
                     fontFamily = AppFont,
@@ -772,19 +790,19 @@ private fun SimulationToggles(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "SİMÜLASYON",
+                text = stringResource(R.string.playground_simulation),
                 color = GameGold,
                 fontSize = 10.sp,
                 letterSpacing = 0.8.sp,
                 fontFamily = AppFont,
             )
-            ToggleRow("Günlük bulmaca çözüldü", state.isDailySolved) {
+            ToggleRow(stringResource(R.string.playground_sim_daily_solved), state.isDailySolved) {
                 onStateChange(state.copy(isDailySolved = it))
             }
-            ToggleRow("Kristal var (0 = sayaç göster)", state.crystals > 0) {
+            ToggleRow(stringResource(R.string.playground_sim_has_crystals), state.crystals > 0) {
                 onStateChange(state.copy(crystals = if (it) 3 else 0))
             }
-            ToggleRow("Yarım kalan bölüm var", state.hasDraft) {
+            ToggleRow(stringResource(R.string.playground_sim_has_draft), state.hasDraft) {
                 onStateChange(state.copy(hasDraft = it))
             }
         }

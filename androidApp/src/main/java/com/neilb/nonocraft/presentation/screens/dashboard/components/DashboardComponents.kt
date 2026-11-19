@@ -1,6 +1,9 @@
 package com.neilb.nonocraft.presentation.screens.dashboard.components
 
 import androidx.compose.foundation.background
+import androidx.annotation.StringRes
+import com.neilb.nonocraft.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -49,16 +52,16 @@ import com.neilb.nonocraft.presentation.theme.TextMuted
 import com.neilb.nonocraft.presentation.theme.icons.AppIcons
 
 data class DashboardTabItem(
-    val label: String,
+    @param:StringRes val label: Int,
     val filledIcon: ImageVector,
     val outlinedIcon: ImageVector
 )
 
 enum class DashboardTab(val tabItem: DashboardTabItem) {
-    PLAYGROUND(DashboardTabItem("Oyun Alanı", Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports)),
-    FEED(DashboardTabItem("Keşfet", Icons.Filled.Explore, Icons.Outlined.Explore)),
-    LIBRARY(DashboardTabItem("Koleksiyon", AppIcons.CardsStar.Filled, AppIcons.CardsStar.Outlined)),
-    ACCOUNT(DashboardTabItem("Profil", Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle))
+    PLAYGROUND(DashboardTabItem(R.string.tab_playground, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports)),
+    FEED(DashboardTabItem(R.string.tab_explore, Icons.Filled.Explore, Icons.Outlined.Explore)),
+    LIBRARY(DashboardTabItem(R.string.tab_library, AppIcons.CardsStar.Filled, AppIcons.CardsStar.Outlined)),
+    ACCOUNT(DashboardTabItem(R.string.tab_profile, Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle))
 }
 
 @Composable
@@ -87,7 +90,7 @@ fun DashboardBottomNavBar(
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                label = { NavLabel(tabItem.label, isSelected) },
+                label = { NavLabel(stringResource(tabItem.label), isSelected) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = PurpleAccent,
                     selectedTextColor = PurpleAccent,
@@ -132,7 +135,7 @@ fun DashboardNavRail(
                                 modifier = Modifier.size(24.dp)
                             )
                         },
-                        label = { NavLabel(tabItem.label, isSelected) },
+                        label = { NavLabel(stringResource(tabItem.label), isSelected) },
                         colors = NavigationRailItemDefaults.colors(
                             selectedIconColor = PurpleAccent,
                             selectedTextColor = PurpleAccent,
